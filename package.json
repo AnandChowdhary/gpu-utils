@@ -7,14 +7,14 @@
     "node": ">=24"
   },
   "scripts": {
-    "build": "pnpm -r --filter './packages/*' build",
+    "build": "pnpm -r --filter './packages/*' --if-present build",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "size": "pnpm -r --filter './packages/*' size",
-    "check:package": "pnpm -r --filter './packages/*' check:package",
+    "size": "pnpm -r --filter './packages/*' --if-present size",
+    "check:package": "pnpm -r --filter './packages/*' --if-present check:package",
     "new": "node --experimental-strip-types tooling/new-package.ts",
     "changeset": "changeset",
     "version": "changeset version && pnpm install --lockfile-only",
