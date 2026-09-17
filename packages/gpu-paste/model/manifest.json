@@ -1,0 +1,195 @@
+{
+  "format": 1,
+  "name": "gpu-paste",
+  "dim": 32,
+  "mix": 48,
+  "kindHidden": 32,
+  "featureCount": 10,
+  "rows": 1575,
+  "labels": [
+    "O",
+    "B-person",
+    "I-person",
+    "B-company",
+    "I-company",
+    "B-address",
+    "I-address",
+    "B-date",
+    "I-date",
+    "B-money",
+    "I-money",
+    "B-phone",
+    "I-phone"
+  ],
+  "kinds": [
+    "address",
+    "contact",
+    "prose",
+    "list",
+    "code",
+    "markdown"
+  ],
+  "spanKinds": [
+    "person",
+    "company",
+    "address",
+    "date",
+    "money",
+    "phone"
+  ],
+  "checkpoint": {
+    "seed": 1,
+    "epoch": 0,
+    "date": "2026-09-17",
+    "heldout": {
+      "kind_accuracy": 0.24779735682819384,
+      "span_f1_micro": 0.0
+    }
+  },
+  "tensors": [
+    {
+      "name": "embed",
+      "offset": 0,
+      "length": 50400,
+      "shape": [
+        1575,
+        32
+      ],
+      "scale": 0.0014245177228604594
+    },
+    {
+      "name": "gate_f.w",
+      "offset": 50400,
+      "length": 2048,
+      "shape": [
+        64,
+        32
+      ],
+      "scale": 0.0069297715540855166
+    },
+    {
+      "name": "gate_f.b",
+      "offset": 52448,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.006707354899375669
+    },
+    {
+      "name": "gate_b.w",
+      "offset": 52512,
+      "length": 2048,
+      "shape": [
+        64,
+        32
+      ],
+      "scale": 0.006917354560667469
+    },
+    {
+      "name": "gate_b.b",
+      "offset": 54560,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.006078803250866551
+    },
+    {
+      "name": "mix.w",
+      "offset": 54624,
+      "length": 4608,
+      "shape": [
+        48,
+        96
+      ],
+      "scale": 0.004494634366804554
+    },
+    {
+      "name": "mix.b",
+      "offset": 59232,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.0042906691951136436
+    },
+    {
+      "name": "head.w",
+      "offset": 59280,
+      "length": 4608,
+      "shape": [
+        48,
+        96
+      ],
+      "scale": 0.00468150261909731
+    },
+    {
+      "name": "head.b",
+      "offset": 63888,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.0040437708939275434
+    },
+    {
+      "name": "out.w",
+      "offset": 63936,
+      "length": 624,
+      "shape": [
+        13,
+        48
+      ],
+      "scale": 0.005656794194252261
+    },
+    {
+      "name": "out.b",
+      "offset": 64560,
+      "length": 13,
+      "shape": [
+        13
+      ],
+      "scale": 0.004108257832065705
+    },
+    {
+      "name": "kind1.w",
+      "offset": 64573,
+      "length": 1536,
+      "shape": [
+        32,
+        48
+      ],
+      "scale": 0.0051120851309068745
+    },
+    {
+      "name": "kind1.b",
+      "offset": 66109,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.004613583126375752
+    },
+    {
+      "name": "kind2.w",
+      "offset": 66141,
+      "length": 192,
+      "shape": [
+        6,
+        32
+      ],
+      "scale": 0.006545784011963875
+    },
+    {
+      "name": "kind2.b",
+      "offset": 66333,
+      "length": 6,
+      "shape": [
+        6
+      ],
+      "scale": 0.004850367384572183
+    }
+  ],
+  "parameters": 66339
+}
