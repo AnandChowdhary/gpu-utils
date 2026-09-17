@@ -1,0 +1,35 @@
+name: Size report
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  size:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Measure
+        id: measure
+        run: |
+          {
+            echo 'table<<EOF'
+            node --experimental-strip-types tooling/size.ts --all --markdown
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: size-report
+          message: |
+            ### Bundle sizes (minified + Brotli, includes weights)
+            ${{ steps.measure.outputs.table }}

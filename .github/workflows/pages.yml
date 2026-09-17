@@ -1,0 +1,44 @@
+name: Website
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps/website/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Build website
+        run: |
+          if [ -d apps/website ]; then pnpm --filter website build; else mkdir -p apps/website/dist && echo "coming soon" > apps/website/dist/index.html; fi
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: apps/website/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

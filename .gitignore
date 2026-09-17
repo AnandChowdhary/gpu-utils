@@ -1,0 +1,22 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
+
+# Training artefacts (checkpoints are promoted into packages/*/model/ explicitly)
+packages/*/training/.venv/
+tooling/python/.venv/
+video/.venv/
+video/output/
+packages/*/training/runs/
+packages/*/training/data/cache/
+packages/*/training/__pycache__/
+**/__pycache__/
+*.pt
+*.pth
+*.safetensors
+
+# Video renders
+video/media/
+video/**/media/

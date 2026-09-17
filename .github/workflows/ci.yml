@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Test
+        run: pnpm test
+      - name: Build
+        run: pnpm build
+      - name: Size budgets
+        run: pnpm size
+      - name: Inspect npm package contents
+        run: pnpm check:package
+
+  training:
+    # Python-side unit tests for every package that has a training/ directory.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+      - name: Run training tests
+        run: |
+          set -euo pipefail
+          found=0
+          for dir in packages/*/training; do
+            [ -f "$dir/pyproject.toml" ] || continue
+            found=1
+            echo "::group::$dir"
+            (cd "$dir" && uv sync && uv run pytest -q)
+            echo "::endgroup::"
+          done
+          echo "::group::tooling/python"
+          (cd tooling/python && uv sync && uv run pytest -q)
+          echo "::endgroup::"
+          [ "$found" = 1 ] || echo "No training packages yet."
