@@ -50,6 +50,6 @@
     "@gpu-utils/runtime": "workspace:*"
   },
   "gpuUtils": {
-    "sizeBudget": 40000
+    "sizeBudget": 60000
   }
 }

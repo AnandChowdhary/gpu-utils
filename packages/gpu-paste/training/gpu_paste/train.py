@@ -1,6 +1,6 @@
 """Train gpu-paste with int6 quantization-aware training.
 
-    uv run python -m gpu_paste.train [--n 120000] [--epochs 6] [--seed 1]
+    uv run python -m gpu_paste.train [--n 160000] [--epochs 8] [--seed 1]
 
 Writes runs/best.pt (state dict + metrics) and runs/metrics.json. Default run: ~15 min on
 two CPU threads.
@@ -27,9 +27,9 @@ from gpu_paste.model import PasteModel, parameter_count
 
 def main(argv: list[str] | None = None) -> dict:
     p = argparse.ArgumentParser()
-    p.add_argument("--n", type=int, default=120_000)
+    p.add_argument("--n", type=int, default=160_000)
     p.add_argument("--heldout", type=int, default=8_000)
-    p.add_argument("--epochs", type=int, default=6)
+    p.add_argument("--epochs", type=int, default=8)
     p.add_argument("--batch", type=int, default=64)
     p.add_argument("--lr", type=float, default=3e-3)
     p.add_argument("--seed", type=int, default=1)

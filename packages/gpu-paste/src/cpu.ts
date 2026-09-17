@@ -40,7 +40,7 @@ export function forwardCpu(model: Model, rows: number[][]): Logits {
   for (let t = 0; t < n; t++) {
     for (const id of rows[t]!) {
       const base = id * D;
-      for (let d = 0; d < D; d++) x[t * D + d] += E[base + d]!;
+      for (let d = 0; d < D; d++) x[t * D + d] = x[t * D + d]! + E[base + d]!;
     }
   }
 
@@ -76,7 +76,10 @@ export function forwardCpu(model: Model, rows: number[][]): Logits {
       let acc = bm[j]!;
       const row = j * 3 * D;
       for (let i = 0; i < D; i++) {
-        acc += Wm[row + i]! * x[t * D + i]! + Wm[row + D + i]! * h[0]![t * D + i]! + Wm[row + 2 * D + i]! * h[1]![t * D + i]!;
+        acc +=
+          Wm[row + i]! * x[t * D + i]! +
+          Wm[row + D + i]! * h[0]![t * D + i]! +
+          Wm[row + 2 * D + i]! * h[1]![t * D + i]!;
       }
       const v = acc > 0 ? acc : 0;
       m[t * M + j] = v;

@@ -174,8 +174,12 @@ class Gen:
         else:
             name = f.name()
         roll = self.rng.random()
+        if self.chance(0.14):  # first name only ("Maya picks up the van")
+            first = name.split()[0]
+            if first.isalpha() and len(first) > 1:
+                return first
         if roll < 0.08:
-            name = f"{self.pick(['Dr.', 'Mr.', 'Ms.', 'Mrs.', 'Prof.', 'Dr', 'Mx.'])} {name}"
+            name = f"{self.pick(['Dr.', 'Mr.', 'Ms.', 'Mrs.', 'Prof.', 'Dr', 'Mx.', 'Herr', 'Frau', 'M.', 'Mme', 'Sr.', 'Sra.'])} {name}"
         elif roll < 0.14:
             name = f"{name}{self.pick([', PhD', ' Jr.', ', MD', ' III', ', CPA', ' Sr.'])}"
         elif roll < 0.2:
@@ -196,11 +200,20 @@ class Gen:
             name = name.lower()
         return name
 
+    VENUES = ["Restaurant", "Café", "Cafe", "Hotel", "Bar", "Pizzeria", "Trattoria", "Ristorante", "Bistro", "Studio", "Clinic", "Bakery", "Salon", "Gasthaus", "Boulangerie", "Osteria", "Taverna", "Brasserie", "Pub", "Gym", "Garage", "Pharmacy", "Deli", "Kiosk", "Bookshop", "Galerie", "Praxis", "Kanzlei", "Cantina", "Sushi"]
+    BRANDS = ["Zentro", "Hexlo", "Vantra", "Nimbly", "Kova", "Plentix", "Orbio", "Fleek", "Tandem", "Loom", "Notch", "Ripple", "Bloom", "Anvil", "Mosaic", "Lumo", "Quill", "Stripe", "Wave", "Pilot", "Basecamp", "Hertz", "Uber", "Ikea", "Zara", "Bolt", "Wise", "Klarna", "Revolut", "Deliveroo"]
+
     def company(self) -> str:
         roll = self.rng.random()
-        if self.words["company"] and roll < 0.3:
+        if roll < 0.12:  # venue-style: "Restaurant Zur Linde", "Café Landtmann", "Hotel Da Enzo"
+            loc, f = self.faker(english_bias=0.4)
+            tail = self.pick([f.last_name(), f"Da {f.first_name()}", f"Zur {f.last_name()}", f"Chez {f.first_name()}", f"{f.last_name()} & {f.last_name()}", f.city(), f"The {f.last_name()}", f"{f.first_name()}'s"])
+            return f"{self.pick(self.VENUES)} {tail}" if self.chance(0.75) else f"{tail} {self.pick(['Café', 'Bar', 'Hotel', 'Restaurant', 'Bakery'])}"
+        if roll < 0.2:  # single-word brand
+            return self.pick(self.BRANDS)
+        if self.words["company"] and roll < 0.42:
             return self.pick(self.words["company"])
-        if roll < 0.7:
+        if roll < 0.72:
             loc, f = self.faker()
             return f.company()
         adj = self.pick(["Blue", "Northwind", "Acme", "Bright", "Apex", "Summit", "Nova", "Pioneer", "Cedar", "Quantum", "Atlas", "Orbit", "Lumen", "Vertex", "Harbor", "Silver", "Alpine", "Delta", "Golden", "Iron"])
@@ -410,6 +423,18 @@ class Gen:
         "This is the third time the printer has jammed today.", "Great work on the presentation!",
         "ok", "sounds good", "will do", "thanks!", "see you then", "noted, thanks", "lol", "yes please", "no worries",
         "on it", "got it, thank you", "perfect", "hmm, not sure about that", "fine by me", "🙂", "👍 thanks", "brb",
+        "I switched from Chrome to Firefox last week and haven't looked back.", "The Lisbon trip was great, the Alfama stairs less so.",
+        "Try the ramen place near Shibuya station.", "My iPhone battery dies before lunch these days.", "Docker keeps crashing on my Mac after the update.",
+        "Booked the Eurostar for the Paris leg.", "Bay Area rents are frankly absurd.", "Ctrl-V didn't paste anything, weird.",
+        "We watched Dune again on Netflix.", "The Tesla in the car park has been there since Monday morning, I think.", "Photoshop still hangs on export.",
+        "Kubernetes is overkill for a blog.", "The Thames path is flooded near Kew.", "ETA 20 min, stuck behind a tractor on the A303.",
+        "500g flour, 10g salt, 7g yeast, 350ml water.", "Two kilos of oranges for 3 quid, bargain.", "The room is 4.2 m by 3.8 m.",
+        "Booking ref 7HK2LP, seat 14C.", "Order #A12B34 is still processing.", "Tracking number 1Z999AA10123456784.", "SKU 7HK2-LP is out of stock.",
+        "Flight BA283 lands at 15:40.", "Room 204, second floor, past the lifts.", "Version 2.3.1 fixes it.", "Use the A4 paper, not the letter size.",
+        "Ich melde mich morgen nochmal.", "Das Protokoll hängt an.", "Vielen Dank für die schnelle Antwort!", "Bitte um kurze Rückmeldung.",
+        "Je vous envoie le devis demain.", "Merci pour votre retour rapide.", "On se voit à la gare.", "Le dossier est en pièce jointe.",
+        "Te mando el archivo esta tarde.", "Gracias por la información.", "Nos vemos en la oficina.", "Adjunto la factura.",
+        "Guest: see attached.", "Attendees: TBC", "Kontakt siehe unten.", "Ingredients below.", "Cc'd the team.", "FYI", "ETA?", "ok cool, Tuesday-ish?",
     ]
     TEMPLATES = [
         "Hi {person}, thanks for the call on {date}.", "{company} will invoice {money} by {date}.",
@@ -437,6 +462,12 @@ class Gen:
         "Rechnung über {money} von {company}, fällig am {date}.", "Reunión con {person} el {date}.",
         "{person} zahlt {money}.", "Le colis a été livré à {address}.", "Der Termin ist am {date}.",
         "Nous avons payé {money} à {company}.", "Ligue para {phone} até {date}.", "Envía el pago de {money} a {company}.",
+        "Booking ref {code}, guest {person}, check-in {date}.", "Order {code} shipped {date} to {address}.", "Ticket {code}: {person} says the {money} refund never arrived.",
+        "{person} picks up the van from {company} on {date}.", "Dinner at {company} {date}, {person} booked a table.", "Ask {person} — she was at {company} until {date}.",
+        "Meet at {company}, {address} — {date}.", "{person} and {person2} are flying to {city} {date}.", "Landlord: {person}, {phone} (only after 6pm).",
+        "Reminder: your appointment with {person} is {date}. Reply STOP to opt out.", "Your {company} receipt: {money} for the trip {date}. Driver: {person2}.",
+        "Seat 14C, flight {code}, lands {date}.", "Tracking {code} says delivered, but nothing at {address}.", "Sehr geehrte {person}, anbei die Rechnung über {money}, zahlbar bis {date}.",
+        "Rendez-vous chez {company} ({address}) {date}.", "La reunión con {person} de {company} es {date}.", "Ich habe {person} {date} bei {company} getroffen.",
     ]
 
     def city(self) -> str:
@@ -471,6 +502,8 @@ class Gen:
                     b.add(self.url())
                 elif slot == "city":
                     b.add(self.city())
+                elif slot == "code":
+                    b.add("".join(self.pick(string.ascii_uppercase + string.digits) for _ in range(self.rng.randint(5, 8))))
                 i = j + 1
             else:
                 j = tpl.find("{", i)
@@ -525,7 +558,9 @@ class Gen:
             if self.chance(0.4):
                 b.add(self.address(multiline=self.chance(0.5)), "address").add("\n")
         elif style < 0.5:  # contact card / labelled
-            b.add(self.pick(["Name: ", "Contact: ", "Full name: ", "", "Nom : ", "Name: "])).add(name, "person").add("\n")
+            if self.chance(0.3):
+                b.add(self.pick(["Kontakt", "Contact", "Contact details", "Billing contact", "Guest", "Ansprechpartner", "Emergency contact", "Vendor", "Kontaktdaten", "Sold to", "Ship to"])).add(self.pick(["\n", ":\n", "\n\n"]))
+            b.add(self.pick(["Name: ", "Contact: ", "Full name: ", "", "", "Nom : ", "Name: ", "Guest: ", "Attn: ", "Ansprechpartner: ", "Owner: "])).add(name, "person").add("\n")
             fields = []
             if self.chance(0.7):
                 fields.append(("company", self.pick(["Company: ", "Org: ", "Employer: ", "Firma: ", "Organisation: "]), company))
@@ -604,10 +639,12 @@ class Gen:
             sep = self.pick([", ", ", ", "; ", " / ", " • ", " | "])
             b.add(sep.join(items))
             return b.build("list")
-        bullet_kind = self.pick(["- ", "* ", "• ", "· ", "– ", "— ", "+ ", "", "", "[ ] ", "[x] ", "☐ ", "✅ ", "→ ", ">> ", "num", "num)", "alpha", "roman"])
-        entity = self.pick([None, None, None, "person", "money", "date", "phone", "company", "mixed"])
-        if self.chance(0.25):
-            b.add(self.pick(["Shopping:", "TODO", "To do:", "Agenda", "Attendees:", "Groceries", "Packing list", "Next steps:", "Ideas", "Cities to visit", "Things to bring", "Notes from standup:", "Options:"])).add("\n")
+        bullet_kind = self.pick(["- ", "* ", "• ", "· ", "– ", "— ", "+ ", "", "", "", "[ ] ", "[x] ", "☐ ", "☑ ", "✅ ", "→ ", ">> ", "num", "num)", "alpha", "roman"])
+        entity = self.pick([None, None, None, "person", "money", "date", "phone", "company", "mixed", "agenda", "quantity", "code", "people_status"])
+        if self.chance(0.3):
+            b.add(self.pick(["Shopping:", "TODO", "To do:", "Agenda", "Attendees:", "Groceries", "Packing list", "Next steps:", "Ideas", "Cities to visit", "Things to bring", "Notes from standup:", "Options:", "Ingredients", "For the dough:", "Kontakt", "Guests", "Einkaufsliste", "Liste de courses", "Things I said I'd do this week", "Shopping for the BBQ", "Apologies:", "Who's in:"])).add("\n")
+            if self.chance(0.3):
+                b.add("\n")
         for i in range(n):
             if bullet_kind == "num":
                 b.add(f"{i + 1}. ")
@@ -620,7 +657,34 @@ class Gen:
             else:
                 b.add(bullet_kind)
             kind = entity if entity != "mixed" else self.pick(SPAN_KINDS + [None, None])
-            if kind == "person":
+            if kind == "agenda":
+                hh = r.randint(8, 18)
+                b.add(f"{hh:02d}:{self.pick(['00', '15', '30', '45'])}", "date").add(self.pick([" ", " – ", " - ", "  "]))
+                b.add(self.pick(["Registration", "Welcome", "Coffee", "Lunch", "Keynote", "Break", "Panel", "Wrap-up", "Begrüßung", "Mittagessen", "Vortrag", "Pause", "Demo", "Q&A", "Standup", "Retro"]))
+                if self.chance(0.4):
+                    b.add(self.pick([" with ", " von ", " by ", " – ", " (", " @ "])).add(self.person() if self.chance(0.6) else self.company(), "person" if b.parts[-1] != " (" and self.chance(0.6) else "company")
+                    if b.parts[-2] == " (":
+                        b.add(")")
+            elif kind == "quantity":
+                qty = self.pick([f"{r.randint(1, 900)}g", f"{r.randint(1, 5)} kg", f"{r.randint(1, 12)} x", f"{r.randint(100, 900)}ml", f"{r.randint(1, 6)}l", f"{r.randint(1, 9)} tbsp", f"{r.randint(1, 4)} tsp", f"{r.randint(2, 12)}", f"{r.randint(1, 3)} pack", f"{r.randint(1, 6)} pcs", "a bunch of", "half a", f"{r.randint(1, 20)} m", f"{r.randint(2, 10)} boxes of"])
+                item = self.pick(self.ITEMS[:25] + ["strong flour", "salt", "yeast", "San Marzano tomatoes", "fior di latte", "basil", "chicken thighs", "charcoal", "ice", "lemons", "Parmesan", "Greek yoghurt"])
+                if self.chance(0.5):
+                    b.add(f"{qty} {item}")
+                else:
+                    b.add(f"{item} {self.pick(['x', '×', '-', ':'])} {r.randint(1, 12)}")
+            elif kind == "code":
+                code = "".join(self.pick(string.ascii_uppercase + string.digits) for _ in range(r.randint(5, 8)))
+                b.add(self.pick(["Booking ref: ", "Order ", "Ref ", "SKU ", "Ticket ", "PNR ", "Seat ", "Room ", "Invoice ", "Tracking: ", "Case ", "ID ", ""]))
+                b.add(self.pick([code, f"#{r.randint(100, 99999)}", f"{code[:3]}-{code[3:]}", f"{r.randint(10, 99)}{self.pick('ABCDEF')}", f"v{r.randint(0, 9)}.{r.randint(0, 20)}.{r.randint(0, 9)}"]))
+                if self.chance(0.4):
+                    b.add(self.pick([" - ", ": ", " "])).add(self.pick(["confirmed", "pending", "shipped", "out of stock", "cancelled", "paid", "open"]))
+            elif kind == "people_status":
+                b.add(self.person(), "person").add(self.pick([" — ", " - ", ": ", " – "]))
+                status = self.pick(["ok", "out", "travelling", "TBC", "in", "remote", "on holiday", "sick", "yes", "no", "maybe", "late"])
+                b.add(status)
+                if self.chance(0.4):
+                    b.add(self.pick([" until ", " on ", " from ", " till "])).add(self.date(), "date")
+            elif kind == "person":
                 b.add(self.person(), "person")
                 if self.chance(0.4):
                     b.add(self.pick([" - ", ": ", " (", " — "])).add(self.pick(self.TITLES + self.ITEMS[25:45]))
