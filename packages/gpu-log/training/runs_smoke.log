@@ -1,0 +1,12 @@
+/home/vercel-sandbox/gpu-utils-wt/gpu-log/packages/gpu-log/training/gpu_log/train.py:96: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  loss_sum += float(loss)
+built train: 20000 lines, 939366 tokens, 0 misaligned tokens -> /home/vercel-sandbox/gpu-utils-wt/gpu-log/packages/gpu-log/training/data/cache/train-20000-1.npz
+built heldout: 12000 lines, 561660 tokens, 0 misaligned tokens -> /home/vercel-sandbox/gpu-utils-wt/gpu-log/packages/gpu-log/training/data/cache/heldout-12000-2.npz
+params: 150,042
+epoch 0 step 200/417 loss 1.4463 (7s)
+epoch 0 step 400/417 loss 0.9168 (15s)
+epoch 0 done: train loss 0.8921; held-out (int6) tok 0.8729 span-F1 0.8245 kind 0.9548 line 0.5381 (23s)
+saved runs/smoke.pt after 23s
+exported 150,042 parameters to /home/vercel-sandbox/gpu-utils-wt/gpu-log/packages/gpu-log/model
+torch vs numpy max abs diff: 7.63e-06; fixtures: 37

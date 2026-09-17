@@ -634,7 +634,7 @@ MESSAGE_TEMPLATES: list[str] = [
     "接続に失敗しました: {host}",
     "Tab\tseparated\tmessage part",
     "Message with trailing spaces",
-    ("Very long message: " + "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua " * 2).rstrip() + ",
+    ("Very long message: " + "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua " * 2).rstrip(),
     "{{\"event\": \"{word}\", \"id\": {num}, \"ok\": true}}",
     "payload={{\"user\":\"{user}\",\"action\":\"{word}\"}}",
     "response: {{\"status\":\"{word}\",\"items\":[{num},{num},{num}]}}",

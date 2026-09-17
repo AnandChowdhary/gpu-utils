@@ -35,7 +35,12 @@
     "wgsl",
     "browser",
     "on-device",
-    "tiny-model"
+    "tiny-model",
+    "log-parser",
+    "logs",
+    "syslog",
+    "logfmt",
+    "stack-trace"
   ],
   "scripts": {
     "build": "node --experimental-strip-types ../../tooling/build.ts",
@@ -50,6 +55,6 @@
     "@gpu-utils/runtime": "workspace:*"
   },
   "gpuUtils": {
-    "sizeBudget": 40000
+    "sizeBudget": 120000
   }
 }

@@ -93,7 +93,7 @@ def main() -> None:
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             opt.step()
             sched.step()
-            loss_sum += float(loss)
+            loss_sum += loss.item()
             n += 1
             step += 1
             if step % 200 == 0:

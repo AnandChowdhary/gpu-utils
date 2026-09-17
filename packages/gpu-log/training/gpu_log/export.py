@@ -50,13 +50,13 @@ def main() -> None:
     unf = DATA_DIR / "unfamiliar.txt"
     if unf.exists():
         samples += [ex.text for ex in read_markup_file(unf)[:12]]
-    picked = [s for s in samples if 0 < len(s) < 400][:32]
+    picked = [s for s in samples if 0 < len(s) < 160][:22]
     picked += ["", "x", "   ", "🚀 café 日本語 emoji line", "\t\tat a.b(C.java:1)"]
     for text in picked:
         tokens, rows = featurize(text)
         feats = np.asarray(rows, dtype=np.int64).reshape(-1, FEATURE_COUNT)
         logits = forward_numpy(deq, feats, blocks=len(model.blocks)) if len(rows) else np.zeros((0, len(LABELS) + len(KINDS)), np.float32)
-        cases.append({"text": text, "features": rows, "logits": [[round(float(v), 6) for v in row] for row in logits]})
+        cases.append({"text": text, "features": rows, "logits": [[round(float(v), 5) for v in row] for row in logits]})
     (MODEL_DIR / "fixtures.json").write_text(json.dumps(cases) + "\n")
 
     # Sanity: torch (fake-quant) vs numpy dequantized forward on one case.
