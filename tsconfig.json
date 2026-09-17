@@ -2,6 +2,9 @@
   "files": [],
   "references": [
     {
+      "path": "packages/gpu-cite"
+    },
+    {
       "path": "packages/runtime"
     },
     {
