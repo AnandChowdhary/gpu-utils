@@ -39,6 +39,12 @@ importers:
         specifier: 1.4.1
         version: 1.4.1
 
+  packages/gpu-log:
+    devDependencies:
+      '@gpu-utils/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/runtime: {}
 
   tooling: {}

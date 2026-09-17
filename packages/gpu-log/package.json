@@ -1,0 +1,55 @@
+{
+  "name": "gpu-log",
+  "version": "0.0.0",
+  "description": "Universal log line parser: timestamps, levels, sources, key=value pairs, messages, and stack frames from any format",
+  "author": "Anand Chowdhary (https://anandchowdhary.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnandChowdhary/gpu-utils.git",
+    "directory": "packages/gpu-log"
+  },
+  "homepage": "https://github.com/AnandChowdhary/gpu-utils/tree/main/packages/gpu-log#readme",
+  "bugs": {
+    "url": "https://github.com/AnandChowdhary/gpu-utils/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "MODEL_CARD.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "webgpu",
+    "wgsl",
+    "browser",
+    "on-device",
+    "tiny-model"
+  ],
+  "scripts": {
+    "build": "node --experimental-strip-types ../../tooling/build.ts",
+    "size": "node --experimental-strip-types ../../tooling/size.ts",
+    "check:package": "node --experimental-strip-types ../../tooling/check-package.ts",
+    "test": "vitest run",
+    "prepack": "cp ../../LICENSE ./LICENSE",
+    "train": "cd training && uv run python -m gpu_log.train",
+    "export": "cd training && uv run python -m gpu_log.export"
+  },
+  "devDependencies": {
+    "@gpu-utils/runtime": "workspace:*"
+  },
+  "gpuUtils": {
+    "sizeBudget": 40000
+  }
+}
