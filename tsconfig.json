@@ -2,6 +2,9 @@
   "files": [],
   "references": [
     {
+      "path": "packages/gpu-view"
+    },
+    {
       "path": "packages/runtime"
     },
     {
