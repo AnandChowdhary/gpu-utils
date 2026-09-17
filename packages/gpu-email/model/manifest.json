@@ -1,0 +1,9 @@
+{
+  "format": 1,
+  "name": "gpu-email",
+  "hidden": 32,
+  "labels": ["O"],
+  "tensors": [],
+  "parameters": 0,
+  "checkpoint": null
+}
