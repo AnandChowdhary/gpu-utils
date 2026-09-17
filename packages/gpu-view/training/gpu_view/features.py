@@ -13,6 +13,8 @@ Whitespace tokens are dropped before the model: the sequence the model sees is
 
 from __future__ import annotations
 
+import unicodedata
+
 from gpu_utils_training.features import CLASS_DIGIT, CLASS_OTHER, SHAPE_TITLE, SHAPE_UPPER, Token, hash_token
 
 from . import match
@@ -124,7 +126,7 @@ def featurize(text: str, schema: dict) -> tuple[list[Token], list[list[int]]]:
         add("skeleton", hash_token(skeleton(tok.text), SKEL_BUCKETS))
         add("keyword", KEYWORD_ID.get(low, KEYWORD_COUNT))
 
-        has_digit = any(c.isdigit() for c in tok.text)
+        has_digit = any(unicodedata.category(c) == "Nd" for c in tok.text)
         if has_digit:
             add("flags", FLAG_HAS_DIGIT)
         if tok.cls == CLASS_DIGIT:

@@ -51,10 +51,12 @@ CONTAINS_OPS = ["contains", "containing", "with", "mentioning", "mentions", "mat
 NEG_WORDS = ["not", "isn't", "is not", "except", "excluding", "other than", "!=", "doesn't", "aren't"]
 GT_OPS = ["more than", "greater than", "over", "above", "exceeding", ">", "bigger than", "higher than",
           "larger than"]
-GTE_OPS = ["at least", "minimum", "min", ">=", "≥", "no less than", "not less than", "greater than or equal to"]
-LT_OPS = ["less than", "fewer than", "under", "below", "<", "smaller than", "lower than"]
-LTE_OPS = ["at most", "maximum", "max", "<=", "≤", "up to", "no more than", "not more than",
-           "less than or equal to"]
+# "no less than" is NEG + "less than": the negation flips lt to gte at compile time.
+GT_OPS += ["no more than", "not more than", "not over", "not above"]
+GTE_OPS = ["at least", "minimum", "min", ">=", "≥", "greater than or equal to"]
+LT_OPS = ["less than", "fewer than", "under", "below", "<", "smaller than", "lower than",
+          "no less than", "not less than", "not under", "not below"]
+LTE_OPS = ["at most", "maximum", "max", "<=", "≤", "up to", "less than or equal to"]
 EQ_NUM_OPS = ["=", "is", "equals", "exactly", "equal to", "of", "==", ":"]
 BEFORE_OPS = ["before", "prior to", "earlier than", "older than"]
 UNTIL_OPS = ["until", "till", "through", "up to", "by", "no later than", "on or before"]
@@ -500,8 +502,14 @@ def render_date(schema: Schema, f: Field, fi: int, rng: random.Random, fentries)
     value = time_phrase(rng)
     if value.endswith("ago") and fam == "in":
         op = ""
-    bare = fam == "in" and rng.random() < 0.3 and op in ("", "in", "during", "for")
-    op_pieces = [P(w, "OP") for w in op.split(" ")] if op else []
+    bare = (fam == "in" and rng.random() < 0.3 and op in ("", "in", "during", "for")
+            and len(schema.of_kind(DATE)) == 1)
+    op_pieces = [P(w, "NEG" if w in ("no", "not") else "OP") for w in op.split(" ")] if op else []
+    if op == "no later than":
+        fam = "after"  # NEG + after → until (lte)
+        s_neg = 1
+    else:
+        s_neg = 0
     if bare:
         pieces = op_pieces + [P(value, "TIME_VALUE")]
         return Clause("filter", pieces, {"field": f.name, "op": fam, "_dates": 1, "_bare": True})
@@ -510,7 +518,7 @@ def render_date(schema: Schema, f: Field, fi: int, rng: random.Random, fentries)
         pieces = [P(surface, "FIELD")] + op_pieces + [P(value, "TIME_VALUE")]
     else:
         pieces = op_pieces + [P(value, "TIME_VALUE"), P(surface, "FIELD")] if fam == "in" else [P(surface, "FIELD")] + op_pieces + [P(value, "TIME_VALUE")]
-    return Clause("filter", pieces, {"field": f.name, "op": fam, "_dates": 1})
+    return Clause("filter", pieces, {"field": f.name, "op": fam, "_dates": 1, "_neg": s_neg})
 
 
 def render_bool(schema: Schema, f: Field, fi: int, rng: random.Random, fentries, eentries) -> Clause | None:
@@ -563,8 +571,7 @@ def render_text(schema: Schema, f: Field, fi: int, rng: random.Random, fentries)
         if rng.random() < 0.5:
             words = rng.choice(EMPTY_SUFFIX_OPS).split(" ")
             pieces = [P(surface, "FIELD")] + [P(w, "NEG" if w == "not" else "OP") for w in words]
-            op = "is_empty" if "not" not in words else "not_empty"
-            return Clause("filter", pieces, {"field": f.name, "op": op})
+            return Clause("filter", pieces, {"field": f.name, "op": "is_empty"})
         if rng.random() < 0.5:
             op = rng.choice(FILLED_OPS)
             words = op.split(" ")
@@ -572,8 +579,7 @@ def render_text(schema: Schema, f: Field, fi: int, rng: random.Random, fentries)
             return Clause("filter", pieces, {"field": f.name, "op": "not_empty"})
         words = rng.choice(FILLED_SUFFIX_OPS).split(" ")
         pieces = [P(surface, "FIELD")] + [P(w, "NEG" if w == "not" else "OP") for w in words]
-        op = "not_empty" if "not" not in words else "not_empty"
-        return Clause("filter", pieces, {"field": f.name, "op": op})
+        return Clause("filter", pieces, {"field": f.name, "op": "not_empty"})
     if f.person and style < 0.35:
         # "assigned to me", "owner is me", "my ..." is not supported; "me" is eq.
         layout = rng.random()
@@ -1008,6 +1014,8 @@ def compile_filter(clause: Clause, s: dict, text: str, span: dict, schema: Schem
             return [{**base, "value": [ranges[0][0], ranges[1][1]]}]
         lo, hi = ranges[0]
         ago = times[0].lower().strip().endswith("ago")
+        if s.get("_neg"):
+            op = {"after": "until", "since": "before", "before": "since", "until": "after"}[op]
         if op == "in":
             if lo == hi:
                 return [{**base, "op": "eq", "value": lo}]
