@@ -3,14 +3,13 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from gpu_utils_training.batch import collate
-from gpu_utils_training.models import from_config
-from gpu_utils_training.quant import decode_weights
-
 from gpu_email.data import encode_example, generate
 from gpu_email.features import BIO_LABELS, LINE_KINDS, NUM_SLOTS, featurize
 from gpu_email.model import DILATIONS, build
 from gpu_email.train import collate_examples, loss
+from gpu_utils_training.batch import collate
+from gpu_utils_training.models import from_config
+from gpu_utils_training.quant import decode_weights
 
 MODEL_DIR = Path(__file__).resolve().parents[2] / "model"
 

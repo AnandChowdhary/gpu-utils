@@ -31,7 +31,6 @@ TRANSITIONS = np.array(
 )
 
 
-
 def log_softmax(x: np.ndarray) -> np.ndarray:
     m = x.max(axis=-1, keepdims=True)
     return x - m - np.log(np.exp(x - m).sum(axis=-1, keepdims=True))
