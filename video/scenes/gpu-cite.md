@@ -73,13 +73,13 @@ DOI. Hold on the record and the size line.
 
 **Duration**: ~9 seconds
 
-**Purpose**: The trunk is two bidirectional gated affine scans with a depthwise conv between them.
+**Purpose**: The trunk is the shared scan family: two bidirectional gated affine scans, each followed by a residual 5-tap depthwise conv.
 
 ### Visual Elements
 
 - Caption "Bidirectional gated scans".
 - An accent-coloured window sweeps left→right over the cells, then a second sweeps right→left; a thin accent bar connects all cells (pooled context).
-- Footnote: "h = a·h_prev + (1−a)·b, as a parallel prefix scan on the GPU".
+- Footnote: "h = a·h_prev + (1−a)·tanh(u), as a parallel prefix scan on the GPU".
 
 ---
 

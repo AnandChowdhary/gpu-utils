@@ -1,4 +1,11 @@
-import { type FeatureRows, viterbi } from "@gpu-utils/runtime";
+import {
+  bioStartMask,
+  bioToSpans,
+  bioTransitions,
+  type FeatureRows,
+  tensor,
+  viterbi,
+} from "@gpu-utils/runtime";
 import type { Logits } from "./cpu.ts";
 import { findArxiv, findDois, findUrls, type Span } from "./features.ts";
 import type { Model } from "./model.ts";
@@ -97,21 +104,18 @@ const ROLE_FIELD: Record<string, CiteField> = {
   ACCESSED: "accessed",
 };
 
-const NEG = -1e4;
 const transitionCache = new WeakMap<Model, Float32Array>();
 
-/** Learned CRF transitions plus hard BIO constraints (O→I-X, B-X→I-Y, I-X→I-Y forbidden). */
+/**
+ * Learned CRF transitions (`trans`, an extra exported tensor read only here) plus the
+ * runtime's hard BIO constraints (O→I-X, B-X→I-Y, I-X→I-Y forbidden).
+ */
 function constrainedTransitions(model: Model): Float32Array {
   let cached = transitionCache.get(model);
   if (cached) return cached;
-  const K = model.manifest.labels.length;
-  const R = model.manifest.roles.length;
-  cached = new Float32Array(model.t.trans!);
-  for (let to = 1 + R; to < K; to++) {
-    const role = to - 1 - R;
-    cached[0 * K + to] = NEG;
-    for (let from = 1; from < K; from++) if ((from - 1) % R !== role) cached[from * K + to] = NEG;
-  }
+  const learned = tensor(model.weights, model.manifest, "trans");
+  cached = bioTransitions(model.manifest.labels);
+  for (let i = 0; i < cached.length; i++) cached[i]! += learned[i]!;
   transitionCache.set(model, cached);
   return cached;
 }
@@ -123,23 +127,11 @@ interface Entity {
 }
 
 function entities(path: Int32Array, model: Model): Entity[] {
-  const R = model.manifest.roles.length;
-  const out: Entity[] = [];
-  let cur: Entity | undefined;
-  for (let i = 0; i < path.length; i++) {
-    const tag = path[i]!;
-    if (tag === 0) {
-      cur = undefined;
-      continue;
-    }
-    const role = model.manifest.roles[(tag - 1) % R]!;
-    const begin = tag <= R;
-    if (begin || !cur || cur.role !== role) {
-      cur = { role, first: i, last: i };
-      out.push(cur);
-    } else cur.last = i;
-  }
-  return out;
+  return bioToSpans(path, model.manifest.labels).map((s) => ({
+    role: s.label,
+    first: s.startToken,
+    last: s.endToken - 1,
+  }));
 }
 
 const LEAD = " \t\"'“”‘’«»‚„*_";
@@ -225,7 +217,6 @@ export function decode(
 ): CiteRecord {
   const m = model.manifest;
   const K = m.labels.length;
-  const R = m.roles.length;
   const P = m.nameparts.length;
   const n = features.tokens.length;
   const tokens = features.tokens;
@@ -234,7 +225,8 @@ export function decode(
 
   // 1. Viterbi over constrained CRF transitions; a sequence may not start inside an entity.
   const emissions = new Float32Array(logits.tags);
-  for (let j = 1 + R; j < K; j++) emissions[j] = NEG;
+  const start = bioStartMask(m.labels);
+  for (let j = 0; j < K && n > 0; j++) emissions[j]! += start[j]!;
   const path = n > 0 ? viterbi(emissions, n, K, constrainedTransitions(model)) : new Int32Array(0);
   let confidence = 0;
   for (let i = 0; i < n; i++) confidence += softmaxAt(logits.tags, i * K, K, path[i]!);
