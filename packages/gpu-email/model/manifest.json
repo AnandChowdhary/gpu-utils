@@ -1,6 +1,23 @@
 {
   "format": 1,
   "name": "gpu-email",
+  "family": "conv",
+  "featureRows": 2267,
+  "paddingId": 2267,
+  "embed": 48,
+  "hidden": 48,
+  "head": 48,
+  "dilations": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "tags": 23,
+  "pooled": 0,
+  "slots": 37,
   "labels": [
     "reply",
     "attribution",
@@ -28,215 +45,319 @@
     "B-ADDRESS",
     "I-ADDRESS"
   ],
-  "hidden": 48,
-  "head": 64,
-  "dilations": [
-    1,
-    2,
-    4,
-    8,
-    16,
-    32
-  ],
-  "slots": 37,
-  "rows": 2267,
   "checkpoint": {
+    "run": "default",
+    "epoch": 1,
     "seed": 0,
-    "steps": 8156,
-    "epochs": 3,
     "metrics": {
-      "kind_token_acc": 0.9955243828923155,
-      "bio_token_f1": 0.993268382906424
-    }
+      "kind_token_acc": 0.9940391205025699,
+      "bio_span_f1": 0.9668779146239388,
+      "score": 0.9804585175632543
+    },
+    "date": "2026-09-18"
   },
   "tensors": [
     {
-      "name": "emb",
+      "name": "embed",
       "offset": 0,
       "length": 108816,
       "shape": [
         2267,
         48
       ],
-      "scale": 0.04694153416541315
+      "scale": 0.07187527225863549
     },
     {
-      "name": "conv0.w",
+      "name": "proj.w",
       "offset": 108816,
+      "length": 2304,
+      "shape": [
+        48,
+        48
+      ],
+      "scale": 0.01859364778764786
+    },
+    {
+      "name": "proj.b",
+      "offset": 111120,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.002135372930957425
+    },
+    {
+      "name": "block0.w1",
+      "offset": 111168,
       "length": 6912,
       "shape": [
         3,
         48,
         48
       ],
-      "scale": 0.01662161465614073
+      "scale": 0.018677273104267735
     },
     {
-      "name": "conv0.b",
-      "offset": 115728,
+      "name": "block0.b1",
+      "offset": 118080,
       "length": 48,
       "shape": [
         48
       ],
-      "scale": 0.008438435293013049
+      "scale": 0.006951678183770949
     },
     {
-      "name": "conv1.w",
-      "offset": 115776,
+      "name": "block0.w2",
+      "offset": 118128,
+      "length": 2304,
+      "shape": [
+        48,
+        48
+      ],
+      "scale": 0.013932752032433786
+    },
+    {
+      "name": "block0.b2",
+      "offset": 120432,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.002178914604648467
+    },
+    {
+      "name": "block1.w1",
+      "offset": 120480,
       "length": 6912,
       "shape": [
         3,
         48,
         48
       ],
-      "scale": 0.019452256541098317
+      "scale": 0.01378958648250949
     },
     {
-      "name": "conv1.b",
-      "offset": 122688,
+      "name": "block1.b1",
+      "offset": 127392,
       "length": 48,
       "shape": [
         48
       ],
-      "scale": 0.009478092193603516
+      "scale": 0.007677972797424563
     },
     {
-      "name": "conv2.w",
-      "offset": 122736,
+      "name": "block1.w2",
+      "offset": 127440,
+      "length": 2304,
+      "shape": [
+        48,
+        48
+      ],
+      "scale": 0.01644444465637207
+    },
+    {
+      "name": "block1.b2",
+      "offset": 129744,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.003621682765022401
+    },
+    {
+      "name": "block2.w1",
+      "offset": 129792,
       "length": 6912,
       "shape": [
         3,
         48,
         48
       ],
-      "scale": 0.018174159911371047
+      "scale": 0.014821508238392492
     },
     {
-      "name": "conv2.b",
-      "offset": 129648,
+      "name": "block2.b1",
+      "offset": 136704,
       "length": 48,
       "shape": [
         48
       ],
-      "scale": 0.00788584784153969
+      "scale": 0.005402731318627635
     },
     {
-      "name": "conv3.w",
-      "offset": 129696,
+      "name": "block2.w2",
+      "offset": 136752,
+      "length": 2304,
+      "shape": [
+        48,
+        48
+      ],
+      "scale": 0.012866043275402438
+    },
+    {
+      "name": "block2.b2",
+      "offset": 139056,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.0035947352167098752
+    },
+    {
+      "name": "block3.w1",
+      "offset": 139104,
       "length": 6912,
       "shape": [
         3,
         48,
         48
       ],
-      "scale": 0.02197578453248547
+      "scale": 0.01572764015966846
     },
     {
-      "name": "conv3.b",
-      "offset": 136608,
+      "name": "block3.b1",
+      "offset": 146016,
       "length": 48,
       "shape": [
         48
       ],
-      "scale": 0.007656941010105995
+      "scale": 0.005083978656799563
     },
     {
-      "name": "conv4.w",
-      "offset": 136656,
+      "name": "block3.w2",
+      "offset": 146064,
+      "length": 2304,
+      "shape": [
+        48,
+        48
+      ],
+      "scale": 0.01374260744740886
+    },
+    {
+      "name": "block3.b2",
+      "offset": 148368,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.0042218296758590205
+    },
+    {
+      "name": "block4.w1",
+      "offset": 148416,
       "length": 6912,
       "shape": [
         3,
         48,
         48
       ],
-      "scale": 0.030235352054719004
+      "scale": 0.015609634499396048
     },
     {
-      "name": "conv4.b",
-      "offset": 143568,
+      "name": "block4.b1",
+      "offset": 155328,
       "length": 48,
       "shape": [
         48
       ],
-      "scale": 0.009282066937415831
+      "scale": 0.0042128159153846005
     },
     {
-      "name": "conv5.w",
-      "offset": 143616,
+      "name": "block4.w2",
+      "offset": 155376,
+      "length": 2304,
+      "shape": [
+        48,
+        48
+      ],
+      "scale": 0.01347413755232288
+    },
+    {
+      "name": "block4.b2",
+      "offset": 157680,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.004335274138758259
+    },
+    {
+      "name": "block5.w1",
+      "offset": 157728,
       "length": 6912,
       "shape": [
         3,
         48,
         48
       ],
-      "scale": 0.022827829084088726
+      "scale": 0.018133455707180883
     },
     {
-      "name": "conv5.b",
-      "offset": 150528,
+      "name": "block5.b1",
+      "offset": 164640,
       "length": 48,
       "shape": [
         48
       ],
-      "scale": 0.00636366730736148
+      "scale": 0.006189551084272323
+    },
+    {
+      "name": "block5.w2",
+      "offset": 164688,
+      "length": 2304,
+      "shape": [
+        48,
+        48
+      ],
+      "scale": 0.013464368158771146
+    },
+    {
+      "name": "block5.b2",
+      "offset": 166992,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.004355124408198941
     },
     {
       "name": "head.w",
-      "offset": 150576,
-      "length": 3072,
+      "offset": 167040,
+      "length": 2304,
       "shape": [
         48,
-        64
+        48
       ],
-      "scale": 0.016851380948097475
+      "scale": 0.018026263483109012
     },
     {
       "name": "head.b",
-      "offset": 153648,
-      "length": 64,
+      "offset": 169344,
+      "length": 48,
       "shape": [
-        64
+        48
       ],
-      "scale": 0.007769258272263312
+      "scale": 0.005885401079731603
     },
     {
-      "name": "kind.w",
-      "offset": 153712,
-      "length": 512,
+      "name": "tags.w",
+      "offset": 169392,
+      "length": 1104,
       "shape": [
-        64,
-        8
+        48,
+        23
       ],
-      "scale": 0.03970916425028155
+      "scale": 0.024527317093264674
     },
     {
-      "name": "kind.b",
-      "offset": 154224,
-      "length": 8,
+      "name": "tags.b",
+      "offset": 170496,
+      "length": 23,
       "shape": [
-        8
+        23
       ],
-      "scale": 0.00572620572582368
-    },
-    {
-      "name": "bio.w",
-      "offset": 154232,
-      "length": 960,
-      "shape": [
-        64,
-        15
-      ],
-      "scale": 0.026645143185892412
-    },
-    {
-      "name": "bio.b",
-      "offset": 155192,
-      "length": 15,
-      "shape": [
-        15
-      ],
-      "scale": 0.008420855768265264
+      "scale": 0.005196945801857979
     }
   ],
-  "parameters": 155207
+  "parameters": 170519
 }
