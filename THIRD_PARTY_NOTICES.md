@@ -6,6 +6,22 @@
   sparse features → WGSL tagger recipe and for the explainer video style. No code is copied.
 - **gpu-time** (Arik Chakma, MIT): reference for the affine-scan tagger family and the
   render-script conventions. No code is copied.
+- **Loghub** (LogPAI, https://github.com/logpai/loghub): the `*_2k.log` samples and their
+  `*_structured.csv` labels are used by `packages/gpu-log/training/gpu_log/evaluate.py` for
+  evaluation only. They are downloaded at run time and never committed or used for training.
+  Loghub's license makes the datasets "freely available for research or academic work" with the
+  request to cite: Jieming Zhu, Shilin He, Pinjia He, Jinyang Liu, Michael R. Lyu. *Loghub: A
+  Large Collection of System Log Datasets for AI-driven Log Analytics.* ISSRE 2023.
+- **anystyle core dataset** (`res/parser/core.xml`, Sylvester Keil, BSD-2-Clause,
+  https://github.com/inukshuk/anystyle): 1,514 hand-labelled reference strings used by
+  `packages/gpu-cite` for evaluation only. Downloaded at training time, not committed.
+- **GROBID citation training corpus** (`grobid-trainer/resources/dataset/citation`, Apache-2.0,
+  https://github.com/grobidOrg/grobid): ~3,600 TEI-annotated reference strings used by
+  `packages/gpu-cite` for evaluation only. Downloaded at training time, not committed.
+- **CrossRef REST API metadata** (https://api.crossref.org, metadata is CC0/public domain per
+  CrossRef's terms) and **arXiv OAI-PMH metadata** (https://oaipmh.arxiv.org, CC0): structured
+  bibliographic records used by `packages/gpu-cite` as input to its synthetic reference
+  renderer. Downloaded at training time, not committed.
 
 ## gpu-paste (training data only; nothing below ships in the package)
 
@@ -19,6 +35,14 @@
 - Considered and not used: OpenAddresses (per-source licences, several share-alike),
   libpostal / gpu-postal training corpora (OSM-derived, ODbL), CoNLL-style NER corpora
   (research-only licences).
+- **email_reply_parser** (GitHub, MIT): `test/emails/*.txt` fixtures are downloaded at
+  evaluation time by `packages/gpu-email/training/gpu_email/data.py` and used only to
+  evaluate gpu-email (reply extraction). Not committed, not used for training.
+  https://github.com/github/email_reply_parser
+- **talon** (Mailgun, Apache License 2.0): `tests/fixtures/standard_replies/*.eml` and
+  `tests/fixtures/signature/emails/stripped/*` are downloaded at evaluation time by the
+  same script and used only to evaluate gpu-email (reply and signature extraction). Not
+  committed, not used for training. https://github.com/mailgun/talon
 
 ## gpu-tailwind
 

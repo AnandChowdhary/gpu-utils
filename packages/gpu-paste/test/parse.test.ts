@@ -85,8 +85,14 @@ describe("gpu-paste rules", () => {
     expect(parseAmount("1,5")).toBe(1.5);
     expect(parseAmount("1,234")).toBe(1234);
     expect(parseMoney("€48k")).toEqual({ amount: 48000, currency: "EUR" });
-    expect(parseMoney("R$ 2.499,90")).toEqual({ amount: 2499.9, currency: "BRL" });
-    expect(parseMoney("1 234,56 kr")).toEqual({ amount: 1234.56, currency: "kr" });
+    expect(parseMoney("R$ 2.499,90")).toEqual({
+      amount: 2499.9,
+      currency: "BRL",
+    });
+    expect(parseMoney("1 234,56 kr")).toEqual({
+      amount: 1234.56,
+      currency: "kr",
+    });
     expect(parseMoney("hello")).toBeUndefined();
   });
 

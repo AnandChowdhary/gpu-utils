@@ -1,17 +1,13 @@
 {
   "files": [],
   "references": [
-    {
-      "path": "packages/gpu-paste"
-    },
-    {
-      "path": "packages/gpu-tailwind"
-    },
-    {
-      "path": "packages/runtime"
-    },
-    {
-      "path": "tooling"
-    }
+    { "path": "packages/gpu-cite" },
+    { "path": "packages/gpu-email" },
+    { "path": "packages/gpu-log" },
+    { "path": "packages/gpu-paste" },
+    { "path": "packages/gpu-tailwind" },
+    { "path": "packages/gpu-view" },
+    { "path": "packages/runtime" },
+    { "path": "tooling" }
   ]
 }
