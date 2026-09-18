@@ -20,3 +20,6 @@ packages/*/training/__pycache__/
 # Video renders
 video/media/
 video/**/media/
+
+# Copied in by each package's prepack script
+packages/*/LICENSE
