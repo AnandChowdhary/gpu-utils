@@ -6,7 +6,7 @@
               by `python -m gpu_email.data` into data/cache (reply / signature expectations
               in data/external_expected.json)
 
-    uv run python -m gpu_email.evaluate [--markdown]
+    uv run python -m gpu_email.evaluate [--markdown] [--run default | --exported]
 
 Reports line-kind accuracy (non-blank lines), reply exact match, and per-field contact
 precision/recall/F1. Numbers use the int6-dequantized weights, i.e. what the package ships.
@@ -20,29 +20,54 @@ import email.policy
 import json
 import sys
 from collections import Counter
-from pathlib import Path
 
-import numpy as np
 import torch
-
-from gpu_email.data import CACHE_DIR, DATA_DIR, reply_from_lines, Line, KIND
-from gpu_email.decode import decode
-from gpu_email.export import dequantized_model, load_model
-from gpu_email.features import FIELDS, LINE_KINDS, featurize_tokens, line_infos
-from gpu_email.model import EmailTagger
+from gpu_utils_training.batch import collate
 from gpu_utils_training.features import tokenize
+from gpu_utils_training.loop import load_checkpoint
+from gpu_utils_training.models import TaggerBase, from_config
+from gpu_utils_training.quant import decode_weights
+
+from gpu_email.data import CACHE_DIR, DATA_DIR, KIND, Line, reply_from_lines
+from gpu_email.decode import decode
+from gpu_email.export import MODEL_DIR, RUNS
+from gpu_email.features import (
+    FIELDS,
+    LINE_KINDS,
+    NUM_SLOTS,
+    featurize_tokens,
+    line_infos,
+)
+from gpu_email.model import build
 
 
-def run(model: EmailTagger, text: str) -> dict:
+def load_model(run: str = "default") -> TaggerBase:
+    """The checkpoint with int6 fake quantization on (bit-identical to the exported weights)."""
+    model = build()
+    load_checkpoint(model, RUNS / run / "best.pt")
+    model.quant = True
+    model.eval()
+    return model
+
+
+def load_exported() -> TaggerBase:
+    """The shipped model/{manifest.json,weights.txt}, decoded exactly like runtime/weights.ts."""
+    manifest = json.loads((MODEL_DIR / "manifest.json").read_text())
+    model = from_config(manifest)
+    model.load_tensors(decode_weights((MODEL_DIR / "weights.txt").read_text(), manifest))
+    model.eval()
+    return model
+
+
+@torch.no_grad()
+def run(model: TaggerBase, text: str) -> dict:
     tokens = tokenize(text)
     lines = line_infos(tokens)
     if not tokens:
         return {"line_kinds": [], "segments": [], "reply": "", "contact": None}
     rows = featurize_tokens(tokens)
-    ids = torch.tensor(rows, dtype=torch.long).unsqueeze(0)
-    with torch.no_grad():
-        kind, bio = model(ids, torch.ones(1, len(rows)))
-    logits = torch.cat([kind, bio], dim=-1)[0].numpy()
+    r, mask = collate([rows], NUM_SLOTS, model.padding_id)
+    logits = model(r, mask)["tags"][0].numpy()
     return decode(tokens, lines, logits, text)
 
 
@@ -184,7 +209,7 @@ class Metrics:
         return rows
 
 
-def evaluate_set(model: EmailTagger, cases: list[dict]) -> Metrics:
+def evaluate_set(model: TaggerBase, cases: list[dict]) -> Metrics:
     m = Metrics()
     for i, case in enumerate(cases):
         name = case.get("name", str(i))
@@ -214,10 +239,11 @@ def main() -> None:
     ap.add_argument("--markdown", action="store_true")
     ap.add_argument("--heldout", type=int, default=3000)
     ap.add_argument("--failures", type=int, default=25)
+    ap.add_argument("--run", default="default", help="checkpoint under runs/ (fake-quantized)")
+    ap.add_argument("--exported", action="store_true", help="score ../model/ instead of a checkpoint")
     args = ap.parse_args()
     torch.set_num_threads(2)
-    model, _ = load_model()
-    model = dequantized_model(model)
+    model = load_exported() if args.exported else load_model(args.run)
     sets = {"held-out (generated)": load_heldout(args.heldout), "unfamiliar (hand-written)": load_unfamiliar(), "external (talon + email_reply_parser)": load_external()}
     for name, cases in sets.items():
         if not cases:

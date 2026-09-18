@@ -1,14 +1,18 @@
 """Python mirror of src/decode.ts, used by evaluate.py so the reported metrics come from
-the same rules + Viterbi + contact extraction the package ships. Keep in sync."""
+the same rules + Viterbi + contact extraction the package ships. Keep in sync. The Viterbi
+and the BIO transition table are the shared ones (gpu_utils_training.decode, fixture-tested
+against runtime/decode.ts and bio.ts); the line-kind transition table is this package's.
+"""
 
 from __future__ import annotations
 
 import re
 
 import numpy as np
-
-from gpu_email.features import BIO_LABELS, EMAIL_RE, LINE_KINDS, LineInfo, URL_RE
+from gpu_utils_training.decode import bio_transitions, viterbi
 from gpu_utils_training.features import CLASS_NEWLINE, CLASS_SPACE, Token
+
+from gpu_email.features import BIO_LABELS, EMAIL_RE, LINE_KINDS, URL_RE, LineInfo
 
 REPLY, ATTRIBUTION, QUOTE, SIGNATURE, DISCLAIMER, FORWARD, GREETING, CLOSING = range(8)
 NEG = -1e9
@@ -26,24 +30,6 @@ TRANSITIONS = np.array(
     dtype=np.float64,
 )
 
-
-def viterbi(emissions: np.ndarray, transitions: np.ndarray) -> list[int]:
-    """Same tie-breaking as runtime/decode.ts (first best on ties)."""
-    n, k = emissions.shape
-    if n == 0:
-        return []
-    score = np.zeros((n, k))
-    back = np.zeros((n, k), dtype=np.int64)
-    score[0] = emissions[0]
-    for i in range(1, n):
-        cand = score[i - 1][:, None] + transitions  # [from, to]
-        back[i] = np.argmax(cand, axis=0)
-        score[i] = cand[back[i], np.arange(k)] + emissions[i]
-    path = [0] * n
-    path[-1] = int(np.argmax(score[-1]))
-    for i in range(n - 1, 0, -1):
-        path[i - 1] = int(back[i, path[i]])
-    return path
 
 
 def log_softmax(x: np.ndarray) -> np.ndarray:
@@ -117,18 +103,7 @@ def _u16_slice(text: str, start: int, end: int) -> str:
     return text.encode("utf-16-le")[start * 2 : end * 2].decode("utf-16-le", errors="ignore")
 
 
-def _bio_transitions() -> np.ndarray:
-    B = len(BIO_LABELS)
-    t = np.zeros((B, B))
-    for f in range(B):
-        for to in range(B):
-            if BIO_LABELS[to].startswith("I-"):
-                ok = BIO_LABELS[f] != "O" and BIO_LABELS[f][2:] == BIO_LABELS[to][2:]
-                t[f, to] = 0 if ok else NEG
-    return t
-
-
-BIO_T = _bio_transitions()
+BIO_T = bio_transitions(BIO_LABELS)
 
 
 def extract_contact(tokens: list[Token], logits: np.ndarray, text: str, span: tuple[int, int]) -> dict | None:
@@ -153,7 +128,7 @@ def extract_contact(tokens: list[Token], logits: np.ndarray, text: str, span: tu
     exact: list[list] = []
     for m in EMAIL_RE.finditer(seg):
         exact.append(["EMAIL", span[0] + _u16(seg[: m.start()]), span[0] + _u16(seg[: m.end()])])
-    for m in re.finditer(URL_RE.pattern, seg, re.I):
+    for m in re.finditer(URL_RE.pattern, seg, re.IGNORECASE):
         s = m.group(0)
         while s and s[-1] in ".,;:!?":
             s = s[:-1]

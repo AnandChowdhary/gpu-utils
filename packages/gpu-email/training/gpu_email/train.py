@@ -1,67 +1,96 @@
-"""Train gpu-email with quantization-aware training.
+"""Train gpu-email with int6 quantization-aware training through the shared loop.
 
-    uv run python -m gpu_email.train [--minutes 16] [--epochs 3] [--seed 0]
+    uv run python -m gpu_email.train [--epochs 3] [--minutes 18] [--seed 0] [--run default]
 
-Reads data/cache/{train,heldout}.npz written by `python -m gpu_email.data`, writes
-runs/latest.pt (gitignored) and prints token-level metrics on the held-out set.
+Reads data/cache/{train,heldout}.npz written by `python -m gpu_email.data` and writes
+runs/<run>/{best.pt,last.pt,history.json}. CPU only, 2 threads by default. The loss is
+cross-entropy on the line-kind columns plus class-weighted cross-entropy on the BIO
+columns; the best checkpoint is the one with the highest mean of held-out line-kind token
+accuracy and BIO span F1 (both measured with fake quantization on).
 """
 
 from __future__ import annotations
 
-import argparse
-import math
-import sys
-import time
 from pathlib import Path
 
 import numpy as np
 import torch
-from torch import nn
+from gpu_utils_training.cli import loop_kwargs, run_dir, training_parser
+from gpu_utils_training.loop import train
+from gpu_utils_training.metrics import bio_to_spans, span_prf, token_accuracy
+from gpu_utils_training.models import ConvTagger
+from torch import Tensor, nn
+from torch.nn import functional as F
 
-from gpu_email.data import CACHE_DIR
-from gpu_email.features import BIO_LABELS, LINE_KINDS, NUM_SLOTS
-from gpu_email.model import EmailTagger
+from gpu_email.data import CACHE_DIR, Encoded
+from gpu_email.features import BIO_LABELS, NUM_SLOTS
+from gpu_email.model import N_BIO, N_KINDS, build
 
 RUNS = Path(__file__).resolve().parents[1] / "runs"
+BIO_WEIGHTS = torch.ones(N_BIO)
+BIO_WEIGHTS[0] = 0.35  # "O" dominates; the old package used the same down-weighting
+
+Batch = tuple[Tensor, Tensor, Tensor, Tensor]
+
+
+def collate_examples(encoded: list[Encoded], padding_id: int) -> Batch:
+    """``(rows [B, T, slots] long, mask [B, T] bool, kinds [B, T], bio [B, T])``; -100 = ignore."""
+    n = len(encoded)
+    t = max(1, max(len(e.kinds) for e in encoded))
+    rows = np.full((n, t, NUM_SLOTS), padding_id, dtype=np.int64)
+    mask = np.zeros((n, t), dtype=bool)
+    kinds = np.full((n, t), -100, dtype=np.int64)
+    bio = np.full((n, t), -100, dtype=np.int64)
+    for b, e in enumerate(encoded):
+        m = len(e.kinds)
+        rows[b, :m] = e.rows
+        mask[b, :m] = True
+        k = e.kinds.astype(np.int64)
+        kinds[b, :m] = np.where(k < 0, -100, k)
+        bio[b, :m] = e.bio
+    return (
+        torch.from_numpy(rows),
+        torch.from_numpy(mask),
+        torch.from_numpy(kinds),
+        torch.from_numpy(bio),
+    )
 
 
 class Split:
+    """One cached split (data/cache/*.npz) with length-bucketed, token-budgeted batching."""
+
     def __init__(self, path: Path):
         z = np.load(path)
         self.rows = z["rows"]
-        self.kinds = z["kinds"].astype(np.int64)
-        self.bio = z["bio"].astype(np.int64)
+        self.kinds = z["kinds"]
+        self.bio = z["bio"]
         self.offsets = z["offsets"]
         self.n = len(self.offsets) - 1
         self.lengths = np.diff(self.offsets)
 
-    def batch(self, idx: np.ndarray) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        L = int(self.lengths[idx].max())
-        B = len(idx)
-        ids = np.zeros((B, L, NUM_SLOTS), dtype=np.int64)
-        mask = np.zeros((B, L), dtype=np.float32)
-        kinds = np.full((B, L), -100, dtype=np.int64)
-        bio = np.full((B, L), -100, dtype=np.int64)
-        for b, i in enumerate(idx):
-            s, e = self.offsets[i], self.offsets[i + 1]
-            n = e - s
-            ids[b, :n] = self.rows[s:e]
-            mask[b, :n] = 1
-            k = self.kinds[s:e]
-            kinds[b, :n] = np.where(k < 0, -100, k)
-            bio[b, :n] = self.bio[s:e]
-        return torch.from_numpy(ids), torch.from_numpy(mask), torch.from_numpy(kinds), torch.from_numpy(bio)
+    def example(self, i: int) -> Encoded:
+        s, e = self.offsets[i], self.offsets[i + 1]
+        return Encoded(self.rows[s:e], self.kinds[s:e], self.bio[s:e])
 
-    def batches(self, rng: np.random.Generator, batch_size: int, max_tokens: int = 12000):
-        """Length-bucketed batches with a token budget so long emails get smaller batches."""
+    def batch(self, idx: np.ndarray, padding_id: int) -> Batch:
+        return collate_examples([self.example(int(i)) for i in idx], padding_id)
+
+    def batches(
+        self, rng: np.random.Generator, batch_size: int, max_tokens: int = 12000
+    ) -> list[np.ndarray]:
+        """Length-bucketed index chunks with a token budget so long emails get smaller batches."""
         order = np.argsort(self.lengths + rng.integers(0, 40, self.n))
         chunks: list[np.ndarray] = []
         i = 0
         while i < self.n:
-            L = int(self.lengths[order[i]])
+            length = int(self.lengths[order[i]])
             j = i
-            while j < self.n and (j - i) < batch_size and (j - i + 1) * max(L, int(self.lengths[order[j]])) <= max_tokens:
-                L = max(L, int(self.lengths[order[j]]))
+            while (
+                j < self.n
+                and (j - i) < batch_size
+                and (j - i + 1) * max(length, int(self.lengths[order[j]])) <= max_tokens
+            ):
+                length = max(length, int(self.lengths[order[j]]))
                 j += 1
             j = max(j, i + 1)
             chunks.append(order[i:j])
@@ -70,105 +99,85 @@ class Split:
         return chunks
 
 
-def evaluate(model: EmailTagger, split: Split, max_emails: int = 1500) -> dict[str, float]:
+def loss(model: nn.Module, batch: Batch) -> Tensor:
+    rows, mask, kinds, bio = batch
+    tags = model(rows, mask)["tags"]
+    loss_k = F.cross_entropy(
+        tags[..., :N_KINDS].reshape(-1, N_KINDS), kinds.reshape(-1), ignore_index=-100
+    )
+    loss_b = F.cross_entropy(
+        tags[..., N_KINDS:].reshape(-1, N_BIO),
+        bio.reshape(-1),
+        ignore_index=-100,
+        weight=BIO_WEIGHTS,
+    )
+    return loss_k + loss_b
+
+
+@torch.no_grad()
+def evaluate(
+    model: ConvTagger, split: Split, max_emails: int = 1500, batch_size: int = 32
+) -> dict[str, float]:
+    """Token-level line-kind accuracy and BIO span F1 on the first ``max_emails`` of ``split``."""
     model.eval()
-    rng = np.random.default_rng(0)
     idx_all = np.arange(min(split.n, max_emails))
-    kind_correct = kind_total = 0
-    bio_tp = np.zeros(len(BIO_LABELS))
-    bio_fp = np.zeros(len(BIO_LABELS))
-    bio_fn = np.zeros(len(BIO_LABELS))
-    with torch.no_grad():
-        for i in range(0, len(idx_all), 32):
-            ids, mask, kinds, bio = split.batch(idx_all[i : i + 32])
-            k_logits, b_logits = model(ids, mask)
-            kp = k_logits.argmax(-1)
-            valid = kinds >= 0
-            kind_correct += int(((kp == kinds) & valid).sum())
-            kind_total += int(valid.sum())
-            bp = b_logits.argmax(-1)
-            v = bio >= 0
-            for c in range(1, len(BIO_LABELS)):
-                bio_tp[c] += int(((bp == c) & (bio == c) & v).sum())
-                bio_fp[c] += int(((bp == c) & (bio != c) & v).sum())
-                bio_fn[c] += int(((bp != c) & (bio == c) & v).sum())
-    del rng
-    tp, fp, fn = bio_tp[1:].sum(), bio_fp[1:].sum(), bio_fn[1:].sum()
-    f1 = 2 * tp / max(1, 2 * tp + fp + fn)
+    kind_p: list[np.ndarray] = []
+    kind_g: list[np.ndarray] = []
+    kind_m: list[np.ndarray] = []
+    pred_spans = []
+    gold_spans = []
+    for i in range(0, len(idx_all), batch_size):
+        rows, mask, kinds, bio = split.batch(
+            idx_all[i : i + batch_size], model.padding_id
+        )
+        tags = model(rows, mask)["tags"]
+        kp = tags[..., :N_KINDS].argmax(-1).numpy()
+        bp = tags[..., N_KINDS:].argmax(-1).numpy()
+        kind_p.append(kp.ravel())
+        kind_g.append(kinds.numpy().ravel())
+        kind_m.append((kinds.numpy() >= 0).ravel())
+        m = mask.numpy()
+        g = bio.numpy()
+        for b in range(len(rows)):
+            n = int(m[b].sum())
+            pred_spans.append(bio_to_spans([BIO_LABELS[t] for t in bp[b, :n]]))
+            gold_spans.append(bio_to_spans([BIO_LABELS[t] for t in g[b, :n]]))
+    acc = token_accuracy(
+        np.concatenate(kind_p), np.concatenate(kind_g), np.concatenate(kind_m)
+    )
+    micro = span_prf(pred_spans, gold_spans)["micro"]
+    assert isinstance(micro, dict)
     model.train()
-    return {"kind_token_acc": kind_correct / max(1, kind_total), "bio_token_f1": float(f1)}
+    return {
+        "kind_token_acc": acc,
+        "bio_span_f1": micro["f1"],
+        "score": 0.5 * (acc + micro["f1"]),
+    }
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--minutes", type=float, default=16.0)
-    ap.add_argument("--epochs", type=int, default=3)
-    ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--lr", type=float, default=2.5e-3)
-    ap.add_argument("--batch", type=int, default=24)
-    ap.add_argument("--dim", type=int, default=48)
-    ap.add_argument("--hidden", type=int, default=64)
-    ap.add_argument("--qat-from", type=float, default=0.4, help="fraction of steps after which QAT is on")
-    ap.add_argument("--threads", type=int, default=2)
-    args = ap.parse_args()
-
-    torch.set_num_threads(args.threads)
-    torch.manual_seed(args.seed)
-    rng = np.random.default_rng(args.seed)
-    train = Split(CACHE_DIR / "train.npz")
+    args = training_parser(
+        "Train gpu-email", epochs=3, lr=2.5e-3, batch=24, minutes=18.0
+    ).parse_args()
+    train_set = Split(CACHE_DIR / "train.npz")
     heldout = Split(CACHE_DIR / "heldout.npz")
-    model = EmailTagger(args.dim, args.hidden)
-    print(f"params: {model.num_params()}  train emails: {train.n}  tokens: {int(train.lengths.sum())}", file=sys.stderr)
-
-    steps_per_epoch = len(train.batches(np.random.default_rng(1), args.batch))
-    total_steps = steps_per_epoch * args.epochs
-    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
-    sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=total_steps, pct_start=0.1, anneal_strategy="cos", div_factor=10, final_div_factor=50)
-    bio_weights = torch.ones(len(BIO_LABELS))
-    bio_weights[0] = 0.35
-    ce_kind = nn.CrossEntropyLoss(ignore_index=-100)
-    ce_bio = nn.CrossEntropyLoss(ignore_index=-100, weight=bio_weights)
-
-    t0 = time.time()
-    step = 0
-    deadline = t0 + args.minutes * 60
-    done = False
-    for epoch in range(args.epochs):
-        for idx in train.batches(rng, args.batch):
-            if step >= int(args.qat_from * total_steps) and not model.qat:
-                model.qat = True
-                print(f"step {step}: QAT on", file=sys.stderr)
-            ids, mask, kinds, bio = train.batch(idx)
-            k_logits, b_logits = model(ids, mask)
-            loss_k = ce_kind(k_logits.reshape(-1, len(LINE_KINDS)), kinds.reshape(-1))
-            loss_b = ce_bio(b_logits.reshape(-1, len(BIO_LABELS)), bio.reshape(-1))
-            loss = loss_k + loss_b
-            opt.zero_grad(set_to_none=True)
-            loss.backward()
-            nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            opt.step()
-            if step < total_steps - 1:
-                sched.step()
-            step += 1
-            if step % 100 == 0:
-                el = time.time() - t0
-                print(f"ep {epoch} step {step}/{total_steps} loss {loss.item():.3f} (kind {loss_k.item():.3f} bio {loss_b.item():.3f}) lr {sched.get_last_lr()[0]:.2e} {el / 60:.1f}min", file=sys.stderr)
-            if time.time() > deadline:
-                print("time budget reached", file=sys.stderr)
-                done = True
-                break
-        m = evaluate(model, heldout)
-        print(f"epoch {epoch}: heldout {m}", file=sys.stderr)
-        if done:
-            break
-    if not model.qat:
-        model.qat = True
-    m = evaluate(model, heldout)
-    print(f"final (QAT): heldout {m}  elapsed {(time.time() - t0) / 60:.1f}min", file=sys.stderr)
-    RUNS.mkdir(exist_ok=True)
-    torch.save({"state": model.state_dict(), "dim": args.dim, "hidden": args.hidden, "dilations": model.dilations, "metrics": m, "seed": args.seed, "steps": step, "epochs": args.epochs}, RUNS / "latest.pt")
-    print(f"saved {RUNS / 'latest.pt'}", file=sys.stderr)
-    assert not math.isnan(loss.item())
+    model = build()
+    print(
+        f"parameters: {model.parameter_count():,}  train emails: {train_set.n}  tokens: {int(train_set.lengths.sum()):,}  held-out: {heldout.n}"
+    )
+    result = train(
+        model,
+        lambda _epoch, rng: [
+            train_set.batch(idx, model.padding_id)
+            for idx in train_set.batches(rng, args.batch)
+        ],
+        lambda m: evaluate(m, heldout),  # type: ignore[arg-type]
+        loss=loss,
+        out_dir=run_dir(__file__, args),
+        select="score",
+        **loop_kwargs(args),
+    )
+    print(f"best: {result['best']}  ({result['minutes']} min)")
 
 
 if __name__ == "__main__":
