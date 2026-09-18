@@ -7,16 +7,20 @@ from collections.abc import Callable
 
 from . import vocab as V
 from .gen import (
-    Line, add_kv, duration, hexid, http_request, identifier, ip, java_logger, level_word, message, pad_level,
-    py_logger, source_name, thread_name, timestamp, uuid, word,
+    Line, add_kv, duration, hexid, hostname, http_request, identifier, ip, java_logger, level_word, message,
+    pad_level, py_logger, source_name, thread_name, timestamp, uuid, word,
 )
 
 Builder = Callable[[random.Random], Line]
 
 
-def msg_tail(line: Line, rng: random.Random, kv_p: float = 0.25, sep: str | None = None) -> None:
-    """Message, optionally followed by a kv tail."""
-    m = message(rng)
+def msg_tail(line: Line, rng: random.Random, kv_p: float = 0.25, sep: str | None = None, prefix: str = "") -> None:
+    """Message, optionally followed by a kv tail.
+
+    `prefix` (the RFC 5424 "BOM" marker) is part of the MSG span: it is glued to the first
+    word of the message, so a span boundary inside that token would be unlearnable.
+    """
+    m = prefix + message(rng)
     line.add(m, "MSG")
     if rng.random() < kv_p:
         add_kv(line, rng, sep=sep)
@@ -42,7 +46,7 @@ def syslog_3164(rng: random.Random) -> Line:
     L = Line("entry")
     maybe_pri(L, rng)
     L.add(timestamp(rng, rng.choice([15, 15, 16])), "TS").add(" ")
-    L.add(rng.choice(V.HOSTS)).add(" ")
+    L.add(hostname(rng), "HOST").add(" ")
     proc = rng.choice(V.PROCS)
     L.add(proc, "SOURCE")
     pid_suffix(L, rng)
@@ -55,7 +59,9 @@ def syslog_5424(rng: random.Random) -> Line:
     L = Line("entry")
     L.add(f"<{rng.randint(0, 191)}>", "LEVEL").add("1 ")
     L.add(timestamp(rng, rng.choice([1, 2, 5, 6])), "TS").add(" ")
-    L.add(rng.choice(V.HOSTS + ["-"])).add(" ")
+    hh = hostname(rng)
+    L.add(hh, "HOST") if hh != "-" else L.add("-")
+    L.add(" ")
     L.add(rng.choice(V.PROCS + V.SERVICES + ["-"]), "SOURCE").add(" ")
     L.add(rng.choice([str(rng.randint(1, 99999)), "-"]), "THREAD").add(" ")
     L.add(rng.choice(["-", "ID47", "MSGID", word(rng).upper()])).add(" ")
@@ -71,9 +77,7 @@ def syslog_5424(rng: random.Random) -> Line:
         L.add("-")
     if rng.random() < 0.9:
         L.add(" ")
-        if rng.random() < 0.1:
-            L.add("BOM")
-        msg_tail(L, rng, 0.15)
+        msg_tail(L, rng, 0.15, prefix="BOM" if rng.random() < 0.1 else "")
     return L
 
 
@@ -81,7 +85,7 @@ def journal(rng: random.Random) -> Line:
     L = Line("entry")
     style = rng.choice([15, 4, 6, 20, 42])
     L.add(timestamp(rng, style), "TS").add(" ")
-    L.add(rng.choice(V.HOSTS)).add(" ")
+    L.add(hostname(rng), "HOST").add(" ")
     L.add(rng.choice(V.PROCS + ["systemd", "systemd", "kernel", "sshd"]), "SOURCE")
     pid_suffix(L, rng)
     L.add(": ")
@@ -104,7 +108,7 @@ def journal_marker(rng: random.Random) -> Line:
 def access_log(rng: random.Random) -> Line:
     L = Line("entry")
     if rng.random() < 0.2:
-        L.add(rng.choice(V.HOSTS + ["example.com", "api.example.com"])).add(" ")
+        L.add(rng.choice(V.HOSTS + ["example.com", "api.example.com"]), "HOST").add(" ")
     L.add(ip(rng), "SOURCE").add(" - ")
     L.add(rng.choice(["-", "-", "-", rng.choice(V.USERS)])).add(" [")
     L.add(timestamp(rng, 17), "TS").add("] \"")
@@ -190,7 +194,7 @@ def log4j(rng: random.Random) -> Line:
         L.add(" (").add(logger, "SOURCE").add(")")
         return L
     elif variant == 6:  # elasticsearch: [%d][%-5p][%c{1.}] [node] %m
-        L.add("[").add(ts, "TS").add("][").add(lw, "LEVEL").add(pad).add("][").add(logger, "SOURCE").add(" " * rng.randint(0, 12)).add("] [").add(rng.choice(V.HOSTS)).add("] ")
+        L.add("[").add(ts, "TS").add("][").add(lw, "LEVEL").add(pad).add("][").add(logger, "SOURCE").add(" " * rng.randint(0, 12)).add("] [").add(hostname(rng), "HOST").add("] ")
     elif variant == 7:  # spring boot: %d  %5p %pid --- [%15.15t] %-40.40logger{39} : %m
         L.add(ts, "TS").add("  ").add(" " * max(0, 5 - len(lw))).add(lw, "LEVEL").add(" ").add(str(rng.randint(1, 99999)), "THREAD").add(" --- [")
         L.add(" " * max(0, 15 - len(thread[:15]))).add(thread[:15], "THREAD").add("] ").add(logger[:40], "SOURCE").add(" " * max(0, 40 - len(logger[:40]))).add(" : ")
@@ -369,7 +373,7 @@ def node_log(rng: random.Random) -> Line:
         L.add("[").add(timestamp(rng, rng.choice([29, 1, 39])), "TS").add("] ").add(lw.upper(), "LEVEL").add(" (")
         if rng.random() < 0.5:
             L.add(rng.choice(V.NODE_MODULES), "SOURCE").add("/")
-        L.add(str(rng.randint(1, 99999)), "THREAD").add(" on ").add(rng.choice(V.HOSTS)).add("): ")
+        L.add(str(rng.randint(1, 99999)), "THREAD").add(" on ").add(hostname(rng), "HOST").add("): ")
     elif v == 1:  # winston: ts [level]: msg  / level: msg
         if rng.random() < 0.6:
             L.add(timestamp(rng, rng.choice([1, 7])), "TS").add(" ")
@@ -385,7 +389,7 @@ def node_log(rng: random.Random) -> Line:
             L.add("}")
         return L
     elif v == 2:  # bunyan pretty: [ts]  INFO: app/pid on host: msg
-        L.add("[").add(timestamp(rng, 1), "TS").add("] ").add(" " * max(0, 5 - len(lw))).add(lw.upper(), "LEVEL").add(": ").add(rng.choice(V.NODE_MODULES), "SOURCE").add("/").add(str(rng.randint(1, 99999)), "THREAD").add(" on ").add(rng.choice(V.HOSTS)).add(": ")
+        L.add("[").add(timestamp(rng, 1), "TS").add("] ").add(" " * max(0, 5 - len(lw))).add(lw.upper(), "LEVEL").add(": ").add(rng.choice(V.NODE_MODULES), "SOURCE").add("/").add(str(rng.randint(1, 99999)), "THREAD").add(" on ").add(hostname(rng), "HOST").add(": ")
     elif v == 3:  # nest: [Nest] pid  - date, time     LOG [Context] msg
         L.add("[Nest] ").add(str(rng.randint(1, 99999)), "THREAD").add("  - ").add(timestamp(rng, 23).replace(" ", ", ", 1), "TS").add("     ").add(rng.choice(["LOG", "ERROR", "WARN", "DEBUG", "VERBOSE"]), "LEVEL").add(" [").add(rng.choice(V.NODE_MODULES), "SOURCE").add("] ")
     elif v == 4:  # debug module: namespace msg +Nms
@@ -636,3 +640,229 @@ ENTRY_BUILDERS: list[tuple[Builder, float]] = [
 ]
 MULTI_BUILDERS: list[tuple[Callable[[random.Random], list[Line]], float]] = [(jul_two_line, 1), (dotnet, 1)]
 INNER.extend([log4j, python_logging, go_log, rust_log, node_log, generic_entry, plain_line, logfmt_mixed, syslog_3164])
+
+
+# --- v2 coverage: supercomputer, Windows, Proxifier, bracket variants, nested kv, prose kv ---
+
+def cluster_node(rng: random.Random) -> str:
+    return rng.choice([f"R{rng.randint(0, 99):02d}-M{rng.randint(0, 1)}-N{rng.randint(0, 15)}-C:J{rng.randint(0, 17):02d}-U{rng.randint(1, 11):02d}",
+                       f"node-{rng.randint(0, 1023)}", f"dn{rng.randint(1, 999)}", f"cn{rng.randint(1, 9999)}", f"tbird-admin{rng.randint(1, 9)}",
+                       f"sn{rng.randint(1, 999)}", f"an{rng.randint(1, 99)}", f"nid{rng.randint(1000, 99999):05d}", f"c{rng.randint(0, 9)}-{rng.randint(0, 9)}c{rng.randint(0, 2)}s{rng.randint(0, 15)}"])
+
+
+def supercomputer(rng: random.Random) -> Line:
+    """Cluster / supercomputer RAS logs: alert flag, epoch, dotted date, node, timestamp, node, facility, component, level, msg."""
+    L = Line("entry")
+    v = rng.randrange(4)
+    node = cluster_node(rng)
+    if v == 0:  # BGL-like
+        L.add(rng.choice(["- ", "- ", "KERNDTLB ", "APPREAD ", "KERNRTSP "])).add(str(rng.randint(10**9, 2 * 10**9))).add(" ")
+        L.add(f"{rng.randint(2003, 2026)}.{rng.randint(1, 12):02d}.{rng.randint(1, 28):02d}").add(" ").add(node, "HOST").add(" ")
+        L.add(timestamp(rng, 45), "TS").add(" ").add(node, "HOST").add(" ")
+        L.add(rng.choice(["RAS", "RAS", "RAS", "NULL", "BGLMASTER"])).add(" ").add(rng.choice(["KERNEL", "APP", "DISCOVERY", "HARDWARE", "LINKCARD", "MMCS", "MONITOR", "CMCS"]), "SOURCE").add(" ")
+        L.add(rng.choice(["INFO", "FATAL", "WARNING", "ERROR", "SEVERE", "FAILURE"]), "LEVEL").add(" ")
+    elif v == 1:  # HPC-like: id node component state epoch flag msg
+        L.add(str(rng.randint(1, 9999999))).add(" ").add(node, "HOST").add(" ")
+        L.add(rng.choice(["unix.hw", "node", "action", "boot_cmd", "unix.sw", "cpu.hw", "mem.hw", "net.sw"]), "SOURCE").add(" ")
+        L.add(rng.choice(["state_change.unavailable", "start", "end", "cmd", "node", "running", "unavailable", "state_change.available"])).add(" ")
+        L.add(timestamp(rng, 30), "TS").add(" ").add(str(rng.randint(1, 9))).add(" ")
+    elif v == 2:  # Thunderbird-like: - epoch yyyy.mm.dd host <syslog line>
+        L.add("- ").add(str(rng.randint(10**9, 2 * 10**9))).add(" ").add(f"{rng.randint(2003, 2026)}.{rng.randint(1, 12):02d}.{rng.randint(1, 28):02d}").add(" ")
+        L.add(node, "HOST").add(" ").add(timestamp(rng, 16), "TS").add(" ")
+        L.add(rng.choice([f"{node}/{node}", f"local@{node}", node, f"src@{node}"]), "HOST").add(" ")
+        L.add(rng.choice(V.PROCS + ["crond(pam_unix)", "/apps/x86_64/system/ganglia-3.0.1/sbin/gmetad", "sshd(pam_unix)", "ntpd", "kernel", "pbs_mom"]), "SOURCE")
+        pid_suffix(L, rng, 0.7)
+        L.add(": ")
+    else:  # Slurm / PBS-like
+        L.add("[").add(timestamp(rng, 2), "TS").add("] ")
+        if rng.random() < 0.5:
+            L.add(rng.choice(["error", "debug", "info", "fatal", "verbose", "debug2"]), "LEVEL").add(": ")
+        L.add(rng.choice(["slurmctld", "slurmd", "slurmstepd", "_slurm_rpc_node_registration", "pbs_server", "job_scheduler"]), "SOURCE").add(": ")
+    msg_tail(L, rng, 0.1)
+    return L
+
+
+def windows_cbs(rng: random.Random) -> Line:
+    """Windows CBS/CSI/setupapi style: 'yyyy-mm-dd hh:mm:ss, Level   Component   msg'."""
+    L = Line("entry")
+    L.add(timestamp(rng, 7), "TS").add(", ")
+    lw = rng.choice(["Info", "Info", "Info", "Error", "Warning", "Verbose"])
+    L.add(lw, "LEVEL").add(" " * max(1, 22 - len(lw)))
+    L.add(rng.choice(["CBS", "CSI", "CBS", "DPX", "DISM", "WcpInitialize", "SQM", "TI", "SetupAPI", "Session"]), "SOURCE").add(" " * rng.randint(1, 6))
+    if rng.random() < 0.3:
+        L.add(f"{rng.randint(1, 999999):08d}@{rng.randint(2010, 2026)}/{rng.randint(1, 12)}/{rng.randint(1, 28)}:{rng.randint(0, 23):02d}:{rng.randint(0, 59):02d}:{rng.randint(0, 59):02d}.{rng.randint(0, 999):03d} ")
+    msg_tail(L, rng, 0.05)
+    return L
+
+
+def windows_event(rng: random.Random) -> list[Line]:
+    """Windows Event Viewer text export: one field per line."""
+    out: list[Line] = []
+    out.append(Line("entry").add("Log Name:      ").add(rng.choice(["System", "Application", "Security", "Setup", "Microsoft-Windows-Sysmon/Operational"]), "VALUE"))
+    out.append(Line("continuation").add("Source:        ").add(rng.choice(["Service Control Manager", "Microsoft-Windows-Kernel-General", "Windows Error Reporting", "Application Error", "Microsoft-Windows-Security-Auditing", "EventLog", "Windows PowerShell", "MSSQLSERVER", "DCOM", "Disk"]), "SOURCE"))
+    out.append(Line("continuation").add("Date:          ").add(timestamp(rng, 23), "TS"))
+    out.append(Line("continuation").add("Event ID:      ").add(str(rng.randint(1, 9999)), "VALUE"))
+    out.append(Line("continuation").add("Task Category: ").add(rng.choice(["None", "Logon", "(1)", "Process Creation"]), "VALUE"))
+    out.append(Line("continuation").add("Level:         ").add(rng.choice(["Information", "Error", "Warning", "Critical", "Verbose"]), "LEVEL"))
+    out.append(Line("continuation").add("Keywords:      ").add(rng.choice(["Classic", "Audit Success", "Audit Failure", "(70368744177664)"]), "VALUE"))
+    out.append(Line("continuation").add("User:          ").add(rng.choice(["N/A", "SYSTEM", "NT AUTHORITY\\SYSTEM", f"DOMAIN\\{rng.choice(V.USERS)}"]), "VALUE"))
+    out.append(Line("continuation").add("Computer:      ").add(rng.choice([f"{word(rng).upper()}-PC", f"DESKTOP-{hexid(rng, 7).upper()}", f"srv{rng.randint(1, 99)}.corp.local"]), "HOST"))
+    out.append(Line("continuation").add("Description:"))
+    out.append(Line("continuation").add(message(rng), "MSG"))
+    return out
+
+
+def proxifier(rng: random.Random) -> Line:
+    L = Line("entry")
+    L.add("[").add(f"{rng.randint(1, 12):02d}.{rng.randint(1, 31):02d} {rng.randint(0, 23):02d}:{rng.randint(0, 59):02d}:{rng.randint(0, 59):02d}", "TS").add("] ")
+    L.add(rng.choice(["chrome.exe", "firefox.exe", "python.exe", "ssh.exe", "Dropbox.exe", "Skype.exe", "outlook.exe", "curl.exe", "java.exe", "Code.exe"]), "SOURCE")
+    if rng.random() < 0.5:
+        L.add(" *").add(str(rng.randint(1, 999)))
+    L.add(" - ")
+    host = rng.choice(V.HOSTS + ["proxy.cse.cuhk.edu.hk", "update.microsoft.com", "api.dropbox.com"])
+    port = rng.randint(80, 65535)
+    v = rng.random()
+    if v < 0.4:
+        L.add(f"{host}:{port} open through proxy {rng.choice(V.HOSTS)}:{rng.randint(1000, 9999)} {rng.choice(['HTTPS', 'SOCKS5', 'HTTP'])}", "MSG")
+    elif v < 0.8:
+        L.add(f"{host}:{port} close, {rng.randint(0, 99999)} bytes sent, {rng.randint(0, 999999)} bytes received, lifetime {rng.randint(0, 59):02d}:{rng.randint(0, 59):02d}", "MSG")
+    else:
+        L.add(f"{host}:{port} error : Could not connect through proxy {rng.choice(V.HOSTS)}:{rng.randint(1000, 9999)} - {rng.choice(V.ERRORS)}", "MSG")
+    return L
+
+
+MULTI_WORD_SOURCES = ["Service Control Manager", "Windows PowerShell", "Application Error", "Group Policy", "Task Scheduler", "Windows Update Agent",
+                      "User Profile Service", "Disk Manager", "Print Spooler", "Remote Desktop Services", "Audit Service", "Cluster Service",
+                      "SQL Server", "Volume Shadow Copy", "Network Manager", "Bluetooth Daemon", "Power Manager", "Step Counter", "Health Kit"]
+
+
+def bracket_variants(rng: random.Random) -> Line:
+    """Sources and threads in every wrapper: (src), <thread>, {thread}, [src:thread], [thread|src], src(pid), src/pid, [pid/tid]."""
+    L = Line("entry")
+    if rng.random() < 0.85:
+        o, c = bracket(rng)
+        L.add(o).add(timestamp(rng), "TS").add(c).add(rng.choice([" ", "  ", " | ", "\t"]))
+    src = rng.choice(MULTI_WORD_SOURCES) if rng.random() < 0.35 else source_name(rng)
+    thr = thread_name(rng)
+    lw, _ = level_word(rng)
+    v = rng.randrange(10)
+    if v == 0:
+        L.add("(").add(src, "SOURCE").add(") ").add(lw, "LEVEL").add(" ")
+    elif v == 1:
+        L.add(lw, "LEVEL").add(" <").add(thr, "THREAD").add("> ").add(src, "SOURCE").add(": ")
+    elif v == 2:
+        L.add("{").add(thr, "THREAD").add("} [").add(lw, "LEVEL").add("] ").add(src, "SOURCE").add(" - ")
+    elif v == 3:
+        L.add("[").add(src, "SOURCE").add(":").add(thr, "THREAD").add("] ").add(lw, "LEVEL").add(": ")
+    elif v == 4:
+        L.add("[").add(thr, "THREAD").add("|").add(src, "SOURCE").add("] ").add(lw, "LEVEL").add(" ")
+    elif v == 5:
+        L.add(lw, "LEVEL").add(" ").add(src, "SOURCE").add("(").add(str(rng.randint(1, 99999)), "THREAD").add("): ")
+    elif v == 6:
+        L.add(src, "SOURCE").add("/").add(str(rng.randint(1, 99999)), "THREAD").add(" ").add(lw, "LEVEL").add(": ")
+    elif v == 7:
+        L.add("[").add(str(rng.randint(1, 99999)), "THREAD").add("/").add(str(rng.randint(1, 99999)), "THREAD").add("] ").add(lw, "LEVEL").add(" ").add(src, "SOURCE").add(": ")
+    elif v == 8:
+        L.add("<").add(lw, "LEVEL").add("> ").add("[").add(src, "SOURCE").add("] ").add("(").add(thr, "THREAD").add(") ")
+    else:
+        L.add(src, "SOURCE").add(" [").add(thr, "THREAD").add("] <").add(lw, "LEVEL").add("> ")
+    msg_tail(L, rng, 0.3)
+    return L
+
+
+def nested_value(rng: random.Random) -> str:
+    """Values with braces, brackets and quotes inside (JSON blobs, maps, lists)."""
+    v = rng.random()
+    if v < 0.3:
+        return "{" + ", ".join(f'"{rng.choice(gen_words())}": {rng.choice([str(rng.randint(0, 999)), "true", "null", f"\"{word(rng)}\"", "{\"x\": 1}"])}' for _ in range(rng.randint(1, 3))) + "}"
+    if v < 0.5:
+        return "{" + ", ".join(f"{rng.choice(gen_words())}={rng.choice([str(rng.randint(0, 999)), word(rng)])}" for _ in range(rng.randint(1, 3))) + "}"
+    if v < 0.7:
+        return "[" + ", ".join(rng.choice([word(rng), str(rng.randint(0, 999)), f'"{word(rng)}"']) for _ in range(rng.randint(1, 4))) + "]"
+    if v < 0.85:
+        return f"({rng.choice(gen_words())}={rng.randint(0, 99)}, {rng.choice(gen_words())}={word(rng)})"
+    return f"<{word(rng)} {rng.choice(gen_words())}={rng.randint(0, 99)}>"
+
+
+def gen_words() -> list[str]:
+    from .gen import WORDS
+    return WORDS
+
+
+def nested_kv(rng: random.Random) -> Line:
+    """Entry with a kv tail whose values are quoted strings with spaces or nested structures."""
+    L = Line("entry")
+    if rng.random() < 0.7:
+        L.add(timestamp(rng), "TS").add(" ")
+    if rng.random() < 0.6:
+        lw, _ = level_word(rng)
+        L.add(lw, "LEVEL").add(" ")
+    if rng.random() < 0.5:
+        L.add(source_name(rng), "SOURCE").add(rng.choice([": ", " - ", " "]))
+    L.add(message(rng), "MSG")
+    sep = rng.choice([" ", " ", ", ", "  ", "\t"])
+    for i in range(rng.randint(1, 4)):
+        L.add(sep if i else " ")
+        L.add(rng.choice(["data", "payload", "opts", "tags", "labels", "meta", "ctx", "args", "params", "headers", "body", "extra", "fields", "attrs"]), "KEY")
+        L.add(rng.choice(["=", "=", ": ", "="]))
+        val = nested_value(rng)
+        if rng.random() < 0.3:
+            q = rng.choice(['"', "'"])
+            L.add(q).add(val.replace(q, ""), "VALUE").add(q)
+        else:
+            L.add(val, "VALUE")
+    return L
+
+
+PROSE_KV_TEMPLATES = [
+    "Set {word}={num} for client {ip}",
+    "Using timeout={num}s and retries={num}",
+    "Connected with user={user} host={host} in {dur}",
+    "Rejected: status={status} reason={word}",
+    "Values: min={num} max={num} avg={num}",
+    "Starting with config={path} and port={port}",
+    "Ignoring option {word}={word} (deprecated)",
+    "{Word} finished: ok={num} failed={num} skipped={num}",
+    "request_id={ident} not found in cache",
+    "Node {host} reported load={num} mem={size}",
+    "Setting {word} = {num} (was {num})",
+    "watch: {word}={word}, {word}={num}",
+    "{word}: {num} -> {num} ({word}={dur})",
+    "Applied {word}={word} to {num} items",
+]
+
+
+def prose_kv(rng: random.Random) -> Line:
+    """key=value inside the sentence is message text, not a kv tail (sometimes followed by a real tail)."""
+    from .gen import fill
+    L = Line("entry")
+    if rng.random() < 0.8:
+        L.add(timestamp(rng), "TS").add(" ")
+    if rng.random() < 0.7:
+        lw, _ = level_word(rng)
+        o, c = bracket(rng)
+        L.add(o).add(lw, "LEVEL").add(c).add(" ")
+    if rng.random() < 0.5:
+        L.add(source_name(rng), "SOURCE").add(rng.choice([": ", " - ", " "]))
+    L.add(fill(rng, rng.choice(PROSE_KV_TEMPLATES)), "MSG")
+    if rng.random() < 0.35:
+        L.add(rng.choice(["  ", " | ", " -- ", "\t"]))
+        add_kv(L, rng, n=rng.randint(1, 3), style="eq", sep=" ")
+    return L
+
+
+def syslog_wrapped(rng: random.Random) -> Line:
+    """syslog prefix wrapping a structured application line (vault/consul/docker via journald)."""
+    L = Line("entry")
+    L.add(timestamp(rng, rng.choice([15, 16, 4])), "TS").add(" ").add(hostname(rng), "HOST").add(" ")
+    L.add(rng.choice(V.PROCS + V.SERVICES), "SOURCE")
+    pid_suffix(L, rng, 0.8)
+    L.add(": ")
+    inner = rng.choice([log4j, python_logging, go_log, rust_log, node_log, generic_entry, bracket_variants, nested_kv])(rng)
+    L.parts.extend(inner.parts)
+    return L
+
+
+ENTRY_BUILDERS.extend([(supercomputer, 4), (windows_cbs, 2), (proxifier, 1.5), (bracket_variants, 5), (nested_kv, 3), (prose_kv, 3), (syslog_wrapped, 2)])
+MULTI_BUILDERS.append((windows_event, 0.5))
+INNER.extend([bracket_variants, nested_kv])

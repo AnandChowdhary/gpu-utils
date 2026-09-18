@@ -33,7 +33,8 @@ def test_unfamiliar_set_is_large_and_aligned() -> None:
 
 
 def test_bio_tags_are_consistent() -> None:
-    for ex in data.generate(200, 6):
+    """No O -> I-ROLE transition: every gold span must start on a token boundary."""
+    for ex in data.generate(4000, 6) + data.read_markup_file(data.DATA_DIR / "unfamiliar_v2.txt"):
         _, tags, _, _ = data.tag_example(ex)
         prev = "O"
         for t in tags:

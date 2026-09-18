@@ -34,6 +34,8 @@ export interface LogLine {
   timestamp?: LogTimestamp;
   level?: Level;
   source?: string;
+  /** Hostname / node / IP the line originated from (syslog, cluster logs). */
+  host?: string;
   thread?: string;
   kv: LogKv[];
   message?: string;

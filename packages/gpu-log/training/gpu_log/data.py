@@ -13,6 +13,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+import torch
+import torch.nn.functional as F
+from gpu_utils_training.batch import pad_labels, to_torch, pack_rows
 
 from .features import FEATURE_COUNT, featurize
 from .formats import ENTRY_BUILDERS, MULTI_BUILDERS
@@ -33,8 +36,28 @@ class Example:
     kind: str
 
 
+def trim_spans(text: str, spans: tuple[tuple[int, int, str], ...]) -> tuple[tuple[int, int, str], ...]:
+    """Drop whitespace from both ends of every span.
+
+    A span that starts or ends inside a whitespace run would put a label boundary inside a
+    single whitespace token (the tokenizer groups runs by character class), which no tagger
+    can express - and which showed up as O -> I-ROLE transitions in the gold tags.
+    """
+    out = []
+    for start, end, role in spans:
+        s, e = start, end
+        while s < e and text[s].isspace():
+            s += 1
+        while e > s and text[e - 1].isspace():
+            e -= 1
+        if s < e:
+            out.append((s, e, role))
+    return tuple(out)
+
+
 def from_line(line: Line) -> Example:
-    return Example(line.text(), tuple(line.spans()), line.kind)
+    text = line.text()
+    return Example(text, trim_spans(text, tuple(line.spans())), line.kind)
 
 
 MARKUP_RE = re.compile(r"⟦([A-Z]+)\|(.*?)⟧", re.S)
@@ -61,7 +84,8 @@ def parse_markup(s: str) -> Example:
         n += len(inner)
         pos = m.end()
     text.append(body[pos:])
-    return Example("".join(text), tuple(spans), kind)
+    joined = "".join(text)
+    return Example(joined, trim_spans(joined, tuple(spans)), kind)
 
 
 def to_markup(ex: Example) -> str:
@@ -73,6 +97,16 @@ def to_markup(ex: Example) -> str:
         pos = e
     out.append(ex.text[pos:])
     return "".join(out) + f" ##{ex.kind}"
+
+
+def read_jsonl(path: Path) -> list[Example]:
+    out = []
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        if raw.strip():
+            d = json.loads(raw)
+            spans = tuple((int(a), int(b), str(r)) for a, b, r in d["spans"])
+            out.append(Example(d["text"], trim_spans(d["text"], spans), d["kind"]))
+    return out
 
 
 def read_markup_file(path: Path) -> list[Example]:
@@ -220,3 +254,37 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+Batch = tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
+
+
+def batches(ds: Dataset, batch_lines: int, rng: np.random.Generator, padding_id: int, slots: int = FEATURE_COUNT) -> list[Batch]:
+    """Length-bucketed batches: (rows [B, T, slots] int64, mask [B, T] bool, tags [B, T] (-100 padded), kinds [B])."""
+    n = len(ds)
+    lengths = np.diff(ds.offsets)
+    order = rng.permutation(n)
+    chunk = batch_lines * 50
+    groups: list[np.ndarray] = []
+    for c in range(0, n, chunk):
+        idx = order[c : c + chunk]
+        idx = idx[np.argsort(lengths[idx], kind="stable")]
+        for b in range(0, len(idx), batch_lines):
+            groups.append(idx[b : b + batch_lines])
+    rng.shuffle(groups)  # type: ignore[arg-type]
+    out: list[Batch] = []
+    for idx in groups:
+        seqs = [ds.features[ds.offsets[i] : ds.offsets[i + 1]].tolist() for i in idx]
+        rows, lens = pack_rows(seqs, slots, padding_id)
+        r, m = to_torch(rows, lens)
+        tags = pad_labels([ds.tags[ds.offsets[i] : ds.offsets[i + 1]].astype(np.int64).tolist() for i in idx], rows.shape[1])
+        out.append((r, m, tags, torch.from_numpy(ds.kinds[idx].astype(np.int64))))
+    return out
+
+
+def loss(model: torch.nn.Module, batch: Batch) -> torch.Tensor:
+    rows, mask, tags, kinds = batch
+    out = model(rows, mask)
+    tl = F.cross_entropy(out["tags"].reshape(-1, out["tags"].shape[-1]), tags.reshape(-1), ignore_index=-100)
+    kl = F.cross_entropy(out["pooled"], kinds)
+    return tl + 0.5 * kl

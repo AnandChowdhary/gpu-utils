@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 from . import vocab as V
 
-ROLES = ["TS", "LEVEL", "SOURCE", "THREAD", "KEY", "VALUE", "MSG", "FN", "FILE", "LINE", "COL"]
+ROLES = ["TS", "LEVEL", "SOURCE", "HOST", "THREAD", "KEY", "VALUE", "MSG", "FN", "FILE", "LINE", "COL"]
 KINDS = ["entry", "continuation", "frame"]
 
 
@@ -888,6 +888,29 @@ def java_logger(rng: random.Random) -> str:
 def py_logger(rng: random.Random) -> str:
     n = rng.choice([1, 2, 2, 3, 4])
     return ".".join(rng.choice(PKG_SEGMENTS + WORDS[:20]).lower() if rng.random() < 0.8 else word(rng) for _ in range(n))
+
+
+def hostname(rng: random.Random) -> str:
+    """A hostname / node id / IP as it appears in the host field of syslog and cluster logs."""
+    v = rng.random()
+    if v < 0.12:
+        return "-"
+    if v < 0.30:
+        return ip(rng)
+    if v < 0.45:
+        return f"{ip(rng)}:{rng.randint(1, 65535)}"
+    if v < 0.62:
+        return rng.choice(V.HOSTS)
+    if v < 0.74:  # cluster node ids
+        return rng.choice([f"node-{rng.randint(0, 999)}", f"R{rng.randint(0, 99):02d}-M{rng.randint(0, 1)}-N{rng.randint(0, 9)}-C:J{rng.randint(0, 99):02d}-U{rng.randint(0, 99):02d}",
+                           f"cn{rng.randint(1, 9999)}", f"dn{rng.randint(1, 999)}", f"nid{rng.randint(10000, 99999)}", f"c{rng.randint(0, 9)}-{rng.randint(0, 9)}c{rng.randint(0, 2)}s{rng.randint(0, 9)}b{rng.randint(0, 9)}n{rng.randint(0, 3)}",
+                           f"blade{rng.randint(1, 64)}", f"compute-{rng.randint(0, 9)}-{rng.randint(0, 63)}"])
+    if v < 0.85:  # fqdn
+        return f"{rng.choice(['web', 'db', 'app', 'cache', 'mail', 'lb', 'gw', 'node', 'host', 'srv'])}{rng.randint(1, 99):02d}.{rng.choice(['prod', 'internal', 'example.com', 'corp.local', 'us-east-1.compute.internal', 'svc.cluster.local'])}"
+    if v < 0.93:  # ec2 / k8s style
+        return rng.choice([f"ip-{rng.randint(10, 172)}-{rng.randint(0, 31)}-{rng.randint(0, 255)}-{rng.randint(0, 255)}",
+                           f"gke-cluster-pool-{hexid(rng, 8)}-{word(rng, 4)}", f"aks-nodepool1-{rng.randint(10000000, 99999999)}-vmss{rng.randint(0, 9):06d}"])
+    return rng.choice(["localhost", "localhost.localdomain", "(none)", rng.choice(V.HOSTS)])
 
 
 def source_name(rng: random.Random) -> str:

@@ -1,0 +1,150 @@
+#! Fresh hand-written evaluation lines (v2) from formats the v2 generator does not produce. Written before evaluation; never tuned on.
+#! Format: ⟦ROLE|text⟧ inline spans, " ##kind" suffix. Hostnames/node ids are HOST; pids/ids are THREAD; process/logger is SOURCE.
+⟦TS|2024-01-15 10:30:00.12⟧ ⟦THREAD|spid52⟧      ⟦MSG|Starting up database 'tempdb'.⟧ ##entry
+⟦TS|2024-01-15 10:30:01.45⟧ ⟦SOURCE|Logon⟧       ⟦MSG|Login failed for user 'sa'. Reason: Password did not match that for the login provided. [CLIENT: 10.0.0.9]⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123+0000⟧ ⟦LEVEL|INFO⟧  [⟦SOURCE|o.n.k.i.DatabaseHealth⟧] ⟦MSG|Database health set to OK⟧ ##entry
+⟦TS|2024-01-15T10:30:00.456+0000⟧ ⟦LEVEL|WARN⟧  [⟦SOURCE|o.n.k.a.p.GlobalProcedures⟧] ⟦MSG|Procedure apoc.load.json is not available⟧ ##entry
+<⟦THREAD|30⟧ ⟦MSG|new auto-negotiating client connection⟧ ##entry
+<⟦THREAD|30⟧ ⟦MSG|Read binary protocol data:⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|cache1⟧ ⟦SOURCE|memcached⟧[⟦THREAD|1234⟧]: ⟦MSG|slab class   1: chunk size        96 perslab   10922⟧ ##entry
+⟦TS|2024-01-15T10:30:00Z⟧ ⟦LEVEL|I⟧! ⟦MSG|Loading config file: /etc/telegraf/telegraf.conf⟧ ##entry
+⟦TS|2024-01-15T10:30:00Z⟧ ⟦LEVEL|E⟧! [⟦SOURCE|inputs.cpu⟧] ⟦MSG|Error in plugin: open /proc/stat: permission denied⟧ ##entry
+[⟦TS|1705314600⟧] ⟦SOURCE|SERVICE ALERT⟧: ⟦MSG|web01;HTTP;CRITICAL;HARD;3;HTTP CRITICAL: HTTP/1.1 503 Service Unavailable⟧ ##entry
+[⟦TS|1705314601⟧] ⟦SOURCE|HOST NOTIFICATION⟧: ⟦MSG|nagiosadmin;db01;DOWN;notify-host-by-email;PING CRITICAL - Packet loss = 100%⟧ ##entry
+  ⟦THREAD|1234⟧:⟦TS|20240115:103000.123⟧ ⟦MSG|Starting Zabbix Server. Zabbix 6.4.10 (revision 8d1c7e5).⟧ ##entry
+  ⟦THREAD|1240⟧:⟦TS|20240115:103001.456⟧ ⟦MSG|server #0 started [main process]⟧ ##entry
+[⟦TS|2024-01-15T10:30:00+00:00⟧] ⟦LEVEL|INFO⟧: ⟦MSG|Chef Infra Client, version 18.3.0⟧ ##entry
+[⟦TS|2024-01-15T10:30:02+00:00⟧] ⟦LEVEL|WARN⟧: ⟦MSG|Node prod-web-01 has an empty run list.⟧ ##entry
+[⟦LEVEL|INFO⟧    ] ⟦MSG|Executing command state.apply with jid 20240115103000123456⟧ ##entry
+⟦TS|2024-01-15 10:30:00,123⟧ [⟦SOURCE|salt.minion⟧      :⟦LINE|1234⟧][⟦LEVEL|INFO⟧    ][⟦THREAD|5678⟧] ⟦MSG|Returning information for job: 20240115103000123456⟧ ##entry
+⟦TS|00:00:01.234567⟧ ⟦SOURCE|main⟧     ⟦MSG|VirtualBox VM 7.0.12 r159484 linux.amd64 (Oct 12 2023 20:31:17) release log⟧ ##entry
+⟦TS|2024-01-15 10:30:00.123+0000⟧: ⟦THREAD|1234⟧: ⟦LEVEL|error⟧ : ⟦FN|virNetSocketReadWire⟧:⟦LINE|1234⟧ : ⟦MSG|End of file while reading data: Input/output error⟧ ##entry
+[    ⟦TS|12.345⟧] (⟦LEVEL|II⟧) ⟦SOURCE|modeset(0)⟧: ⟦MSG|Initializing kms color map for depth 24, 8 bpc.⟧ ##entry
+[    ⟦TS|12.346⟧] (⟦LEVEL|WW⟧) ⟦MSG|Open ACPI failed (/var/run/acpid.socket) (No such file or directory)⟧ ##entry
+⟦SOURCE|wlan0⟧: ⟦MSG|CTRL-EVENT-CONNECTED - Connection to 00:11:22:33:44:55 completed [id=0 id_str=]⟧ ##entry
+⟦LEVEL|I⟧ [⟦TS|15/Jan/2024:10:30:00 +0000⟧] [⟦THREAD|Job 123⟧] ⟦MSG|Queued on "HP_LaserJet" by "alice".⟧ ##entry
+⟦LEVEL|E⟧ [⟦TS|15/Jan/2024:10:30:05 +0000⟧] ⟦MSG|Unable to open listen socket for address [v1.::1]:631 - Address already in use.⟧ ##entry
+[⟦TS|2024/01/15 10:30:00.123456⟧,  ⟦LEVEL|0⟧] ⟦FILE|../../source3/smbd/server.c⟧:⟦LINE|1234⟧(⟦FN|main⟧) ##frame
+  ⟦MSG|smbd version 4.19.3 started.⟧ ##continuation
+Start-Date: ⟦TS|2024-01-15  10:30:00⟧ ##entry
+Commandline: ⟦VALUE|apt-get install nginx⟧ ##continuation
+Install: ⟦VALUE|nginx:amd64 (1.24.0-2), nginx-common:amd64 (1.24.0-2)⟧ ##continuation
+End-Date: ⟦TS|2024-01-15  10:30:04⟧ ##continuation
+⟦TS|2024-01-15 10:30:00⟧ status installed ⟦MSG|nginx:amd64 1.24.0-2⟧ ##entry
+⟦TS|2024-01-15 10:30:00⟧ ⟦MSG|startup archives unpack⟧ ##entry
+⟦TS|2024-01-15T10:30:00+0000⟧ ⟦LEVEL|INFO⟧ ⟦MSG|--- logging initialized ---⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦MSG|Installed: nginx-1.24.0-1.el9.x86_64⟧ ##entry
+[⟦TS|2024-01-15T10:30:00+0000⟧] [⟦SOURCE|ALPM⟧] ⟦MSG|installed nginx (1.24.0-1)⟧ ##entry
+[⟦TS|2024-01-15T10:30:00+0000⟧] [⟦SOURCE|PACMAN⟧] ⟦MSG|Running 'pacman -Syu'⟧ ##entry
+⟦TS|2024-01-15T10:30:00,123⟧ ⟦MSG|Collecting requests⟧ ##entry
+⟦TS|2024-01-15T10:30:01,456⟧ ⟦MSG|Downloading requests-2.31.0-py3-none-any.whl (62 kB)⟧ ##entry
+yarn install v1.22.19 ##entry
+[1/4] ⟦MSG|Resolving packages...⟧ ##entry
+> Task :app:compileJava UP-TO-DATE ##entry
+[⟦LEVEL|INFO⟧] --- ⟦SOURCE|maven-compiler-plugin⟧:3.11.0:compile (default-compile) @ app --- ##entry
+[⟦LEVEL|ERROR⟧] ⟦FILE|/src/main/java/com/example/Main.java⟧:[⟦LINE|12⟧,⟦COL|5⟧] ⟦MSG|cannot find symbol⟧ ##entry
+[⟦LEVEL|WARNING⟧] ⟦MSG|The requested profile "prod" could not be activated because it does not exist.⟧ ##entry
+make[2]: *** [⟦FILE|Makefile⟧:⟦LINE|12⟧: all] ⟦MSG|Error 1⟧ ##entry
+⟦FILE|main.c⟧:⟦LINE|12⟧:⟦COL|5⟧: ⟦LEVEL|error⟧: ⟦MSG|expected ';' before '}' token⟧ ##entry
+⟦FILE|src/lib.c⟧:⟦LINE|40⟧:⟦COL|10⟧: ⟦LEVEL|warning⟧: ⟦MSG|unused variable 'tmp' [-Wunused-variable]⟧ ##entry
+⟦FILE|src/index.ts⟧(⟦LINE|12⟧,⟦COL|5⟧): ⟦LEVEL|error⟧ TS2322: ⟦MSG|Type 'string' is not assignable to type 'number'.⟧ ##entry
+  ⟦LINE|12⟧:⟦COL|5⟧  ⟦LEVEL|error⟧  ⟦MSG|'foo' is assigned a value but never used⟧  no-unused-vars ##entry
+--- FAIL: ⟦FN|TestFoo⟧ (0.00s) ##entry
+    ⟦FILE|foo_test.go⟧:⟦LINE|12⟧: ⟦MSG|expected 1, got 2⟧ ##continuation
+FAIL	⟦SOURCE|github.com/acme/app/pkg⟧	0.012s ##entry
+⟦FILE|C:\src\Program.cs⟧(⟦LINE|12⟧,⟦COL|5⟧): ⟦LEVEL|error⟧ CS1002: ⟦MSG|; expected⟧ [C:\src\App.csproj] ##entry
+⟦LEVEL|INFO⟧: ⟦MSG|Analyzed target //foo:bar (12 packages loaded, 345 targets configured).⟧ ##entry
+#12 [stage 3/5] RUN npm ci ##entry
+#12 ⟦TS|1.234⟧ ⟦MSG|added 42 packages in 1s⟧ ##continuation
+#12 DONE ⟦VALUE|2.3s⟧ ##continuation
+2m          ⟦LEVEL|Warning⟧   BackOff             ⟦SOURCE|pod/api-7d9f8b6c4-x2k9p⟧   ⟦MSG|Back-off restarting failed container⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|pve⟧ ⟦SOURCE|pvedaemon⟧[⟦THREAD|1234⟧]: ⟦MSG|<root@pam> starting task UPID:pve:00001234:0001A2B3:65A1B2C3:vzstart:100:root@pam:⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123Z⟧ ⟦THREAD|cpu5:1234⟧)⟦SOURCE|World⟧: ⟦THREAD|12345⟧: ⟦MSG|VMKernel started⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123Z⟧ ⟦LEVEL|info⟧ ⟦SOURCE|hostd⟧[⟦THREAD|1234⟧] [Originator@6876 ⟦KEY|sub⟧=⟦VALUE|Vimsvc⟧ ⟦KEY|opID⟧=⟦VALUE|abc123⟧] ⟦MSG|Event 42: User root logged in⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|lb1⟧ ⟦LEVEL|info⟧ ⟦SOURCE|tmm⟧[⟦THREAD|1234⟧]: 01010028:6: ⟦MSG|No members available for pool /Common/web_pool⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|pfSense⟧ ⟦SOURCE|filterlog⟧[⟦THREAD|1234⟧]: ⟦MSG|5,,,1000000103,igb0,match,block,in,4,0x0,,64,12345,0,DF,6,tcp,60,10.0.0.9,10.0.0.1,51234,22,0,S,123456789,,64240,,mss;sackOK⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|srx⟧ ⟦SOURCE|RT_FLOW⟧: RT_FLOW_SESSION_CREATE: ⟦MSG|session created 10.0.0.9/51234->10.0.0.1/443 junos-https 10.0.0.9/51234->10.0.0.1/443 None None 6 trust-to-untrust trust untrust 1234⟧ ##entry
+⟦TS|jan/15 10:30:00⟧ ⟦SOURCE|dhcp,info⟧ ⟦MSG|dhcp1 assigned 10.0.0.9 to 00:11:22:33:44:55⟧ ##entry
+⟦TS|2024-01-15 10:30:00.123⟧ ⟦LEVEL|WARNING⟧ (⟦THREAD|MainThread⟧) [⟦SOURCE|homeassistant.components.sensor⟧] ⟦MSG|Setup of sensor platform mqtt is taking over 10 seconds.⟧ ##entry
+⟦TS|2024-01-15 10:30:00.456⟧ ⟦LEVEL|ERROR⟧ (⟦THREAD|SyncWorker_3⟧) [⟦SOURCE|custom_components.hacs⟧] ⟦MSG|GitHub API rate limit exceeded⟧ ##entry
+⟦SOURCE|Zigbee2MQTT⟧:⟦LEVEL|info⟧  ⟦TS|2024-01-15 10:30:00⟧: ⟦MSG|MQTT publish: topic 'zigbee2mqtt/sensor', payload '{"battery":98}'⟧ ##entry
+⟦TS|1705314600⟧: ⟦MSG|New connection from 10.0.0.9:51234 on port 1883.⟧ ##entry
+⟦TS|1705314601⟧: ⟦MSG|New client connected from 10.0.0.9:51234 as auto-1A2B (p2, c1, k60).⟧ ##entry
+⟦TS|15 Jan 10:30:00⟧ - [⟦LEVEL|info⟧] ⟦MSG|Node-RED version: v3.1.3⟧ ##entry
+⟦TS|15 Jan 10:30:01⟧ - [⟦LEVEL|warn⟧] [⟦SOURCE|mqtt-broker⟧:⟦THREAD|local⟧] ⟦MSG|Connection failed to broker: mqtt://localhost:1883⟧ ##entry
+⟦TS|Jan 15, 2024 10:30:00.123⟧ [⟦THREAD|0x7f8e1c0⟧] ⟦LEVEL|DEBUG⟧ - ⟦MSG|Request: [10.0.0.9:51234 (Loopback)] GET /identity (12 live)⟧ ##entry
+[⟦TS|10:30:00⟧] [⟦LEVEL|INF⟧] [⟦THREAD|12⟧] ⟦SOURCE|Emby.Server.Implementations.ApplicationHost⟧: ⟦MSG|Jellyfin version: 10.8.13⟧ ##entry
+⟦TS|24-1-15 10:30:00.1⟧|⟦LEVEL|Info⟧|⟦SOURCE|RssSync⟧|⟦MSG|Starting RSS Sync⟧ ##entry
+⟦TS|24-1-15 10:30:02.3⟧|⟦LEVEL|Warn⟧|⟦SOURCE|HttpClient⟧|⟦MSG|HTTP Error - Res: HTTP/1.1 [GET] https://api.example.com/feed: 503.ServiceUnavailable⟧ ##entry
+⟦TS|2024/01/15 10:30:00⟧ ...⟦FILE|routers/web/home.go⟧:⟦LINE|12⟧:⟦FN|Home⟧() [⟦LEVEL|I⟧] [⟦THREAD|65a1b2c3⟧] ⟦MSG|router: completed GET / for 10.0.0.9:51234, 200 OK in 1.2ms⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123Z⟧ ⟦THREAD|1234⟧ ⟦THREAD|TID-abc123⟧ ⟦LEVEL|INFO⟧: ⟦MSG|Booting Sidekiq 7.2.0 with Sidekiq::RedisConnection⟧ ##entry
+⟦TS|2024-01-15 10:30:00 +0000⟧ - ⟦SOURCE|dagster⟧ - ⟦LEVEL|DEBUG⟧ - ⟦SOURCE|my_job⟧ - ⟦THREAD|a1b2c3d4-e5f6-7890-abcd-ef1234567890⟧ - ⟦THREAD|1234⟧ - ⟦SOURCE|my_op⟧ - STEP_START - ⟦MSG|Started execution of step "my_op".⟧ ##entry
+⟦TS|10:30:00.123⟧ | ⟦LEVEL|INFO⟧    | ⟦MSG|Flow run 'brave-otter' - Created task run 'fetch-0' for task 'fetch'⟧ ##entry
+⟦TS|2024-01-15 10:30:00.123456⟧: ⟦LEVEL|I⟧ ⟦FILE|tensorflow/core/platform/cpu_feature_guard.cc⟧:⟦LINE|182⟧] ⟦MSG|This TensorFlow binary is optimized to use available CPU instructions⟧ ##entry
+⟦TS|2024-01-15 10:30:01.234567⟧: ⟦LEVEL|W⟧ ⟦FILE|tensorflow/core/common_runtime/gpu/gpu_device.cc⟧:⟦LINE|2256⟧] ⟦MSG|Cannot dlopen some GPU libraries.⟧ ##entry
+⟦HOST|gpu-node-3⟧:⟦THREAD|1234⟧:⟦THREAD|5678⟧ [0] ⟦SOURCE|NCCL⟧ ⟦LEVEL|INFO⟧ ⟦MSG|Bootstrap : Using eth0:10.0.0.9<0>⟧ ##entry
+⟦HOST|gpu-node-3⟧:⟦THREAD|1234⟧:⟦THREAD|5678⟧ [0] ⟦SOURCE|NCCL⟧ ⟦LEVEL|WARN⟧ ⟦MSG|Cuda failure 'out of memory'⟧ ##entry
+[⟦TS|2024-01-15T10:30:00.123⟧] ⟦FN|_slurm_rpc_node_registration⟧: ⟦MSG|node gpu-node-3 registered⟧ ##entry
+⟦SOURCE|slurmstepd⟧: ⟦LEVEL|error⟧: ⟦MSG|*** JOB 12345 ON gpu-node-3 CANCELLED AT 2024-01-15T10:30:00 DUE TO TIME LIMIT ***⟧ ##entry
+⟦TS|01/15/2024 10:30:00⟧;0008;⟦SOURCE|PBS_Server.1234⟧;Job;⟦THREAD|123.host⟧;⟦MSG|Job Queued at request of alice@host, owner = alice@host, job name = run.sh, queue = batch⟧ ##entry
+⟦TS|01/15/24 10:30:00⟧ (pid:⟦THREAD|1234⟧) ⟦MSG|Sent ad to collector for alice@host⟧ ##entry
+(⟦SOURCE|raylet⟧) [⟦TS|2024-01-15 10:30:00,123⟧ ⟦LEVEL|I⟧ ⟦THREAD|1234⟧ ⟦THREAD|5678⟧] (raylet) ⟦FILE|node_manager.cc⟧:⟦LINE|123⟧: ⟦MSG|Node manager started⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123Z⟧	⟦LEVEL|INFO⟧	⟦THREAD|main⟧	⟦SOURCE|io.trino.server.Server⟧	⟦MSG|======== SERVER STARTED ========⟧ ##entry
+⟦LEVEL|INFO⟧  ⟦TS|2024-01-15 10:30:00,123⟧ [⟦THREAD|shard 0⟧] ⟦SOURCE|database⟧ - ⟦MSG|Setting compaction strategy of system.local to SizeTieredCompactionStrategy⟧ ##entry
+⟦TS|2024-01-15 10:30:00.123⟧ ⟦LEVEL|INFO⟧  (⟦THREAD|qtp1234-56⟧) [⟦KEY|c⟧:⟦VALUE|col⟧ ⟦KEY|s⟧:⟦VALUE|shard1⟧ ⟦KEY|r⟧:⟦VALUE|core_node1⟧ ⟦KEY|x⟧:⟦VALUE|col_shard1_replica_n1⟧] ⟦SOURCE|o.a.s.c.S.Request⟧ ⟦MSG|[col_shard1_replica_n1]  webapp=/solr path=/select params={q=*:*} hits=0 status=0 QTime=1⟧ ##entry
+⟦TS|2024-01-15 10:30:00,123⟧ ⟦LEVEL|INFO⟧  [⟦SOURCE|org.keycloak.services⟧] (⟦THREAD|main⟧) KC-SERVICES0001: ⟦MSG|Loading config from standalone.xml⟧ ##entry
+⟦HOST|10.0.0.9⟧ - ⟦VALUE|alice@example.com⟧ [⟦TS|15/Jan/2024:10:30:00 +0000⟧] example.com ⟦MSG|GET - "/" HTTP/1.1 "curl/8.4.0"⟧ ⟦VALUE|200⟧ ⟦VALUE|12⟧ ⟦VALUE|0.001⟧ ##entry
+[⟦TS|15-Jan-2024 10:30:00 UTC⟧] PHP ⟦LEVEL|Deprecated⟧:  ⟦MSG|Creation of dynamic property WC_Cart::$foo is deprecated⟧ in ⟦FILE|/var/www/html/wp-content/plugins/x.php⟧ on line ⟦LINE|12⟧ ##entry
+[⟦TS|2024-01-15T10:30:00.123456+00:00⟧] ⟦SOURCE|main⟧.⟦LEVEL|CRITICAL⟧: ⟦MSG|Broken pipe or closed connection⟧ [] [] ##entry
+⟦TS|2024-01-15 10:30:00⟧ ⟦LEVEL|INFO⟧ ⟦THREAD|1234⟧ ⟦THREAD|5678⟧ ⟦SOURCE|com.android.vending⟧ ⟦MSG|Finsky  : [1] Installer: install request⟧ ##entry
+⟦TS|2024-01-15 10:30:00.123⟧ ⟦THREAD|1234⟧-⟦THREAD|5678⟧/⟦SOURCE|com.example.app⟧ ⟦LEVEL|E⟧/⟦SOURCE|AndroidRuntime⟧: ⟦MSG|FATAL EXCEPTION: main⟧ ##entry
+⟦TS|2024-01-15 10:30:00.123⟧ ⟦THREAD|1234⟧-⟦THREAD|5678⟧/⟦SOURCE|com.example.app⟧ ⟦LEVEL|W⟧/⟦SOURCE|System.err⟧:     at ⟦FN|com.example.app.MainActivity.onCreate⟧(⟦FILE|MainActivity.kt⟧:⟦LINE|42⟧) ##frame
+⟦TS|2024-01-15 10:30:00.123456+0100⟧ ⟦SOURCE|MyApp⟧[⟦THREAD|1234⟧:⟦THREAD|5678⟧] [⟦SOURCE|Network⟧] ⟦MSG|Request failed: The Internet connection appears to be offline.⟧ ##entry
+⟦TS|2024-01-15 10:30:00 +0000⟧ ⟦LEVEL|Error⟧ ⟦SOURCE|WebKit⟧: ⟦MSG|Failed to load resource: the server responded with a status of 404⟧ ##entry
+⟦MSG|Unhandled Exception: System.NullReferenceException: Object reference not set to an instance of an object.⟧ ##continuation
+  at ⟦FN|MyGame.Player.Update⟧ () [0x00012] in <⟦FILE|a1b2c3d4e5f6⟧>:0 ##frame
+⟦MSG|LogTemp: Warning: Hello from Unreal⟧ ##entry
+[⟦TS|2024.01.15-10.30.00:123⟧][⟦THREAD|  0⟧]⟦SOURCE|LogInit⟧: ⟦MSG|Build: ++UE5+Release-5.3-CL-29314046⟧ ##entry
+[⟦TS|2024.01.15-10.30.01:456⟧][⟦THREAD|123⟧]⟦SOURCE|LogNet⟧: ⟦LEVEL|Warning⟧: ⟦MSG|UNetConnection::Close: connection timed out⟧ ##entry
+⟦LEVEL|ERROR⟧: ⟦MSG|Node not found: Player (relative to /root/Main)⟧ ##entry
+   at: ⟦FN|get_node⟧ (⟦FILE|scene/main/node.cpp⟧:⟦LINE|1364⟧) ##frame
+⟦TS|2024-01-15 10:30:00.123⟧ ⟦LEVEL|Info⟧ ⟦SOURCE|Factorio⟧: ⟦MSG|Loading mod base 1.1.100 (data.lua)⟧ ##entry
+   ⟦TS|0.123⟧ ⟦LEVEL|Info⟧ ⟦FILE|Main.cpp⟧:⟦LINE|123⟧: ⟦MSG|Program arguments: "factorio" "--start-server"⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|gw⟧ ⟦SOURCE|snort⟧[⟦THREAD|1234⟧]: [1:2100498:7] ⟦MSG|GPL ATTACK_RESPONSE id check returned root [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 10.0.0.9:80 -> 10.0.0.1:51234⟧ ##entry
+⟦TS|01/15/2024-10:30:00.123456⟧  [**] [1:2100498:7] ⟦MSG|GPL ATTACK_RESPONSE id check returned root⟧ [**] [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 10.0.0.9:80 -> 10.0.0.1:51234 ##entry
+⟦TS|1705314600.123456⟧	⟦THREAD|CAcbdE3z4nFH5QlYd⟧	⟦HOST|10.0.0.9⟧	⟦VALUE|51234⟧	⟦HOST|10.0.0.1⟧	⟦VALUE|443⟧	⟦VALUE|tcp⟧	⟦VALUE|ssl⟧	⟦VALUE|0.123⟧ ##entry
+** Alert ⟦TS|1705314600.123⟧: - ⟦SOURCE|syslog,sshd,authentication_failed⟧, ##entry
+⟦TS|2024 Jan 15 10:30:00⟧ (⟦HOST|web01⟧) ⟦HOST|10.0.0.9⟧->⟦SOURCE|/var/log/auth.log⟧ ##continuation
+Rule: ⟦VALUE|5716⟧ (level ⟦LEVEL|5⟧) -> '⟦MSG|sshd: authentication failed.⟧' ##continuation
+[⟦TS|Mon Jan 15 10:30:00.123456 2024⟧] [⟦SOURCE|mpm_event⟧:⟦LEVEL|notice⟧] [pid ⟦THREAD|1234⟧:tid ⟦THREAD|5678⟧] AH00489: ⟦MSG|Apache/2.4.58 (Unix) configured -- resuming normal operations⟧ ##entry
+⟦TS|2024-01-15 10:30:00⟧ ⟦LEVEL|INFO⟧ ⟦SOURCE|sqlalchemy.engine.Engine⟧ ⟦MSG|BEGIN (implicit)⟧ ##entry
+⟦TS|2024-01-15 10:30:00.123⟧ ⟦LEVEL|INFO⟧ ⟦THREAD|1234⟧ --- [⟦THREAD|  restartedMain⟧] ⟦SOURCE|o.s.b.w.embedded.tomcat.TomcatWebServer⟧  : ⟦MSG|Tomcat initialized with port(s): 8080 (http)⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123456Z⟧ ⟦LEVEL|WARN⟧ ⟦SOURCE|logstash.outputs.elasticsearch⟧ ⟦MSG|Attempted to resurrect connection to dead ES instance⟧ ##entry
+⟦TS|2024-01-15 10:30:00 +0000⟧ [⟦LEVEL|info⟧]: #⟦THREAD|0⟧ ⟦MSG|fluentd worker is now running worker=0⟧ ##entry
+[⟦TS|2024/01/15 10:30:00⟧] [ ⟦LEVEL|info⟧] [⟦SOURCE|engine⟧] ⟦MSG|started (pid=1234)⟧ ##entry
+[⟦TS|2024/01/15 10:30:01⟧] [⟦LEVEL|error⟧] [⟦SOURCE|output:es:es.0⟧] ⟦MSG|HTTP status=429 URI=/_bulk⟧ ##entry
+⟦TS|2024-01-15 10:30:00 UTC⟧ | ⟦SOURCE|CORE⟧ | ⟦LEVEL|INFO⟧ | (⟦FILE|pkg/collector/runner/runner.go⟧:⟦LINE|123⟧ in ⟦FN|run⟧) | ⟦MSG|Running check cpu⟧ ##entry
+⟦TS|2024-01-15 10:30:01 UTC⟧ | ⟦SOURCE|PROCESS⟧ | ⟦LEVEL|WARN⟧ | (⟦FILE|pkg/process/checks/process.go⟧:⟦LINE|456⟧ in ⟦FN|Run⟧) | ⟦MSG|Unable to collect process stats⟧ ##entry
+⟦TS|01-15-2024 10:30:00.123 +0000⟧ ⟦LEVEL|INFO⟧  ⟦SOURCE|Metrics⟧ - ⟦KEY|group⟧=⟦VALUE|per_index_thruput⟧, ⟦KEY|series⟧="⟦VALUE|main⟧", ⟦KEY|kbps⟧=⟦VALUE|12.34⟧, ⟦KEY|eps⟧=⟦VALUE|56.78⟧ ##entry
+⟦TS|01-15-2024 10:30:01.456 +0000⟧ ⟦LEVEL|WARN⟧  ⟦SOURCE|DateParserVerbose⟧ - ⟦MSG|Failed to parse timestamp in first MAX_TIMESTAMP_LOOKAHEAD (128) characters of event.⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123456Z⟧ app/my-lb/50dc6c495c0c9188 ⟦HOST|10.0.0.9⟧:51234 ⟦HOST|10.0.0.5⟧:80 0.000 0.001 0.000 ⟦VALUE|200⟧ ⟦VALUE|200⟧ 34 366 "⟦MSG|GET https://example.com:443/ HTTP/2.0⟧" "curl/7.46.0" ECDHE-RSA-AES128-GCM-SHA256 TLSv1.2 ##entry
+⟦HOST|79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be⟧ ⟦SOURCE|mybucket⟧ [⟦TS|15/Jan/2024:10:30:00 +0000⟧] ⟦HOST|10.0.0.9⟧ arn:aws:iam::123456789012:user/alice 3E57427F3EXAMPLE REST.GET.OBJECT photos/2024/cat.jpg "⟦MSG|GET /mybucket/photos/2024/cat.jpg HTTP/1.1⟧" ⟦VALUE|200⟧ - ⟦VALUE|2662⟧ 2662 70 69 "-" "S3Console/0.4" ##entry
+⟦TS|2024-01-15	10:30:00⟧	⟦HOST|SEA19-C1⟧	⟦VALUE|1234⟧	⟦HOST|10.0.0.9⟧	⟦VALUE|GET⟧	d111111abcdef8.cloudfront.net	⟦VALUE|/index.html⟧	⟦VALUE|200⟧ ##entry
+⟦TS|2024-01-15T10:30:00⟧  ⟦THREAD|PID[1234]⟧ ⟦LEVEL|Information⟧ ⟦MSG|Application started. Press Ctrl+C to shut down.⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123⟧ [⟦LEVEL|Verbose⟧] [⟦SOURCE|Microsoft.Web.Hosting⟧] ⟦MSG|Site 'mysite' started⟧ ##entry
+⟦TS|2024-01-15 10:30:00⟧ ⟦HOST|10.0.0.1⟧ ⟦MSG|GET /default.htm - 80 - 10.0.0.9 Mozilla/5.0+(Windows+NT+10.0) - 200 0 0 15⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123Z⟧ [⟦THREAD|W-0001⟧] [⟦LEVEL|INFO⟧] ⟦MSG|Cloudflare Tunnel connected to lhr01⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|cache-lhr⟧ ⟦SOURCE|fastly⟧[⟦THREAD|1234⟧]: ⟦MSG|10.0.0.9 "-" "-" Mon, 15 Jan 2024 10:30:00 GMT GET /index.html 200⟧ ##entry
+⟦TS|2024-01-15 10:30:00⟧ ⟦LEVEL|INFO⟧ ⟦SOURCE|main⟧ ⟦FN|main.go⟧:⟦LINE|12⟧ ⟦MSG|Starting Vault⟧ ⟦KEY|version⟧=⟦VALUE|1.15.4⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|node1⟧ ⟦SOURCE|nomad⟧[⟦THREAD|1234⟧]:     ⟦TS|2024-01-15T10:30:00.123Z⟧ [⟦LEVEL|INFO⟧]  ⟦SOURCE|client⟧: ⟦MSG|node registration complete⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|kong-1⟧ ⟦SOURCE|kong⟧[⟦THREAD|1234⟧]: ⟦TS|2024/01/15 10:30:00⟧ [⟦LEVEL|notice⟧] ⟦THREAD|1#0⟧: ⟦MSG|[kong] init.lua:1234 declarative config loaded from /kong/kong.yml⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|istio-proxy⟧ [⟦TS|2024-01-15T10:30:00.123Z⟧] "⟦MSG|GET /productpage HTTP/1.1⟧" ⟦VALUE|200⟧ - via_upstream - "-" 0 5183 12 11 "-" "curl/8.4.0" "a1b2c3d4-e5f6-7890-abcd-ef1234567890" "productpage:9080" "10.0.0.5:9080" inbound|9080|| 127.0.0.6:51234 10.0.0.5:9080 10.0.0.9:51234 outbound_.9080_._.productpage.default.svc.cluster.local default ##entry
+[     ⟦TS|0.123456⟧s]  ⟦LEVEL|INFO⟧ ThreadId(⟦THREAD|01⟧) ⟦SOURCE|linkerd⟧: ⟦MSG|Admin interface on 0.0.0.0:4191⟧ ##entry
+⟦TS|2024-01-15T10:30:00.123Z⟧ ⟦LEVEL|WARN⟧ [⟦SOURCE|oauth2-proxy⟧] ⟦MSG|Error redeeming code during OAuth2 callback: token exchange failed⟧ ##entry
+[⟦TS|Mon Jan 15 10:30:00 2024⟧] [⟦LEVEL|error⟧] [⟦SOURCE|client⟧ ⟦HOST|10.0.0.9⟧] ⟦MSG|File does not exist: /var/www/html/favicon.ico⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|ns1⟧ ⟦SOURCE|named⟧[⟦THREAD|1234⟧]: ⟦MSG|client @0x7f8e1c0 10.0.0.9#53210 (example.com): query: example.com IN A + (10.0.0.53)⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|mail⟧ ⟦SOURCE|opendkim⟧[⟦THREAD|1234⟧]: ⟦MSG|A1B2C3D4E5: DKIM-Signature field added (s=default, d=example.com)⟧ ##entry
+⟦TS|2024-01-15 10:30:00,123⟧ ⟦SOURCE|fail2ban.filter⟧         [⟦THREAD|1234⟧]: ⟦LEVEL|INFO⟧    ⟦MSG|[sshd] Found 10.0.0.9 - 2024-01-15 10:29:59⟧ ##entry
+⟦TS|Jan 15 10:30:00⟧ ⟦HOST|vpn⟧ ⟦SOURCE|openvpn⟧[⟦THREAD|1234⟧]: ⟦MSG|alice/10.0.0.9:51234 MULTI_sva: pool returned IPv4=10.8.0.2, IPv6=(Not enabled)⟧ ##entry
+⟦TS|2024-01-15 10:30:00.123⟧ [⟦LEVEL|INFO⟧] ⟦MSG|Preparing to start BungeeCord⟧ ##entry
+[⟦TS|10:30:00⟧ ⟦LEVEL|INFO⟧]: ⟦MSG|Loading properties⟧ ##entry

@@ -1,50 +1,32 @@
-import { type Token, viterbi } from "@gpu-utils/runtime";
-import { fieldsFromObject, parseJsonLine } from "./fastpath.ts";
+import {
+  type BioSpan,
+  bioStartMask,
+  bioToSpans,
+  bioTransitions,
+  type Token,
+  viterbi,
+} from "@gpu-utils/runtime";
+import { parseJsonLine } from "./fastpath.ts";
 import type { Model } from "./model.ts";
 import { normalizeLevel, normalizeTimestamp } from "./normalize.ts";
-import type { LogFrame, LogKv, LogLine } from "./types.ts";
+import type { LogFrame, LogLine } from "./types.ts";
 
-/** BIO transition matrix: I-X may only follow B-X or I-X. Built once per model. */
-export function bioTransitions(labels: string[]): Float32Array {
-  const k = labels.length;
-  const t = new Float32Array(k * k);
-  for (let to = 0; to < k; to++) {
-    const lab = labels[to]!;
-    if (!lab.startsWith("I-")) continue;
-    const role = lab.slice(2);
-    for (let from = 0; from < k; from++) {
-      const f = labels[from]!;
-      if (f !== `B-${role}` && f !== `I-${role}`) t[from * k + to] = -Infinity;
-    }
-  }
-  return t;
+export interface Decoder {
+  labels: string[];
+  kinds: string[];
+  transitions: Float32Array;
+  start: Float32Array;
 }
 
-export interface Span {
-  role: string;
-  /** Token index range, half-open. */
-  start: number;
-  end: number;
+export function makeDecoder(model: Model): Decoder {
+  const labels = model.manifest.labels;
+  return {
+    labels,
+    kinds: model.manifest.kinds,
+    transitions: bioTransitions(labels),
+    start: bioStartMask(labels),
+  };
 }
-
-/** Groups a BIO tag path into role spans. */
-export function spansFromTags(path: Int32Array, labels: string[]): Span[] {
-  const out: Span[] = [];
-  let cur: Span | undefined;
-  for (let i = 0; i <= path.length; i++) {
-    const lab = i < path.length ? labels[path[i]!]! : "O";
-    const role = lab === "O" ? "" : lab.slice(2);
-    if (cur && (lab === "O" || lab.startsWith("B-") || role !== cur.role)) {
-      out.push(cur);
-      cur = undefined;
-    }
-    if (!cur && role) cur = { role, start: i, end: i + 1 };
-    else if (cur) cur.end = i + 1;
-  }
-  return out;
-}
-
-const KIND_NAMES = ["entry", "continuation", "frame"] as const;
 
 function stripQuotes(s: string): string {
   const t = s.trim();
@@ -94,24 +76,22 @@ export function frameLanguage(text: string, frame: LogFrame): string | undefined
 const ACCESS_KEYS = ["status", "bytes", "referrer", "user_agent"];
 
 /**
- * Turns the tag path and kind logits for one line into the typed LogLine. All semantics
- * (which span wins, normalisation, frame language, positional kv keys) live here.
+ * Turns role spans (UTF-16 offsets into `text`) and the kind logits for one line into the
+ * typed LogLine. All semantics (which span wins, normalisation, frame language, positional
+ * kv keys, JSON payload merging) live here.
  */
 export function compileLine(
   text: string,
-  tokens: Token[],
-  path: Int32Array,
-  kindLogits: Float32Array,
-  labels: string[],
+  spans: BioSpan[],
+  kindLogits: ArrayLike<number>,
+  kinds: string[],
   index: number,
   span: [number, number],
 ): LogLine {
-  const spans = spansFromTags(path, labels);
-  const textOf = (s: Span) => text.slice(tokens[s.start]!.start, tokens[s.end - 1]!.end);
   const line: LogLine = { line: index, span, kind: "entry", kv: [] };
   let best = 0;
   for (let k = 1; k < kindLogits.length; k++) if (kindLogits[k]! > kindLogits[best]!) best = k;
-  line.kind = KIND_NAMES[best] ?? "entry";
+  line.kind = (kinds[best] as LogLine["kind"]) ?? "entry";
 
   let msgStart = -1;
   let msgEnd = -1;
@@ -119,8 +99,8 @@ export function compileLine(
   const values: string[] = [];
   const frame: LogFrame = {};
   for (const s of spans) {
-    const raw = textOf(s);
-    switch (s.role) {
+    const raw = text.slice(s.start, s.end);
+    switch (s.label) {
       case "TS":
         if (!line.timestamp) {
           const iso = normalizeTimestamp(raw);
@@ -136,6 +116,9 @@ export function compileLine(
       case "SOURCE":
         if (!line.source) line.source = raw;
         break;
+      case "HOST":
+        if (!line.host) line.host = raw;
+        break;
       case "THREAD":
         if (!line.thread) line.thread = raw;
         break;
@@ -150,8 +133,8 @@ export function compileLine(
         } else values.push(stripQuotes(raw));
         break;
       case "MSG":
-        if (msgStart < 0) msgStart = tokens[s.start]!.start;
-        msgEnd = tokens[s.end - 1]!.end;
+        if (msgStart < 0) msgStart = s.start;
+        msgEnd = s.end;
         break;
       case "FN":
         if (!frame.function) frame.function = raw;
@@ -210,28 +193,23 @@ export function compileLine(
   return line;
 }
 
-/** Decodes one line's logits (tags + kinds per token) with Viterbi over BIO constraints. */
+/** Constrained Viterbi over one line's tag logits, then the compiler. */
 export function decodeLine(
-  model: Model,
-  transitions: Float32Array,
-  logits: Float32Array,
+  dec: Decoder,
+  tags: Float32Array,
+  pooled: ArrayLike<number>,
   text: string,
   tokens: Token[],
   index: number,
   span: [number, number],
 ): LogLine {
-  const T = model.tags;
-  const K = model.kinds;
-  const W = T + K;
+  const k = dec.labels.length;
   const n = tokens.length;
-  const em = new Float32Array(n * T);
-  const kind = new Float32Array(K);
-  for (let p = 0; p < n; p++) {
-    for (let t = 0; t < T; t++) em[p * T + t] = logits[p * W + t]!;
-    for (let k = 0; k < K; k++) kind[k]! += logits[p * W + T + k]!;
-  }
-  const path = viterbi(em, n, T, transitions);
-  return compileLine(text, tokens, path, kind, model.manifest.labels, index, span);
+  const em = Float32Array.from(tags);
+  for (let j = 0; j < k && n > 0; j++) em[j]! += dec.start[j]!;
+  const ids = viterbi(em, n, k, dec.transitions);
+  const spans = bioToSpans(ids, dec.labels, tokens);
+  return compileLine(text, spans, pooled, dec.kinds, index, span);
 }
 
 /** Two-line frames (Go, Rust): copy the function of a FN-only frame into the FILE-only frame below it. */
@@ -251,9 +229,3 @@ export function mergeTwoLineFrames(lines: LogLine[]): void {
     }
   }
 }
-
-export function fieldsFromJson(obj: Record<string, unknown>, into: LogLine): void {
-  fieldsFromObject(obj, into);
-}
-
-export type { LogKv };

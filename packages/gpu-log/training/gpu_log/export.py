@@ -1,74 +1,72 @@
-"""Export runs/latest.pt to ../model/{manifest.json,weights.txt,fixtures.json}."""
+"""Export the promoted checkpoint to ../model/{manifest.json,weights.txt,fixtures.json}.
+
+    uv run python -m gpu_log.export [--run default] [--random]
+
+fixtures.json uses the canonical format ({"cases": [{input, rows, logits, pooled}]}) computed
+from the decoded int6 weights, so test/parity.test.ts and the WGSL harness compare against
+exactly what the runtime loads.
+"""
 
 from __future__ import annotations
 
+import argparse
 import json
-import sys
+from datetime import date
 from pathlib import Path
 
-import numpy as np
 import torch
-from gpu_utils_training.quant import export
+from gpu_utils_training.export import export_package
+from gpu_utils_training.loop import load_checkpoint
 
-from .data import LABELS, generate, read_markup_file, DATA_DIR
-from .features import EMBED_ROWS, FEATURE_COUNT, FEATURE_SIZES, featurize
-from .gen import KINDS
-from .model import LogTagger, dequantized, forward_numpy
+from .data import DATA_DIR, KINDS, LABELS, generate, read_markup_file
+from .features import FEATURE_COUNT, FEATURE_SIZES, featurize
+from .model import build
 
-MODEL_DIR = Path(__file__).resolve().parents[2] / "model"
+HERE = Path(__file__).resolve().parent
+RUNS = HERE.parent / "runs"
+MODEL_DIR = HERE.parent.parent / "model"
+
+HAND_WRITTEN = [
+    "",
+    "x",
+    "   ",
+    "🚀 café 日本語 emoji line",
+    "\t\tat a.b(C.java:1)",
+    "2024-01-15 10:30:00,123 [main] INFO  com.example.Foo - Started server on port 8080",
+    "Jan 15 10:30:00 web-01 sshd[1234]: Accepted publickey for alice from 10.0.0.9 port 22 ssh2",
+]
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--run", default="default")
+    ap.add_argument("--random", action="store_true", help="export an untrained model")
+    args = ap.parse_args()
+    torch.manual_seed(0)
     torch.set_num_threads(2)
-    path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1] / "runs" / "latest.pt"
-    ck = torch.load(path, map_location="cpu")
-    model = LogTagger()
-    model.load_state_dict(ck["state"])
-    tensors = model.tensors()
-    manifest = export(
-        tensors,
-        MODEL_DIR,
-        {
-            "name": "gpu-log",
-            "hidden": model.hidden,
-            "embedDim": model.embed_dim,
-            "blocks": len(model.blocks),
-            "featureCount": FEATURE_COUNT,
-            "featureSizes": [list(x) for x in FEATURE_SIZES],
-            "embedRows": EMBED_ROWS,
-            "labels": LABELS,
-            "kinds": KINDS,
-            "checkpoint": {"seed": ck.get("seed"), "epochs": ck.get("epochs"), "lines": ck.get("lines")},
-        },
-    )
-    print(f"exported {manifest['parameters']:,} parameters to {MODEL_DIR}")
-
-    # Parity fixtures: computed from the dequantized tensors with the numpy reference forward.
-    deq = dequantized(tensors)
-    cases = []
-    samples = [ex.text for ex in generate(60, 99)]
-    unf = DATA_DIR / "unfamiliar.txt"
+    model = build()
+    checkpoint: dict[str, object] = {"run": None, "date": date.today().isoformat()}
+    if not args.random:
+        ckpt = load_checkpoint(model, RUNS / args.run / "best.pt")
+        checkpoint = {"run": args.run, "epoch": ckpt.get("epoch"), "seed": ckpt.get("seed"), "metrics": ckpt.get("metrics"), "date": date.today().isoformat()}
+    texts = HAND_WRITTEN + [e.text for e in generate(40, seed=99) if 0 < len(e.text) < 160][:18]
+    unf = DATA_DIR / "unfamiliar_v2.txt"
     if unf.exists():
-        samples += [ex.text for ex in read_markup_file(unf)[:12]]
-    picked = [s for s in samples if 0 < len(s) < 160][:22]
-    picked += ["", "x", "   ", "🚀 café 日本語 emoji line", "\t\tat a.b(C.java:1)"]
-    for text in picked:
+        texts += [e.text for e in read_markup_file(unf) if len(e.text) < 160][:6]
+    fixtures = []
+    for text in texts:
         tokens, rows = featurize(text)
-        feats = np.asarray(rows, dtype=np.int64).reshape(-1, FEATURE_COUNT)
-        logits = forward_numpy(deq, feats, blocks=len(model.blocks)) if len(rows) else np.zeros((0, len(LABELS) + len(KINDS)), np.float32)
-        cases.append({"text": text, "features": rows, "logits": [[round(float(v), 5) for v in row] for row in logits]})
-    (MODEL_DIR / "fixtures.json").write_text(json.dumps(cases) + "\n")
-
-    # Sanity: torch (fake-quant) vs numpy dequantized forward on one case.
-    model.set_quant(True)
-    model.eval()
-    text = picked[0]
-    _, rows = featurize(text)
-    with torch.no_grad():
-        f = torch.from_numpy(np.asarray(rows, dtype=np.int64))[None]
-        tags, _ = model(f, torch.ones(1, len(rows)))
-    ref = forward_numpy(deq, np.asarray(rows), blocks=len(model.blocks))[:, : len(LABELS)]
-    print(f"torch vs numpy max abs diff: {float(np.abs(tags[0].numpy() - ref).max()):.2e}; fixtures: {len(cases)}")
+        fixtures.append({"input": text, "rows": rows, "tokens": [t.text for t in tokens]})
+    manifest = export_package(
+        model,
+        MODEL_DIR,
+        LABELS,
+        {"name": "gpu-log", "kinds": KINDS, "featureSizes": [list(x) for x in FEATURE_SIZES], "checkpoint": checkpoint},
+        fixtures,
+        slots=FEATURE_COUNT,
+    )
+    print(f"exported {manifest['parameters']:,} parameters and {len(fixtures)} fixtures to {MODEL_DIR}")
+    print(json.dumps({k: v for k, v in manifest.items() if k not in ("tensors", "labels")}, indent=1))
 
 
 if __name__ == "__main__":

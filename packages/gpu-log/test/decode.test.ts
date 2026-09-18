@@ -1,12 +1,6 @@
-import { tokenize } from "@gpu-utils/runtime";
+import { type BioSpan, bioToSpans, tokenize } from "@gpu-utils/runtime";
 import { describe, expect, it } from "vitest";
-import {
-  bioTransitions,
-  compileLine,
-  frameLanguage,
-  mergeTwoLineFrames,
-  spansFromTags,
-} from "../src/decode.ts";
+import { compileLine, frameLanguage, mergeTwoLineFrames } from "../src/decode.ts";
 import type { LogLine } from "../src/types.ts";
 
 const LABELS = [
@@ -36,8 +30,8 @@ const LABELS = [
 ];
 const id = (l: string) => LABELS.indexOf(l);
 
-function tagsFor(text: string, roles: Record<string, string>): Int32Array {
-  // roles: substring -> role; tokens inside a substring get B/I tags.
+function spansFor(text: string, roles: Record<string, string>): BioSpan[] {
+  // roles: substring -> role; tokens inside a substring get B/I tags, decoded like the runtime does.
   const tokens = tokenize(text);
   const path = new Int32Array(tokens.length);
   for (const [sub, role] of Object.entries(roles)) {
@@ -51,36 +45,15 @@ function tagsFor(text: string, roles: Record<string, string>): Int32Array {
       }
     });
   }
-  return path;
+  return bioToSpans(path, LABELS, tokens);
 }
 
+const KINDS = ["entry", "continuation", "frame"];
+
 describe("decode", () => {
-  it("forbids O -> I-X transitions", () => {
-    const t = bioTransitions(LABELS);
-    expect(t[0 * LABELS.length + id("I-TS")]).toBe(-Infinity);
-    expect(t[id("B-TS") * LABELS.length + id("I-TS")]).toBe(0);
-    expect(t[id("B-TS") * LABELS.length + id("I-MSG")]).toBe(-Infinity);
-  });
-
-  it("groups BIO tags into spans", () => {
-    const path = Int32Array.from([
-      id("B-TS"),
-      id("I-TS"),
-      0,
-      id("B-KEY"),
-      id("B-VALUE"),
-      id("I-VALUE"),
-    ]);
-    expect(spansFromTags(path, LABELS)).toEqual([
-      { role: "TS", start: 0, end: 2 },
-      { role: "KEY", start: 3, end: 4 },
-      { role: "VALUE", start: 4, end: 6 },
-    ]);
-  });
-
   it("compiles kv pairs, message, level and timestamp", () => {
     const text = '2024-01-15T10:30:00Z WARN app: disk almost full path="/var/log" pct=91';
-    const path = tagsFor(text, {
+    const spans = spansFor(text, {
       "2024-01-15T10:30:00Z": "TS",
       WARN: "LEVEL",
       app: "SOURCE",
@@ -90,15 +63,7 @@ describe("decode", () => {
       pct: "KEY",
       "91": "VALUE",
     });
-    const line = compileLine(
-      text,
-      tokenize(text),
-      path,
-      Float32Array.from([1, 0, 0]),
-      LABELS,
-      3,
-      [10, 20],
-    );
+    const line = compileLine(text, spans, [1, 0, 0], KINDS, 3, [10, 20]);
     expect(line).toEqual({
       line: 3,
       span: [10, 20],
@@ -116,30 +81,24 @@ describe("decode", () => {
 
   it("merges JSON payload messages and names access-log values", () => {
     const text = '2024-01-15T10:30:00Z stdout F {"level":"error","msg":"boom","id":7}';
-    const path = tagsFor(text, {
+    const spans = spansFor(text, {
       "2024-01-15T10:30:00Z": "TS",
       '{"level":"error","msg":"boom","id":7}': "MSG",
     });
-    const line = compileLine(text, tokenize(text), path, Float32Array.from([1, 0, 0]), LABELS, 0, [
-      0,
-      text.length,
-    ]);
+    const line = compileLine(text, spans, [1, 0, 0], KINDS, 0, [0, text.length]);
     expect(line.level).toBe("error");
     expect(line.message).toBe("boom");
     expect(line.kv).toEqual([{ key: "id", value: "7" }]);
 
     const access = '"GET / HTTP/1.1" 200 512 "-" "curl"';
-    const p2 = tagsFor(access, {
+    const s2 = spansFor(access, {
       "GET / HTTP/1.1": "MSG",
       "200": "VALUE",
       "512": "VALUE",
       "-": "VALUE",
       curl: "VALUE",
     });
-    const l2 = compileLine(access, tokenize(access), p2, Float32Array.from([1, 0, 0]), LABELS, 0, [
-      0,
-      access.length,
-    ]);
+    const l2 = compileLine(access, s2, [1, 0, 0], KINDS, 0, [0, access.length]);
     expect(l2.kv).toEqual([
       { key: "status", value: "200" },
       { key: "bytes", value: "512" },

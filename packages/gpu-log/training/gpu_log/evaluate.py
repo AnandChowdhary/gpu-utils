@@ -1,263 +1,267 @@
-"""Evaluation: held-out generated set, hand-written unfamiliar set, Loghub real samples.
+"""Evaluation on four sets:
 
-`uv run python -m gpu_log.evaluate [runs/latest.pt]`
+* **held-out** (generated, seed 2): the training distribution;
+* **unfamiliar v1** (frozen, hand-written, `../eval/unfamiliar-v1.jsonl`): the v1 hard set.
+  It drove the v2 generator widening, so for v2 it is *contaminated* and is reported for
+  continuity only;
+* **unfamiliar v2** (hand-written, fresh, `data/unfamiliar_v2.txt`): layouts the v2
+  generator does not produce, written before any v2 evaluation;
+* **real-world** (Loghub, `loghub.py`): real third-party log lines whose gold spans come
+  from Loghub's own structured CSVs, not from us. Downloaded at evaluation time.
+
+    uv run python -m gpu_log.evaluate [--run default] [--real-limit 1000] [--baseline]
+
+`--baseline` also scores the promoted v1 model (rebuilt from `main`) on the same sets with
+the same code. v1 has no HOST role, so every comparison run folds HOST into O for both
+models ("common roles").
 """
 
 from __future__ import annotations
 
-import csv
-import io
-import sys
-import urllib.request
-from collections import Counter, defaultdict
-from pathlib import Path
+import argparse
+from collections import Counter
 
 import numpy as np
 import torch
+from gpu_utils_training.batch import collate
+from gpu_utils_training.decode import bio_start_mask, bio_transitions, viterbi
+from gpu_utils_training.loop import load_checkpoint
+from gpu_utils_training.metrics import bio_to_spans, span_prf
+from gpu_utils_training.qat import set_quant
 
-from .data import DATA_DIR, KIND_INDEX, LABELS, Dataset, build, cached, read_markup_file
-from .features import featurize
+from .data import (
+    DATA_DIR,
+    LABELS,
+    Dataset,
+    Example,
+    build,
+    cached,
+    read_jsonl,
+    read_markup_file,
+    tag_example,
+)
+from .features import FEATURE_COUNT, featurize
 from .gen import KINDS, ROLES
-from .model import LogTagger
+from .loghub import SEEN_LAYOUTS, SYSTEMS, RealLine
+from .loghub import load as loghub_load
 
-TRANSITIONS = None
-
-
-def transitions() -> np.ndarray:
-    """BIO constraints: I-X may only follow B-X or I-X."""
-    global TRANSITIONS
-    if TRANSITIONS is None:
-        k = len(LABELS)
-        t = np.zeros((k, k), dtype=np.float32)
-        for j, to in enumerate(LABELS):
-            if to.startswith("I-"):
-                role = to[2:]
-                for i, frm in enumerate(LABELS):
-                    if frm not in (f"B-{role}", f"I-{role}"):
-                        t[i, j] = -1e9
-        TRANSITIONS = t
-    return TRANSITIONS
-
-
-def viterbi(em: np.ndarray) -> np.ndarray:
-    n, k = em.shape
-    t = transitions()
-    score = em[0].astype(np.float64).copy()
-    back = np.zeros((n, k), dtype=np.int64)
-    for i in range(1, n):
-        cand = score[:, None] + t
-        back[i] = cand.argmax(0)
-        score = cand.max(0) + em[i]
-    path = np.zeros(n, dtype=np.int64)
-    path[-1] = int(score.argmax())
-    for i in range(n - 1, 0, -1):
-        path[i - 1] = back[i, path[i]]
-    return path
-
-
-def spans_from_tags(tags: list[int]) -> set[tuple[int, int, str]]:
-    out = set()
-    start, role = -1, ""
-    for i, t in enumerate(list(tags) + [0]):
-        lab = LABELS[t] if t < len(LABELS) else "O"
-        if lab == "O" or lab.startswith("B-") or (lab.startswith("I-") and lab[2:] != role):
-            if role:
-                out.add((start, i, role))
-            start, role = (i, lab[2:]) if lab != "O" else (-1, "")
-    return out
+EVAL_DIR = DATA_DIR.parents[1] / "eval"
+Tagged = tuple[list[str], int]  # BIO label strings per token, kind id
 
 
 @torch.no_grad()
-def predict_lines(model: LogTagger, feats_list: list[np.ndarray]) -> list[tuple[np.ndarray, int]]:
-    """Returns (tag path, kind) per line, batching by length."""
+def predict_lines(model: torch.nn.Module, feats_list: list[list[list[int]]], labels: list[str] = LABELS) -> list[Tagged]:
+    """Constrained-Viterbi label strings and the kind id per line; batched by length."""
     model.eval()
-    out: list[tuple[np.ndarray, int] | None] = [None] * len(feats_list)
+    trans = bio_transitions(labels)
+    start = bio_start_mask(labels)
+    out: list[Tagged | None] = [None] * len(feats_list)
     order = sorted(range(len(feats_list)), key=lambda i: len(feats_list[i]))
     for b in range(0, len(order), 64):
         idx = order[b : b + 64]
-        L = max(1, max(len(feats_list[i]) for i in idx))
-        F_ = feats_list[idx[0]].shape[1] if len(feats_list[idx[0]]) else 9
-        feats = np.zeros((len(idx), L, F_), dtype=np.int64)
-        mask = np.zeros((len(idx), L), dtype=np.float32)
+        rows, mask = collate([feats_list[i] or [[model.padding_id] * FEATURE_COUNT] for i in idx], FEATURE_COUNT, model.padding_id)
+        res = model(rows, mask)
+        tags = res["tags"].numpy()
+        kinds = res["pooled"].numpy().argmax(1)
         for j, i in enumerate(idx):
             n = len(feats_list[i])
-            feats[j, :n] = feats_list[i]
-            mask[j, :n] = 1.0
-        tags, kinds = model(torch.from_numpy(feats), torch.from_numpy(mask))
-        tags = tags.numpy()
-        kinds = kinds.numpy().argmax(1)
-        for j, i in enumerate(idx):
-            n = len(feats_list[i])
-            out[i] = (viterbi(tags[j, :n]) if n else np.zeros(0, dtype=np.int64), int(kinds[j]))
+            if n == 0:
+                out[i] = ([], int(kinds[j]))
+                continue
+            em = tags[j, :n].astype(np.float64)
+            em[0] += start
+            out[i] = ([labels[t] for t in viterbi(em, trans)], int(kinds[j]))
     return out  # type: ignore[return-value]
 
 
-def score(pred: list[tuple[np.ndarray, int]], gold_tags: list[np.ndarray], gold_kinds: list[int]) -> dict:
+def fold(tags: list[str], drop_roles: frozenset[str]) -> list[str]:
+    """Map labels of dropped roles to O, so label sets of different vintages can be compared."""
+    if not drop_roles:
+        return tags
+    return [t if t == "O" or t[2:] not in drop_roles else "O" for t in tags]
+
+
+def score(
+    pred: list[Tagged],
+    gold_tags: list[list[str]],
+    gold_kinds: list[int],
+    masks: list[list[bool]] | None = None,
+    dropped: list[set[tuple[int, int]]] | None = None,
+    drop_roles: frozenset[str] = frozenset(),
+) -> dict:
+    """Token accuracy, span P/R/F1, kind accuracy and line-exact.
+
+    `masks[i][t]` False excludes a token from token accuracy and line-exact; `dropped[i]`
+    holds token ranges the gold does not label, so predictions falling entirely inside one
+    are discarded instead of counted as false positives.
+    """
     tok_correct = tok_total = 0
-    kind_correct = 0
-    line_exact = 0
-    tp: Counter[str] = Counter()
-    fp: Counter[str] = Counter()
-    fn: Counter[str] = Counter()
+    kind_correct = line_exact = 0
+    pred_spans, gold_spans = [], []
     kind_conf: Counter[tuple[str, str]] = Counter()
-    for (ptags, pkind), gtags, gkind in zip(pred, gold_tags, gold_kinds, strict=True):
-        eq = ptags == gtags
-        tok_correct += int(eq.sum())
-        tok_total += len(gtags)
+    for i, ((ptags, pkind), gold, gkind) in enumerate(zip(pred, gold_tags, gold_kinds, strict=True)):
+        ptags, gtags = fold(ptags, drop_roles), fold(gold, drop_roles)
+        eq = np.asarray(ptags) == np.asarray(gtags)
+        keep = np.asarray(masks[i], dtype=bool) if masks is not None else np.ones(len(gtags), dtype=bool)
+        tok_correct += int((eq & keep).sum())
+        tok_total += int(keep.sum())
         kind_correct += int(pkind == gkind)
         kind_conf[(KINDS[gkind], KINDS[pkind])] += 1
-        if eq.all() and pkind == gkind:
+        if bool((eq | ~keep).all()) and pkind == gkind:
             line_exact += 1
-        ps, gs = spans_from_tags(list(ptags)), spans_from_tags(list(gtags))
-        for s in ps & gs:
-            tp[s[2]] += 1
-        for s in ps - gs:
-            fp[s[2]] += 1
-        for s in gs - ps:
-            fn[s[2]] += 1
-    per_role = {}
-    for r in ROLES:
-        p = tp[r] / max(1, tp[r] + fp[r])
-        rc = tp[r] / max(1, tp[r] + fn[r])
-        per_role[r] = {"p": p, "r": rc, "f1": 2 * p * rc / max(1e-9, p + rc), "support": tp[r] + fn[r]}
-    micro_p = sum(tp.values()) / max(1, sum(tp.values()) + sum(fp.values()))
-    micro_r = sum(tp.values()) / max(1, sum(tp.values()) + sum(fn.values()))
+        spans = bio_to_spans(ptags)
+        if dropped is not None:
+            spans = [sp for sp in spans if not any(lo <= sp[1] and sp[2] <= hi for lo, hi in dropped[i])]
+        pred_spans.append(spans)
+        gold_spans.append(bio_to_spans(gtags))
+    prf = span_prf(pred_spans, gold_spans)
     n = len(gold_kinds)
-    return {
-        "lines": n,
+    flat = {
         "token_acc": tok_correct / max(1, tok_total),
+        "span_f1": prf["micro"]["f1"],
         "kind_acc": kind_correct / max(1, n),
         "line_exact": line_exact / max(1, n),
-        "span_f1": 2 * micro_p * micro_r / max(1e-9, micro_p + micro_r),
-        "per_role": per_role,
-        "kind_confusion": dict(kind_conf),
-        "summary": f"tok {tok_correct / max(1, tok_total):.4f} span-F1 {2 * micro_p * micro_r / max(1e-9, micro_p + micro_r):.4f} kind {kind_correct / max(1, n):.4f} line {line_exact / max(1, n):.4f}",
     }
+    return {"lines": n, "flat": flat, "per_role": prf["per_label"], "kind_confusion": dict(kind_conf),
+            "summary": " ".join(f"{k} {v:.4f}" for k, v in flat.items())}
 
 
-def evaluate_dataset(model: LogTagger, ds: Dataset, limit: int | None = None) -> dict:
+def evaluate_dataset(model: torch.nn.Module, ds: Dataset, limit: int | None = None, labels: list[str] = LABELS,
+                     drop_roles: frozenset[str] = frozenset()) -> dict:
     n = len(ds) if limit is None else min(limit, len(ds))
-    feats = [ds.line(i)[0] for i in range(n)]
-    gold_tags = [ds.line(i)[1].astype(np.int64) for i in range(n)]
+    feats = [ds.line(i)[0].tolist() for i in range(n)]
+    gold_tags = [[LABELS[t] for t in ds.line(i)[1].astype(np.int64).tolist()] for i in range(n)]
     gold_kinds = [ds.line(i)[2] for i in range(n)]
-    return score(predict_lines(model, feats), gold_tags, gold_kinds)
+    return score(predict_lines(model, feats, labels), gold_tags, gold_kinds, drop_roles=drop_roles)
+
+
+def evaluate_examples(model: torch.nn.Module, examples: list[Example], labels: list[str] = LABELS,
+                      drop_roles: frozenset[str] = frozenset()) -> dict:
+    ds, _ = build(examples)
+    return evaluate_dataset(model, ds, labels=labels, drop_roles=drop_roles)
 
 
 def print_report(name: str, m: dict) -> None:
+    f = m["flat"]
     print(f"\n== {name}: {m['lines']} lines")
-    print(f"token acc {m['token_acc']:.4f} | span F1 {m['span_f1']:.4f} | kind acc {m['kind_acc']:.4f} | line exact {m['line_exact']:.4f}")
-    for r, v in m["per_role"].items():
-        if v["support"]:
-            print(f"  {r:7s} P {v['p']:.3f} R {v['r']:.3f} F1 {v['f1']:.3f} (n={v['support']})")
+    print(f"token acc {f['token_acc']:.4f} | span F1 {f['span_f1']:.4f} | kind acc {f['kind_acc']:.4f} | line exact {f['line_exact']:.4f}")
+    for r in ROLES:
+        v = m["per_role"].get(r)
+        if v and v["support"]:
+            print(f"  {r:7s} P {v['precision']:.3f} R {v['recall']:.3f} F1 {v['f1']:.3f} (n={v['support']})")
 
 
-# --- Loghub (research-license, evaluation only, downloaded at runtime) ------------------
-
-LOGHUB = "https://raw.githubusercontent.com/logpai/loghub/master/{d}/{d}_2k.log_structured.csv"
-LOGHUB_SETS = ["HDFS", "Hadoop", "Spark", "Zookeeper", "OpenSSH", "Linux", "Mac", "Apache", "Android", "BGL", "HPC",
-               "Thunderbird", "Windows", "HealthApp", "Proxifier", "OpenStack"]
-# Which CSV columns correspond to which of our fields (Content ~ message).
-LOGHUB_FIELDS = {"Level": "level", "Component": "source", "Content": "message"}
-LEVEL_NORMAL = {"info": "info", "warn": "warn", "warning": "warn", "error": "error", "err": "error", "fatal": "fatal",
-                "debug": "debug", "trace": "trace", "notice": "info", "severe": "error", "critical": "error", "crit": "error",
-                "v": "trace", "d": "debug", "i": "info", "w": "warn", "e": "error", "f": "fatal"}
+# --- Real-world set: Loghub lines with gold spans from Loghub's structured CSVs ----------
 
 
-def fetch_loghub(d: str, cache: Path) -> list[dict] | None:
-    cache.mkdir(parents=True, exist_ok=True)
-    p = cache / f"{d}_2k.log_structured.csv"
-    if not p.exists():
-        try:
-            with urllib.request.urlopen(LOGHUB.format(d=d), timeout=30) as r:
-                p.write_bytes(r.read())
-        except Exception as e:  # noqa: BLE001
-            print(f"  (skipping {d}: {e})")
-            return None
-    return list(csv.DictReader(io.StringIO(p.read_text(encoding="utf-8", errors="replace"))))
+def real_lines(limit: int = 1000) -> list[RealLine]:
+    lines, coverage = loghub_load(limit)
+    missing = [s for s in SYSTEMS if s not in coverage]
+    if missing:
+        print(f"  (no Loghub data for {', '.join(missing)}; offline?)")
+    return lines
 
 
-def line_from_row(d: str, row: dict) -> str | None:
-    """Reconstruct the raw line for datasets whose CSV keeps the whole content (best effort)."""
-    raw = row.get("Line") or row.get("Raw")
-    if raw:
-        return raw
-    return None
+def prepare_real(lines: list[RealLine]) -> tuple[list, list, list, list]:
+    """(feature rows, gold labels, scored-token masks, unlabelled token ranges) per line."""
+    feats, golds, masks, dropped = [], [], [], []
+    for rl in lines:
+        rows, tags, _kind, _mis = tag_example(Example(rl.text, rl.spans, "entry"))
+        tokens, _ = featurize(rl.text)
+        u16 = [0]
+        for ch in rl.text:
+            u16.append(u16[-1] + (2 if ord(ch) > 0xFFFF else 1))
+        ignores = [(u16[s], u16[e]) for s, e in rl.ignores]
+        keep = [not any(lo < t.end and t.start < hi for lo, hi in ignores) for t in tokens]
+        ranges: list[tuple[int, int]] = []
+        run: int | None = None
+        for i, k in enumerate(keep):
+            if not k and run is None:
+                run = i
+            elif k and run is not None:
+                ranges.append((run, i))
+                run = None
+        if run is not None:
+            ranges.append((run, len(keep)))
+        feats.append(rows)
+        golds.append([LABELS[t] for t in tags])
+        masks.append(keep)
+        dropped.append(set(ranges))
+    return feats, golds, masks, dropped
 
 
-def evaluate_loghub(model: LogTagger, cache: Path, limit: int = 300) -> dict[str, dict]:
-    """Weak-label check on real logs: compare the model's level/source/message against the
-    structured CSV columns. The raw line is read from <D>_2k.log (same order as the CSV)."""
-    results = {}
-    for d in LOGHUB_SETS:
-        rows = fetch_loghub(d, cache)
-        raw_path = cache / f"{d}_2k.log"
-        if rows is None:
-            continue
-        if not raw_path.exists():
-            try:
-                with urllib.request.urlopen(f"https://raw.githubusercontent.com/logpai/loghub/master/{d}/{d}_2k.log", timeout=30) as r:
-                    raw_path.write_bytes(r.read())
-            except Exception as e:  # noqa: BLE001
-                print(f"  (skipping {d}: {e})")
-                continue
-        lines = raw_path.read_text(encoding="utf-8", errors="replace").splitlines()
-        rows = rows[:limit]
-        lines = lines[:limit]
-        feats = [featurize(ln)[1] for ln in lines]
-        preds = predict_lines(model, [np.asarray(f, dtype=np.int64).reshape(-1, 9) for f in feats])
-        hits: Counter[str] = Counter()
-        totals: Counter[str] = Counter()
-        for ln, row, (tags, _kind) in zip(lines, rows, preds, strict=True):
-            tokens = featurize(ln)[0]
-            got: dict[str, list[str]] = defaultdict(list)
-            for s, e, role in sorted(spans_from_tags(list(tags))):
-                got[role].append(ln[tokens[s].start : tokens[e - 1].end])
-            for col, field in LOGHUB_FIELDS.items():
-                gold = (row.get(col) or "").strip()
-                if not gold:
-                    continue
-                totals[field] += 1
-                if field == "level":
-                    g = LEVEL_NORMAL.get(gold.lower(), gold.lower())
-                    p = LEVEL_NORMAL.get(got["LEVEL"][0].lower(), got["LEVEL"][0].lower()) if got["LEVEL"] else ""
-                    hits[field] += int(g == p)
-                elif field == "source":
-                    hits[field] += int(any(gold == s or gold in s or s in gold for s in got["SOURCE"]) if got["SOURCE"] else 0)
-                else:
-                    msg = " ".join(got["MSG"]).strip()
-                    hits[field] += int(bool(msg) and (gold.strip() == msg or gold.strip().startswith(msg) or msg.startswith(gold.strip()[:40])))
-        results[d] = {f: (hits[f], totals[f]) for f in ("level", "source", "message") if totals[f]}
-    return results
+def evaluate_real(model: torch.nn.Module, lines: list[RealLine], labels: list[str] = LABELS,
+                  drop_roles: frozenset[str] = frozenset()) -> tuple[dict, dict[str, dict]]:
+    feats, golds, masks, dropped = prepare_real(lines)
+    pred = predict_lines(model, feats, labels)
+    kinds = [KINDS.index("entry")] * len(lines)
+
+    def sub(idx: list[int]) -> dict:
+        return score([pred[i] for i in idx], [golds[i] for i in idx], [kinds[i] for i in idx],
+                     [masks[i] for i in idx], [dropped[i] for i in idx], drop_roles)
+
+    per_system = {s: sub([i for i, rl in enumerate(lines) if rl.system == s])
+                  for s in dict.fromkeys(rl.system for rl in lines)}
+    for name, want in (("* layouts the generator imitates", True), ("* unseen layouts", False)):
+        idx = [i for i, rl in enumerate(lines) if (rl.system in SEEN_LAYOUTS) == want]
+        if idx:
+            per_system[name] = sub(idx)
+    return sub(list(range(len(lines)))), per_system
 
 
-def load_model(path: Path) -> LogTagger:
-    ck = torch.load(path, map_location="cpu")
-    model = LogTagger()
-    model.load_state_dict(ck["state"])
-    model.set_quant(True)
+def load_model(run: str) -> torch.nn.Module:
+    from .model import build as build_model
+
+    model = build_model()
+    load_checkpoint(model, DATA_DIR.parent / "runs" / run / "best.pt")
+    set_quant(model, True)
     model.eval()
     return model
 
 
-def evaluate_markup(model: LogTagger, path: Path) -> dict:
-    exs = read_markup_file(path)
-    ds, _ = build(exs)
-    return evaluate_dataset(model, ds)
+def report_all(name: str, model: torch.nn.Module, labels: list[str], real: list[RealLine],
+               drop_roles: frozenset[str] = frozenset()) -> None:
+    tag = f" [{name}]" if name else ""
+    kw = {"labels": labels, "drop_roles": drop_roles}
+    print_report(f"held-out (generated, seed 2){tag}", evaluate_dataset(model, cached("heldout", 12_000, 2), **kw))
+    v1_path = EVAL_DIR / "unfamiliar-v1.jsonl"
+    if v1_path.exists():
+        m = evaluate_examples(model, read_jsonl(v1_path), **kw)
+        print_report(f"unfamiliar v1 (frozen; contaminated for v2: it drove the v2 coverage){tag}", m)
+        print("  kind confusion:", m["kind_confusion"])
+    v2_path = DATA_DIR / "unfamiliar_v2.txt"
+    if v2_path.exists():
+        m = evaluate_examples(model, read_markup_file(v2_path), **kw)
+        print_report(f"unfamiliar v2 (hand-written, fresh){tag}", m)
+        print("  kind confusion:", m["kind_confusion"])
+    if real:
+        overall, per_system = evaluate_real(model, real, **kw)
+        print_report(f"real-world (Loghub 2k samples, gold spans from the structured CSVs){tag}", overall)
+        print(f"\n== real-world per system{tag}")
+        for system, m in sorted(per_system.items()):
+            f = m["flat"]
+            seen = "" if system.startswith("*") else ("  (seen layout)" if system in SEEN_LAYOUTS else "  (UNSEEN layout)")
+            print(f"  {system:32s} {m['lines']:6d} lines  token acc {f['token_acc']:.4f}  span F1 {f['span_f1']:.4f}  line exact {f['line_exact']:.4f}{seen}")
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Evaluate gpu-log")
+    ap.add_argument("--run", default="default")
+    ap.add_argument("--real-limit", type=int, default=1000, help="Loghub lines per system")
+    ap.add_argument("--baseline", action="store_true", help="also score the v1 model from main")
+    args = ap.parse_args()
     torch.set_num_threads(2)
-    path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1] / "runs" / "latest.pt"
-    model = load_model(path)
-    print_report("held-out (generated, seed 2)", evaluate_dataset(model, cached("heldout", 12_000, 2)))
-    unf = DATA_DIR / "unfamiliar.txt"
-    if unf.exists():
-        m = evaluate_markup(model, unf)
-        print_report("unfamiliar (hand-written)", m)
-        print("  kind confusion:", m["kind_confusion"])
-    print("\n== Loghub 2k samples (weak labels from *_structured.csv; first 300 lines each)")
-    for d, r in evaluate_loghub(model, DATA_DIR / "cache" / "loghub").items():
-        print(f"  {d:12s} " + "  ".join(f"{f} {h}/{t} ({h / t:.0%})" for f, (h, t) in r.items()))
+    real = real_lines(args.real_limit)
+    model = load_model(args.run)
+    report_all("v2, all roles" if args.baseline else "", model, LABELS, real)
+    if args.baseline:
+        from .baseline_v1 import load_v1
+
+        v1, v1_labels = load_v1()
+        common = frozenset({"HOST"})
+        print("\n\n######## common-role scoring (HOST folded into O; v1 has no HOST role) ########")
+        report_all("v2, common roles", model, LABELS, real, common)
+        report_all("v1, common roles", v1, v1_labels, real, common)
 
 
 if __name__ == "__main__":
