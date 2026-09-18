@@ -25,10 +25,41 @@ def quantize(t: np.ndarray) -> tuple[np.ndarray, float]:
     return q, scale
 
 
+def dequantize(q: np.ndarray, scale: float) -> np.ndarray:
+    """Exactly what runtime/weights.ts computes: float64 product, stored as float32."""
+    return (q.astype(np.float64) * float(scale)).astype(np.float32)
+
+
 def fake_quant(t: np.ndarray) -> np.ndarray:
-    """Round-trip through int6 (use with a straight-through estimator during QAT)."""
-    q, scale = quantize(t)
-    return q.astype(np.float32) * scale
+    """Round-trip through int6 (the NumPy twin of qat.fake_quant; bit-identical to the runtime)."""
+    q, scale = quantize(np.asarray(t, dtype=np.float32))
+    return dequantize(q, scale)
+
+
+LOOKUP = {ch: i - 32 for i, ch in enumerate(ALPHABET)}
+
+
+def decode(encoded: str) -> np.ndarray:
+    """Inverse of encode(): int codes in [-31, 31]."""
+    return np.fromiter((LOOKUP[c] for c in encoded), dtype=np.int32, count=len(encoded))
+
+
+def decode_weights(encoded: str, manifest: dict[str, Any]) -> dict[str, np.ndarray]:
+    """Decode weights.txt back to named float32 tensors, exactly like runtime/weights.ts."""
+    out: dict[str, np.ndarray] = {}
+    for t in manifest["tensors"]:
+        q = decode(encoded[t["offset"] : t["offset"] + t["length"]])
+        out[t["name"]] = dequantize(q, t["scale"]).reshape(t["shape"])
+    return out
+
+
+def flat_weights(encoded: str, manifest: dict[str, Any]) -> np.ndarray:
+    """The flat float32 buffer the WGSL kernels index with manifest offsets (decodeInt6 in TS)."""
+    out = np.zeros(len(encoded), dtype=np.float32)
+    for t in manifest["tensors"]:
+        seg = encoded[t["offset"] : t["offset"] + t["length"]]
+        out[t["offset"] : t["offset"] + t["length"]] = dequantize(decode(seg), t["scale"])
+    return out
 
 
 def encode(q: np.ndarray) -> str:

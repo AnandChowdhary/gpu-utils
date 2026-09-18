@@ -12,5 +12,12 @@ describe("__NAME__", () => {
     const result = await parse("hello world", { backend: "cpu" });
     expect(result.labels).toHaveLength(3);
     expect(result.tokens.map((t) => t.text)).toEqual(["hello", " ", "world"]);
+    for (const s of result.spans) expect("hello world".slice(s.start, s.end)).toBe(s.text);
+  });
+
+  it("handles empty input", async () => {
+    const result = await parse("", { backend: "cpu" });
+    expect(result.labels).toEqual([]);
+    expect(result.spans).toEqual([]);
   });
 });

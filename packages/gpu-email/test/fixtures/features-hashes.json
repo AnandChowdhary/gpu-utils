@@ -1,0 +1,560 @@
+[
+  {
+    "name": "russian-android-attribution",
+    "text": "Hello\n02.04.2012 14:20 пользователь \"bob@xxx.mailgun.org\" <\nbob@xxx.mailgun.org> написал:\n\n> Hi\n>\n",
+    "tokens": 45,
+    "hash": 2165421765
+  },
+  {
+    "name": "korean-gmail",
+    "text": "안녕하세요 민수님,\n\n보내주신 자료 잘 받았습니다. 검토 후 내일 회신드리겠습니다.\n\n감사합니다.\n박지영 드림\n\n2024년 1월 5일 (금) 오후 3:14, 김민수 <minsu.kim@example.kr>님이 작성:\n\n> 자료 첨부드립니다.\n> 확인 부탁드립니다.\n",
+    "tokens": 84,
+    "hash": 1143483806
+  },
+  {
+    "name": "czech-thunderbird",
+    "text": "Dobrý den,\n\nděkuji za rychlou odpověď. Termín mi vyhovuje.\n\nS pozdravem\nJan Novák\nVedoucí projektu, Novák s.r.o.\n+420 601 234 567\n\nDne 5. 2. 2024 v 9:12 Petra Svobodová <petra@example.cz> napsal(a):\n> Dobrý den,\n> posílám nabídku v příloze.\n",
+    "tokens": 107,
+    "hash": 31707944
+  },
+  {
+    "name": "finnish-gmail",
+    "text": "Hei Matti,\n\nKiitos viestistä. Sopii hyvin, nähdään torstaina.\n\nTerveisin,\nAnna Korhonen\n\nke 5. helmik. 2024 klo 9.12 Matti Virtanen <matti.virtanen@example.fi> kirjoitti:\n\n> Hei Anna,\n> sopisiko torstai klo 10?\n",
+    "tokens": 82,
+    "hash": 3022210493
+  },
+  {
+    "name": "danish-apple",
+    "text": "Det lyder fint, tak.\n\nSendt fra min iPhone\n\nDen 5. feb. 2024 kl. 09.12 skrev Lars Hansen <lars@example.dk>:\n\n> Hej,\n> kan vi mødes på fredag?\n",
+    "tokens": 71,
+    "hash": 1557591544
+  },
+  {
+    "name": "turkish-outlook",
+    "text": "Merhaba Ayşe Hanım,\n\nDosyayı aldım, teşekkür ederim. Yarın dönüş yapacağım.\n\nSaygılarımla,\nMehmet Yılmaz\nSatış Müdürü | Yıldız Teknoloji A.Ş.\nTel: +90 212 555 12 34\n\n-----Özgün İleti-----\nKimden: Ayşe Demir <ayse@example.com.tr>\nGönderildi: 5 Şubat 2024 Pazartesi 09:12\nKime: Mehmet Yılmaz\nKonu: Sözleşme\n\nMerhaba Mehmet Bey,\nsözleşme ektedir.\n",
+    "tokens": 134,
+    "hash": 2338457885
+  },
+  {
+    "name": "greek-gmail",
+    "text": "Γεια σου Νίκο,\n\nΕυχαριστώ για την ενημέρωση. Θα το δω και θα σου πω αύριο.\n\nΦιλικά,\nΜαρία Παπαδοπούλου\n\nΣτις Δευ, 5 Φεβ 2024 στις 9:12 π.μ., ο/η Νίκος Γεωργίου <nikos@example.gr> έγραψε:\n\n> Καλημέρα,\n> σου στέλνω το αρχείο.\n",
+    "tokens": 102,
+    "hash": 1060348581
+  },
+  {
+    "name": "traditional-chinese-outlook",
+    "text": "王經理您好，\n\n報價單已收到，我們會在本週五前回覆。\n\n謝謝！\n陳美玲\n業務專員 | 台灣科技股份有限公司\n電話：+886 2 2345 6789\n\n寄件者: 王大明 <daming.wang@example.tw>\n寄件日期: 2024年2月5日 上午 9:12\n收件者: 陳美玲\n主旨: 報價單\n\n陳小姐您好，\n附件為本次報價單，請查收。\n",
+    "tokens": 83,
+    "hash": 3279143419
+  },
+  {
+    "name": "japanese-fullwidth-quote",
+    "text": "田中様\n\nお世話になっております。山田です。\n資料を拝見しました。来週の打ち合わせでご相談させてください。\n\nよろしくお願いいたします。\n\n山田太郎\n株式会社サンプル 営業部\nTEL: 03-1234-5678\n\n2024/02/05 9:12 田中一郎 <tanaka@example.co.jp>:\n＞山田様\n＞\n＞資料をお送りします。\n＞ご確認ください。\n",
+    "tokens": 70,
+    "hash": 3584408072
+  },
+  {
+    "name": "lotus-notes",
+    "text": "Approved. Please go ahead and book it.\n\nRobert\n\n\n\n\"Linda Park\" <linda.park@example.com> wrote on 03/05/2024 10:15:22 AM:\n\n> From: \"Linda Park\" <linda.park@example.com>\n> To: robert.chen@example.com\n> Date: 03/05/2024 10:15 AM\n> Subject: Travel request\n> \n> Hi Robert,\n> \n> Can I book the flights for the Denver trip?\n",
+    "tokens": 152,
+    "hash": 2588721945
+  },
+  {
+    "name": "lotus-pipe-quotes",
+    "text": "Yes, that matches what I have.\n\nKaren Hill/US/ACME@ACME wrote on 02/05/2024 04:30:11 PM:\n\n| Hi,\n|\n| the totals for January are attached.\n| Let me know if they match.\n|\n| Karen\n",
+    "tokens": 88,
+    "hash": 989376864
+  },
+  {
+    "name": "zendesk-top-marker",
+    "text": "##- Please type your reply above this line -##\n\nHi, I'm still seeing the error after the update. Screenshot attached.\n\nThanks\nDana\n\nOn Mon, 5 Feb at 9:12 AM , Support <support@example.zendesk.com> wrote:\n> Your request (#48213) has been updated.\n> To add additional comments, reply to this email.\n",
+    "tokens": 128,
+    "hash": 3548467708
+  },
+  {
+    "name": "jira-notification",
+    "text": "Looks like a regression from the cache change.\n\nPriya\n\n> On 5 Feb 2024, at 09:12, Sam Jones (Jira) <jira@example.atlassian.net> wrote:\n>\n> Sam Jones updated an issue\n>\n> ----------------------------------------\n> Web / WEB-1234\n> Login page blank after deploy\n> ----------------------------------------\n>\n> Get Jira notifications on your phone! Download the Jira Cloud app for Android or iOS\n",
+    "tokens": 219,
+    "hash": 915346090
+  },
+  {
+    "name": "markdown-code-fence",
+    "text": "You can reproduce it with:\n\n```\ncurl -X POST https://api.example.com/v1/items -d '{\"name\": \"test\"}'\n```\n\nIt returns a 500 instead of a 400.\n\n| Field | Value |\n|-------|-------|\n| name  | test  |\n\nCheers,\nTom\n\nOn Tue, Feb 6, 2024 at 11:02 AM Ana Ruiz <ana@example.com> wrote:\n> Do you have a minimal repro?\n",
+    "tokens": 172,
+    "hash": 1262453726
+  },
+  {
+    "name": "ascii-art-signature",
+    "text": "Patch applied, thanks!\n\n+---------------------------+\n| Klaus Berger              |\n| Systems Administrator     |\n| klaus@example.org         |\n+---------------------------+\n",
+    "tokens": 95,
+    "hash": 4012319147
+  },
+  {
+    "name": "windows-mail-from-block",
+    "text": "Yes, Friday works.\n\nSent from Mail for Windows\n\nFrom: Oliver Grant\nSent: Monday, February 5, 2024 9:12 AM\nTo: Emma Stone\nSubject: Friday?\n\nWould Friday work for the review?\n\nOliver\n",
+    "tokens": 76,
+    "hash": 3686551152
+  },
+  {
+    "name": "slash-signature",
+    "text": "Done - the DNS change is live.\n\nNadia Hussain / Network Engineer / Beacon Networks\n+44 20 7946 0958\n",
+    "tokens": 41,
+    "hash": 2882253130
+  },
+  {
+    "name": "closing-and-name-same-line",
+    "text": "I'll have the numbers to you by Thursday.\n\nRegards, Miguel\n\nOn 2/5/24, 9:12 AM, \"Laura Chen\" <laura@example.com> wrote:\n\n> When can we expect the Q4 numbers?\n",
+    "tokens": 78,
+    "hash": 2133625000
+  },
+  {
+    "name": "single-initial",
+    "text": "ok, will do\n\nthanks,\nJ\n",
+    "tokens": 13,
+    "hash": 2535076267
+  },
+  {
+    "name": "bottom-post-with-snip",
+    "text": "On Mon, Feb 05, 2024 at 09:12:34AM +0100, Stefan Koch wrote:\n> The patch breaks the build on arm64:\n> \n> [snip]\n> \n> Can you take a look?\n\nFixed in v2, sorry about that. The cast was wrong on 32-bit targets.\n\n[snip]\n\n> Also, please update the changelog.\n\nDone.\n\nThanks,\nWei\n",
+    "tokens": 138,
+    "hash": 1540135113
+  },
+  {
+    "name": "date-word-in-body",
+    "text": "Hi team,\n\nDate: TBD\nLocation: Room 4B\nAgenda: roadmap review, hiring, budget\n\nFrom my side, nothing else to add.\n\nThanks,\nGrace\n",
+    "tokens": 55,
+    "hash": 3244675497
+  },
+  {
+    "name": "out-of-office",
+    "text": "Thank you for your email. I am out of the office until Monday, 12 February with no access to email.\nFor urgent matters please contact Sarah Lee at sarah.lee@example.com.\n\nKind regards,\nDaniel Wright\nHead of Partnerships, Halcyon Media\n",
+    "tokens": 89,
+    "hash": 2146916701
+  },
+  {
+    "name": "calendar-invite-text",
+    "text": "You have been invited to the following event.\n\nRoadmap review\nWhen: Thu 8 Feb 2024 14:00 – 15:00 (CET)\nWhere: Zoom\nCalendar: team@example.com\nWho: Anna Schmidt - organizer, Ben Ford\n\nInvitation from Google Calendar. You are receiving this email because you are an attendee. To stop receiving these emails, change your settings.\n",
+    "tokens": 126,
+    "hash": 2403686888
+  },
+  {
+    "name": "apple-forward-only",
+    "text": "Begin forwarded message:\n\nFrom: Accounts Payable <ap@example.com>\nSubject: Invoice INV-2024-0042\nDate: 5 February 2024 at 09:12:03 GMT\nTo: Paul Adams <paul@example.com>\n\nHi Paul,\n\nPlease find attached invoice INV-2024-0042, due in 30 days.\n\nBest regards,\nAccounts Payable\n",
+    "tokens": 109,
+    "hash": 2387177641
+  },
+  {
+    "name": "bottom-post-signature",
+    "text": "On 05/02/2024 09:12, Ines Costa wrote:\n> Can you review the PR today?\n\nReviewed and approved. One small nit inline.\n\nBest,\nRui Pereira\nStaff Engineer @ Lumen\nrui@example.pt | +351 912 345 678\n",
+    "tokens": 85,
+    "hash": 1576642180
+  },
+  {
+    "name": "rfc-delimiter-with-contacts",
+    "text": "Merged. Thanks for the quick turnaround.\n\n-- \nAhmed Khalil\nhttps://ahmed.example.dev\n+1.415.555.0142\n",
+    "tokens": 42,
+    "hash": 1324313357
+  },
+  {
+    "name": "mobile-then-full-signature",
+    "text": "Yes please, send it over.\n\nSent from my iPhone\n\nJulia Weber\nProjektleiterin\nMobil +49 171 234 5678\n",
+    "tokens": 39,
+    "hash": 3057868541
+  },
+  {
+    "name": "aligned-signature-table",
+    "text": "Attached is the signed copy.\n\nRegards\n\nPeter Novak\nController\nTel   +43 1 234 5678\nFax   +43 1 234 5679\nMail  peter.novak@example.at\n",
+    "tokens": 53,
+    "hash": 2784433058
+  },
+  {
+    "name": "german-two-blocks",
+    "text": "Sehr geehrter Herr Braun,\n\nvielen Dank für Ihre Anfrage. Ein Angebot erhalten Sie bis Ende der Woche.\n\nMit freundlichen Grüßen\n\ni.A. Sabine Fischer\nVertriebsinnendienst\n\nFischer & Söhne GmbH\nIndustriestraße 5\n70565 Stuttgart\nTel.: 0711 123456-0\n\nGeschäftsführer: Karl Fischer | Amtsgericht Stuttgart HRB 12345 | USt-IdNr. DE123456789\nDiese E-Mail kann vertrauliche Informationen enthalten. Wenn Sie nicht der Adressat sind, löschen Sie bitte diese Nachricht.\n",
+    "tokens": 151,
+    "hash": 3984663340
+  },
+  {
+    "name": "indian-english",
+    "text": "Dear Sir,\n\nKindly find attached the revised quotation as discussed. Do the needful at the earliest.\n\nThanks & Regards,\nRahul Verma\nSr. Sales Executive\nSharma Enterprises Pvt. Ltd.\nMob: 98765 43210\n\nSent from Jio phone\n",
+    "tokens": 81,
+    "hash": 2146669483
+  },
+  {
+    "name": "support-ticket-update",
+    "text": "Ticket #12345 has been updated.\n\nStatus: Pending customer\nAssignee: Leo Martin\n\n----\nHi, we deployed a fix to staging. Can you confirm it works on your end?\n----\n\nYou are receiving this because you opened the ticket. Reply to this email to add a comment, or visit https://help.example.com/tickets/12345\n",
+    "tokens": 126,
+    "hash": 3571949447
+  },
+  {
+    "name": "only-signature",
+    "text": "Marta Kowalska\nAccount Manager, Vantage\n+48 601 234 567\n",
+    "tokens": 20,
+    "hash": 1603552691
+  },
+  {
+    "name": "single-word",
+    "text": "ok\n",
+    "tokens": 2,
+    "hash": 2576535776
+  },
+  {
+    "name": "ps-after-signature",
+    "text": "See you tomorrow at 10.\n\nBest,\nChloe\n\nPS: bring the adapter, the room only has HDMI.\n",
+    "tokens": 39,
+    "hash": 3689747184
+  },
+  {
+    "name": "one-long-line",
+    "text": "Hi Mark just a quick note to say the shipment left the warehouse this morning and the tracking number is 1Z999AA10123456784 so it should arrive by Wednesday at the latest let me know if you need anything else before then thanks Diane\n",
+    "tokens": 88,
+    "hash": 3359007854
+  },
+  {
+    "name": "emoji-heavy",
+    "text": "Hey!! 👋\n\nLaunch is a go 🚀🚀🚀 Huge thanks to everyone 🙏\n\n🎉 Cheers,\nSofía ✨\nGrowth Lead · Ember\n",
+    "tokens": 47,
+    "hash": 4048496774
+  },
+  {
+    "name": "tab-indented-quote",
+    "text": "Agreed, let's go with option two.\n\nElena Rossi wrote:\n\tOption one needs a schema migration, option two\n\tonly changes the API layer. I'd prefer two.\n\nCiao,\nMarco\n",
+    "tokens": 69,
+    "hash": 1404649890
+  },
+  {
+    "name": "original-message-subject-first",
+    "text": "Thanks, received.\n\n---- original message ----\nSubject: Contract draft\nDate: 2024-02-05 09:12\nFrom: legal@example.com\nTo: ops@example.com\n\nPlease find the contract draft attached for your review.\n",
+    "tokens": 79,
+    "hash": 3673455529
+  },
+  {
+    "name": "said-the-following",
+    "text": "No objections from me.\n\nJane Doe said the following on 3/5/2024 10:15 AM:\n> Proposal: we move the standup to 9:30.\n> Any objections?\n",
+    "tokens": 62,
+    "hash": 2256163661
+  },
+  {
+    "name": "spanish-outlook-full",
+    "text": "Buenos días Carlos,\n\nAdjunto la factura corregida. Disculpa las molestias.\n\nUn cordial saludo,\nLucía Fernández\nDepartamento de Administración\nGrupo Solana, S.A.\nTfno.: 91 123 45 67\n\nDe: Carlos Ortega <carlos.ortega@example.es>\nEnviado: viernes, 2 de febrero de 2024 10:02\nPara: Lucía Fernández\nAsunto: RE: Factura 2024-018\n\nHola Lucía,\n\nla factura tiene un error en el IVA, ¿puedes revisarla?\n\nGracias,\nCarlos\n",
+    "tokens": 157,
+    "hash": 3183841436
+  },
+  {
+    "name": "hotmail-quoted-headers",
+    "text": "\nHello\n\n> Subject: Test\n> From: bob@xxx.mailgun.org\n> To: xxx@gmail.com; xxx@hotmail.com\n> Date: Mon, 2 Apr 2012 17:44:22 +0400\n> \n> Hi\n",
+    "tokens": 72,
+    "hash": 3157138590
+  },
+  {
+    "name": "pmp-signature",
+    "text": "Updated timeline attached. Milestone 3 slips one week.\n\nThank you,\n\nJohn Smith, PMP\nSenior Project Manager | Acme Corp\n555.123.4567 (o) | 555.987.6543 (m)\njsmith@acme.example\n",
+    "tokens": 72,
+    "hash": 602269507
+  },
+  {
+    "name": "arabic-greeting-closing",
+    "text": "السلام عليكم أحمد،\n\nThe revised proposal is attached. Let me know if the pricing works for your team.\n\nمع خالص التحية،\nOmar Al-Sayed\nBusiness Development Manager\nGulf Horizon Trading LLC\n+971 50 123 4567\n",
+    "tokens": 77,
+    "hash": 513339740
+  },
+  {
+    "name": "caps-name-paren-title",
+    "text": "Confirmed for the 14th.\n\nMARIA LOPEZ\n(Regional Sales Director)\nNorthwind Traders\n",
+    "tokens": 27,
+    "hash": 1130924337
+  },
+  {
+    "name": "german-doctor-signature",
+    "text": "Liebe Frau Weber,\n\nder Befund liegt vor, alles unauffällig. Wir sehen uns zur Kontrolle im März.\n\nHerzliche Grüße\nDr. med. Anna Müller\nFachärztin für Innere Medizin\nPraxis am Markt · Marktplatz 3 · 80331 München\nTel 089 123456\n",
+    "tokens": 84,
+    "hash": 2813812694
+  },
+  {
+    "name": "linkedin-connect",
+    "text": "Great meeting you at the conference!\n\nTalk soon,\nBen Carter\nConnect with me: https://www.linkedin.com/in/bencarter\n",
+    "tokens": 44,
+    "hash": 633293009
+  },
+  {
+    "name": "yours-blank-name",
+    "text": "I've booked the table for 7.\n\nYours,\n\nHenry\n",
+    "tokens": 22,
+    "hash": 468241268
+  },
+  {
+    "name": "reply-after-quote-thanks-inline",
+    "text": "On Feb 5, 2024, at 09:12, Nora Fitzgerald <nora@example.ie> wrote:\n\n> Did the payment go through?\n\nYes, it cleared this morning. Thanks, Sean\n",
+    "tokens": 64,
+    "hash": 266856355
+  },
+  {
+    "name": "nested-original-in-quote-then-reply",
+    "text": "On Mon, Feb 5, 2024 at 9:12 AM Alex Kim <alex@example.com> wrote:\n> Forwarding the vendor's answer below.\n>\n> -----Original Message-----\n> From: Vendor Support <support@vendor.example>\n> Sent: Friday, February 2, 2024 4:44 PM\n> To: Alex Kim\n> Subject: RE: Licence renewal\n>\n> The renewal price is unchanged for 2024.\n\nGreat, then let's renew for another year.\n\nThanks,\nJordan\n",
+    "tokens": 171,
+    "hash": 1536145135
+  },
+  {
+    "name": "newsletter-footer",
+    "text": "This week: three new integrations, a faster dashboard, and our February webinar.\n\nRead the full changelog at https://example.com/changelog\n\nYou're receiving this because you signed up at example.com.\nUnsubscribe: https://example.com/unsubscribe?u=abc123\nExample Inc, 500 Market St, San Francisco, CA 94105\n",
+    "tokens": 112,
+    "hash": 3313226392
+  },
+  {
+    "name": "suite-address-fax",
+    "text": "The signed lease is in the mail.\n\nSincerely,\nPatricia Moore\nProperty Manager\nCrestview Realty\n1200 Oak Street, Suite 310\nPortland, OR 97205\nPhone: (503) 555-0187\nFax: (503) 555-0188\n",
+    "tokens": 71,
+    "hash": 3772333266
+  },
+  {
+    "name": "markdown-hr-before-signature",
+    "text": "Draft v3 is in the shared folder.\n\n---\nLiu Yang\nTechnical Writer, Quill Docs\n",
+    "tokens": 34,
+    "hash": 2231248912
+  },
+  {
+    "name": "quoted-text-hidden",
+    "text": "+1, ship it.\n\nOn Tue, 6 Feb 2024, 10:15 Sam O'Neil, <sam@example.com> wrote:\n\n> Ready to release 2.4?\n> [Quoted text hidden]\n",
+    "tokens": 68,
+    "hash": 2853235822
+  },
+  {
+    "name": "outlook-ios-link",
+    "text": "Will call you in 10.\n\nGet Outlook for iOS<https://aka.ms/o0ukef>\n\nFrom: Rachel Green <rachel@example.com>\nSent: Tuesday, February 6, 2024 10:15:03 AM\nTo: Ross Geller\nSubject: Call?\n\nDo you have 5 minutes?\n",
+    "tokens": 95,
+    "hash": 3327702758
+  },
+  {
+    "name": "digest-style",
+    "text": "Replying to the digest below re: message 2.\n\nWe can host the meetup in March.\n\nMessage: 2\nDate: Mon, 5 Feb 2024 09:12:00 +0000\nFrom: Organizer <organizer@lists.example.org>\nSubject: [meetup] Venue for March?\n\nDoes anyone have a venue for the March meetup?\n",
+    "tokens": 110,
+    "hash": 700466766
+  },
+  {
+    "name": "slack-paste",
+    "text": "Pasting the thread from Slack for context:\n\nalice  10:02 AM\nthe deploy failed on step 3\nbob  10:04 AM\nlooking now\n\nSo the root cause was the expired token.\n\nThanks,\nAlice\n",
+    "tokens": 72,
+    "hash": 1929527693
+  },
+  {
+    "name": "french-thunderbird-wrapped",
+    "text": "Bonjour Monsieur Petit,\n\nje vous confirme la réception du dossier. Nous reviendrons vers vous sous huit jours.\n\nBien cordialement,\n\nCamille Roux\nChargée de clientèle – Banque du Nord\nLigne directe : 01 23 45 67 89\n\nLe 05/02/2024 à 09:12, Jean Petit a\nécrit :\n> Bonjour,\n> veuillez trouver ci-joint le dossier complet.\n",
+    "tokens": 127,
+    "hash": 2924881472
+  },
+  {
+    "name": "dutch-short",
+    "text": "Hoi Sanne,\n\nTop, dan zie ik je donderdag.\n\nGroetjes,\nDaan\n\nOp 5 feb 2024 om 09:12 schreef Sanne de Vries <sanne@example.nl>:\n> Kun je donderdag?\n",
+    "tokens": 67,
+    "hash": 2403602165
+  },
+  {
+    "name": "swedish-with-mobile",
+    "text": "Låter bra, vi kör på det.\n\nSkickat från min Samsung\n\nDen 5 feb. 2024 09:12 skrev Erik Andersson <erik@example.se>:\n\n> Hej, kan vi flytta mötet till torsdag?\n",
+    "tokens": 71,
+    "hash": 2851293518
+  },
+  {
+    "name": "polish-signature",
+    "text": "Dzień dobry,\n\npotwierdzam termin spotkania na piątek o 10:00.\n\nPozdrawiam,\nKatarzyna Nowak\nSpecjalista ds. sprzedaży\nNowak Logistics Sp. z o.o.\ntel. +48 22 123 45 67\n",
+    "tokens": 66,
+    "hash": 4137965775
+  },
+  {
+    "name": "portuguese-br-outlook",
+    "text": "Olá Pedro,\n\nSegue em anexo o relatório atualizado.\n\nAbraços,\nJuliana Santos\nAnalista Financeira | Grupo Atlas\n(11) 91234-5678\n\nDe: Pedro Alves <pedro@example.com.br>\nEnviada em: segunda-feira, 5 de fevereiro de 2024 09:12\nPara: Juliana Santos\nAssunto: Relatório\n\nJuliana, pode me enviar o relatório de janeiro?\n",
+    "tokens": 118,
+    "hash": 2039822377
+  },
+  {
+    "name": "italian-wrapped-attribution",
+    "text": "Perfetto, grazie mille.\n\nInviato da iPhone\n\nIl giorno lun 5 feb 2024 alle ore 09:12 Giulia Ferrari\n<giulia.ferrari@example.it> ha scritto:\n\n> Ti confermo l'appuntamento di giovedì.\n",
+    "tokens": 71,
+    "hash": 3966164696
+  },
+  {
+    "name": "gmail-wrapped-email-line",
+    "text": "Sounds good to me.\n\nOn Wed, Feb 7, 2024 at 3:31 PM Christopher Alexander Montgomery <\nchristopher.montgomery@example-corporation.com> wrote:\n\n> Shall we finalize the agenda?\n>\n",
+    "tokens": 68,
+    "hash": 2785161880
+  },
+  {
+    "name": "two-signatures-quoted-and-own",
+    "text": "Thanks Ana, I'll take it from here.\n\nBest,\nLeo Fischer\nCustomer Success | Kestrel\nleo@kestrel.example\n\nOn Mon, Feb 5, 2024 at 9:12 AM Ana Souza <ana@client.example> wrote:\n> Hi Leo,\n> the export still fails for large files.\n>\n> Ana Souza\n> Data Lead | Client Co\n> +55 11 98765 4321\n",
+    "tokens": 131,
+    "hash": 2793633316
+  },
+  {
+    "name": "legal-disclaimer-before-quote",
+    "text": "Please see my comments in the attached redline.\n\nRegards,\nVictoria Hale\nAssociate | Hale & Partners LLP\n\nThis communication is privileged and confidential. If you are not the intended recipient, please delete it and notify the sender.\n\n-----Original Message-----\nFrom: Mark Ellis <mark@client.example>\nSent: 05 February 2024 09:12\nTo: Victoria Hale\nSubject: Draft agreement\n\nVictoria, could you review the attached draft?\n",
+    "tokens": 155,
+    "hash": 2004236702
+  },
+  {
+    "name": "crlf-outlook",
+    "text": "Approved, thanks.\r\n\r\nKaren\r\n\r\n________________________________\r\nFrom: Finance <finance@example.com>\r\nSent: 05 February 2024 09:12\r\nTo: Karen Hill\r\nSubject: Expense report\r\n\r\nPlease approve the attached expense report.\r\n",
+    "tokens": 97,
+    "hash": 3172648511
+  },
+  {
+    "name": "quote-with-no-attribution",
+    "text": "> we could do it next week\n> if that works\n\nnext week is fine\n",
+    "tokens": 31,
+    "hash": 3192047838
+  },
+  {
+    "name": "no-trailing-newline-short",
+    "text": "Received, thank you!\n\nIvan Petrov\nIronclad Security",
+    "tokens": 16,
+    "hash": 4182563597
+  },
+  {
+    "name": "greeting-only-reply",
+    "text": "Hi all,\n\nReminder: office is closed on Monday.\n\nHave a good weekend!\n",
+    "tokens": 30,
+    "hash": 3206768754
+  },
+  {
+    "name": "name-with-pronouns-and-quote-line",
+    "text": "Done, the invite is sent.\n\nSam Rivera (they/them)\nCommunity Manager, Mosaic\n\"Be kind, ship often.\"\n",
+    "tokens": 42,
+    "hash": 3456762508
+  },
+  {
+    "name": "mailing-list-bottom-post",
+    "text": "On 2024-02-05 09:12, Tomas Berg via dev wrote:\n> Is anyone else seeing flaky tests on CI since the runner upgrade?\n\nYes, same here. Pinning the runner image to 22.04 fixed it for us.\n\n-- \nNils\n\n_______________________________________________\ndev mailing list\ndev@lists.example.org\nhttps://lists.example.org/mailman/listinfo/dev\n",
+    "tokens": 169,
+    "hash": 325428512
+  },
+  {
+    "name": "fixture-0",
+    "text": "Hi Bob,\n\nThanks for the update, that works for me.\n\nBest,\nJohn Doe\nCEO, Acme Inc\n+1 (555) 123-4567\njohn@acme.com\nhttps://www.acme.com\n\nOn Mon, Jan 5, 2024 at 3:14 PM Bob Smith <bob@example.com> wrote:\n> Hi John,\n>\n> Can we move the meeting?\n>\n> Bob\n",
+    "tokens": 130,
+    "hash": 3599302530
+  },
+  {
+    "name": "fixture-1",
+    "text": "Here is another email\n\nSent from my iPhone\n\nOn Apr 3, 2012, at 4:19 PM, bob <bob@example.com> wrote:\n\n> Hi\n",
+    "tokens": 55,
+    "hash": 944543050
+  },
+  {
+    "name": "fixture-2",
+    "text": "Outlook with a reply\n\n\n ------------------------------\n\n*From:* Google Apps Sync Team [mailto:mail-noreply@google.com]\n*Sent:* Thursday, February 09, 2012 1:36 PM\n*To:* jow@xxxx.com\n*Subject:* Google Apps Sync was updated!\n\n\n\nDear Google Apps Sync user,\n\nGoogle Apps Sync for Microsoft Outlook was recently updated.\n\nSincerely,\n\nThe Google Apps Sync Team.\n",
+    "tokens": 166,
+    "hash": 523176923
+  },
+  {
+    "name": "fixture-3",
+    "text": "Bonjour Marie,\n\nMerci pour votre retour rapide. Je reviens vers vous lundi.\n\nCordialement,\nPierre Dubois\nChef de Projet | Nova Solutions SAS\nTél. : +33 1 23 45 67 89\n\nLe 5 janv. 2024 à 15:14, Marie Martin <marie@example.fr> a écrit :\n> Bonjour Pierre,\n> Pouvez-vous m'envoyer le rapport ?\n",
+    "tokens": 126,
+    "hash": 131790180
+  },
+  {
+    "name": "fixture-4",
+    "text": "Hallo Herr Müller,\n\ndas klingt gut. Anbei die aktuelle Version.\n\nMit freundlichen Grüßen\nAnna Schmidt\nGeschäftsführerin\nBergmann GmbH\nHauptstraße 12\n10115 Berlin\nTelefon: +49 30 1234 5678\n\n-----Ursprüngliche Nachricht-----\nVon: Hans Müller <hans@example.de>\nGesendet: Montag, 5. Februar 2024 09:12\nAn: Anna Schmidt\nBetreff: AW: Angebot\n\nHallo Frau Schmidt,\nkönnen Sie mir das Angebot schicken?\n",
+    "tokens": 144,
+    "hash": 750225707
+  },
+  {
+    "name": "fixture-5",
+    "text": "Hola Carlos,\n\nMe parece bien. Nos vemos el viernes.\n\nSaludos,\nMaría García\nGerente de Ventas, Atlas Logistics S.L.\nMóvil: +34 612 345 678\n\nEl 5 ene 2024, a las 10:02, Carlos López <carlos@example.es> escribió:\n> ¿Te viene bien a las 10?\n",
+    "tokens": 108,
+    "hash": 580829232
+  },
+  {
+    "name": "fixture-6",
+    "text": "this is an email with a correct -- signature.\n\n-- \nrick\n",
+    "tokens": 27,
+    "hash": 4016450193
+  },
+  {
+    "name": "fixture-7",
+    "text": "Thanks!\n\n---------- Forwarded message ---------\nFrom: Jane Roe <jane@example.org>\nDate: Tue, Mar 5, 2024 at 9:00 AM\nSubject: Invoice #4521\nTo: John Doe <john@acme.com>\n\nHi John,\n\nPlease find the invoice attached.\n\nJane\n",
+    "tokens": 109,
+    "hash": 3400284910
+  },
+  {
+    "name": "fixture-8",
+    "text": "I will reply under this one\n\n>\n> okay?\n>\n\nand under this.\n\n>\n> -- Tim\n>\n\n--\nHey there, this is my signature\n",
+    "tokens": 59,
+    "hash": 3421418719
+  },
+  {
+    "name": "fixture-9",
+    "text": "Awesome! I haven't had another problem with it.\r\n\r\nOn Aug 22, 2011, at 7:37 PM, defunkt<reply@reply.github.com> wrote:\r\n\r\n> Loader seems to be working well.\r\n",
+    "tokens": 70,
+    "hash": 21719661
+  },
+  {
+    "name": "fixture-10",
+    "text": "お世話になっております。\n\n添付ファイルをご確認ください。\n\nよろしくお願いいたします。\n佐藤 健\n営業部長\n株式会社ノヴァ\n電話: 03-1234-5678\n\n2024年1月5日(金) 15:14 鈴木 花子 <suzuki@example.jp>:\n> ご確認のほどよろしくお願いいたします。\n",
+    "tokens": 61,
+    "hash": 401870128
+  },
+  {
+    "name": "fixture-11",
+    "text": "您好，\n\n请查收附件。\n\n谢谢！\n王伟\n销售经理\n北京市朝阳区建国路88号\n手机：+86 138 0013 8000\n\n在 2024年1月5日，李娜 <lina@example.cn> 写道：\n> 没问题。\n",
+    "tokens": 58,
+    "hash": 4054662502
+  },
+  {
+    "name": "fixture-12",
+    "text": "Quick question about the roadmap.\n\nCheers,\nSam\n\nThis email and any attachments are confidential and intended solely for the use of the individual to whom they are addressed. If you have received this email in error please notify the sender.\n",
+    "tokens": 86,
+    "hash": 2337237908
+  },
+  {
+    "name": "fixture-13",
+    "text": "Hi folks\n\nWhat is the best way to clear a Riak bucket of all key, values after\nrunning a test?\nI am currently using the Java HTTP API.\n\n-Abhishek Kona\n\n\n_______________________________________________\nriak-users mailing list\nriak-users@lists.basho.com\nhttp://lists.basho.com/mailman/listinfo/riak-users_lists.basho.com\n",
+    "tokens": 158,
+    "hash": 302907260
+  },
+  {
+    "name": "fixture-14",
+    "text": "Sounds good.\n\nOn Tue, Sep 25, 2012 at 8:59 AM, Chris Wanstrath\n<notifications@github.com>wrote:\n\n> Steps 0-2 are in prod.\n>\n",
+    "tokens": 59,
+    "hash": 238046577
+  },
+  {
+    "name": "fixture-15",
+    "text": "Hi there!\n\nStuff happened.\n\nAnd here is a fix -- this is not a signature.\n\nkthxbai\n",
+    "tokens": 39,
+    "hash": 667537473
+  },
+  {
+    "name": "fixture-16",
+    "text": "Thanks,\nJoe Smith | Director, Product Management | Initech\nM: 415-555-0199 | E: joe@initech.com\n",
+    "tokens": 40,
+    "hash": 3226035074
+  },
+  {
+    "name": "fixture-17",
+    "text": "",
+    "tokens": 0,
+    "hash": 2166136261
+  },
+  {
+    "name": "fixture-18",
+    "text": "Hello",
+    "tokens": 1,
+    "hash": 974932719
+  },
+  {
+    "name": "fixture-19",
+    "text": "> quoted only\n> nothing new here\n",
+    "tokens": 14,
+    "hash": 3920330767
+  },
+  {
+    "name": "fixture-20",
+    "text": "Dear Dr. Patel,\n\nI hope this finds you well. Could you send over the latest version of the deck?\n\nKind regards,\nPriya Sharma\nSenior Product Manager\nMeridian Health Pvt. Ltd.\n+91 98765 43210 | priya.sharma@meridianhealth.in\nwww.meridianhealth.in\n\nSent from my Samsung Galaxy\n",
+    "tokens": 103,
+    "hash": 1365813900
+  },
+  {
+    "name": "fixture-21",
+    "text": "Outlook with a reply directly above line\n________________________________________\nFrom: CRM Comments [crm-comment@example.com]\nSent: Friday, 23 March 2012 5:08 p.m.\nTo: John S. Greene\nSubject: [contact:106] John Greene\n\nA new comment has been added to the Contact named 'John Greene':\n\nI am replying to a comment.\n",
+    "tokens": 158,
+    "hash": 3848495506
+  }
+]
