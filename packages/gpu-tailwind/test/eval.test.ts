@@ -5,8 +5,10 @@ import { parse } from "../src/index.ts";
 
 /**
  * Class-level evaluation with the promoted model: exact-set match and per-class
- * precision/recall on (a) the held-out generated set and (b) the hand-written
- * unfamiliar set. Numbers are written to training/runs/eval.json for MODEL_CARD.md.
+ * precision/recall on (a) the held-out generated set, (b) the frozen v1 unfamiliar set
+ * (`eval/unfamiliar-v1.json`, treated as contaminated: its misses informed the v2
+ * generator) and (c) the v2 unfamiliar set written before any v2 evaluation. Numbers go to
+ * training/runs/eval.json and misses to training/runs/misses-<set>.txt for MODEL_CARD.md.
  * The held-out half is skipped when the generated cache is absent (CI).
  */
 interface Case {
@@ -14,10 +16,10 @@ interface Case {
   classes: string[];
 }
 const root = resolve(import.meta.dirname, "..");
+const runs = resolve(root, "training/runs");
 const heldoutPath = resolve(root, "training/data/cache/heldout.jsonl");
-const unfamiliar = JSON.parse(
-  readFileSync(resolve(root, "training/data/unfamiliar.json"), "utf8"),
-) as Case[];
+const load = (name: string) =>
+  JSON.parse(readFileSync(resolve(root, "eval", `${name}.json`), "utf8")) as Case[];
 
 async function score(cases: Case[]) {
   let exact = 0;
@@ -77,38 +79,50 @@ async function score(cases: Case[]) {
   };
 }
 
+function record(key: string, r: Awaited<ReturnType<typeof score>>) {
+  mkdirSync(runs, { recursive: true });
+  const out = resolve(runs, "eval.json");
+  const prev = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : {};
+  writeFileSync(
+    out,
+    `${JSON.stringify({ ...prev, [key]: { ...r, misses: undefined } }, null, 2)}\n`,
+  );
+  writeFileSync(resolve(runs, `misses-${key}.txt`), `${r.misses.join("\n")}\n`);
+  console.log(
+    `${key}: exact ${r.exact.toFixed(3)} P ${r.precision.toFixed(3)} R ${r.recall.toFixed(3)} F1 ${r.f1.toFixed(3)} (n=${r.n})`,
+  );
+}
+
 describe("evaluation", () => {
   it("CPU latency on a 15-token phrase", async () => {
     const phrase = "bold red text, small, uppercase, blue on hover";
     await parse(phrase, { backend: "cpu" });
-    const runs = 300;
+    const n = 300;
     const t0 = performance.now();
-    for (let i = 0; i < runs; i++) await parse(phrase, { backend: "cpu" });
-    const ms = (performance.now() - t0) / runs;
-    console.log(`cpu latency: ${ms.toFixed(3)} ms per parse (${runs} runs)`);
-    const out = resolve(root, "training/runs/eval.json");
-    mkdirSync(resolve(root, "training/runs"), { recursive: true });
+    for (let i = 0; i < n; i++) await parse(phrase, { backend: "cpu" });
+    const ms = (performance.now() - t0) / n;
+    console.log(`cpu latency: ${ms.toFixed(3)} ms per parse (${n} runs)`);
+    mkdirSync(runs, { recursive: true });
+    const out = resolve(runs, "eval.json");
     const prev = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : {};
     writeFileSync(out, `${JSON.stringify({ ...prev, cpuLatencyMs: ms }, null, 2)}\n`);
     expect(ms).toBeLessThan(50);
   });
 
-  it("unfamiliar hand-written set", async () => {
-    expect(unfamiliar.length).toBeGreaterThanOrEqual(60);
-    const r = await score(unfamiliar);
-    console.log(
-      `unfamiliar: exact ${r.exact.toFixed(3)} P ${r.precision.toFixed(3)} R ${r.recall.toFixed(3)} F1 ${r.f1.toFixed(3)} (n=${r.n})`,
-    );
-    console.log(r.misses.join("\n"));
-    writeFileSync(resolve(root, "training/runs/unfamiliar_misses.txt"), `${r.misses.join("\n")}\n`);
-    const out = resolve(root, "training/runs/eval.json");
-    mkdirSync(resolve(root, "training/runs"), { recursive: true });
-    const prev = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : {};
-    writeFileSync(
-      out,
-      `${JSON.stringify({ ...prev, unfamiliar: { ...r, misses: undefined } }, null, 2)}\n`,
-    );
+  it("unfamiliar v1 (frozen, contaminated)", async () => {
+    const cases = load("unfamiliar-v1");
+    expect(cases.length).toBeGreaterThanOrEqual(60);
+    const r = await score(cases);
+    record("unfamiliarV1", r);
     expect(r.exact).toBeGreaterThan(0.3);
+  });
+
+  it("unfamiliar v2 (hand-written before v2 evaluation)", async () => {
+    const cases = load("unfamiliar-v2");
+    expect(cases.length).toBeGreaterThanOrEqual(66);
+    const r = await score(cases);
+    record("unfamiliarV2", r);
+    expect(r.exact).toBeGreaterThan(0.2);
   });
 
   it.skipIf(!existsSync(heldoutPath))("held-out generated set", async () => {
@@ -118,17 +132,7 @@ describe("evaluation", () => {
       .slice(0, 3000)
       .map((l) => JSON.parse(l) as Case);
     const r = await score(rows);
-    console.log(
-      `held-out: exact ${r.exact.toFixed(3)} P ${r.precision.toFixed(3)} R ${r.recall.toFixed(3)} F1 ${r.f1.toFixed(3)} (n=${r.n})`,
-    );
-    console.log(r.misses.slice(0, 10).join("\n"));
-    const out = resolve(root, "training/runs/eval.json");
-    mkdirSync(resolve(root, "training/runs"), { recursive: true });
-    const prev = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : {};
-    writeFileSync(
-      out,
-      `${JSON.stringify({ ...prev, heldout: { ...r, misses: undefined } }, null, 2)}\n`,
-    );
+    record("heldout", r);
     expect(r.exact).toBeGreaterThan(0.5);
   });
 });
