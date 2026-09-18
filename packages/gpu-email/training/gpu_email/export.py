@@ -1,30 +1,34 @@
-"""Export runs/latest.pt to ../model/{manifest.json,weights.txt,fixtures.json}.
+"""Export the promoted checkpoint to ../model/{manifest.json,weights.txt,fixtures.json}.
 
-    uv run python -m gpu_email.export
+    uv run python -m gpu_email.export [--run default] [--random]
 
-fixtures.json holds >= 20 cases with the input text, the feature rows and the
-PyTorch logits (int6-quantized weights) so test/parity.test.ts can assert that the
-TypeScript reference forward pass reproduces them at 1e-4.
+fixtures.json uses the canonical format ({"cases": [{input, rows, logits, pooled}]}) and
+is computed from the decoded int6 weights, so test/parity.test.ts and the WGSL harness
+compare against exactly what the runtime loads. The export also refreshes
+test/fixtures/features-hashes.json, the row hashes that test/features.test.ts uses to
+check the TypeScript featurizer against this one on the unfamiliar set.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
-import sys
+from datetime import date
 from pathlib import Path
 
-import numpy as np
 import torch
-from gpu_utils_training.quant import export as quant_export
+from gpu_utils_training.export import export_package
+from gpu_utils_training.loop import load_checkpoint
 
 from gpu_email.data import EmailGen, render
-from gpu_email.features import BIO_LABELS, LINE_KINDS, NUM_ROWS, NUM_SLOTS, featurize
-from gpu_email.model import EmailTagger
-from gpu_email.train import RUNS
+from gpu_email.features import BIO_LABELS, LINE_KINDS, NUM_SLOTS, featurize
+from gpu_email.model import build
 
-MODEL_DIR = Path(__file__).resolve().parents[2] / "model"
-TEST_FIXTURES = Path(__file__).resolve().parents[2] / "test" / "fixtures"
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+HERE = Path(__file__).resolve().parent
+RUNS = HERE.parent / "runs"
+MODEL_DIR = HERE.parent.parent / "model"
+TEST_FIXTURES = HERE.parent.parent / "test" / "fixtures"
+DATA_DIR = HERE.parent / "data"
 
 
 def row_hash(rows: list[list[int]]) -> int:
@@ -42,15 +46,34 @@ def write_feature_hashes() -> int:
     out = []
     for c in cases:
         nl = c.get("newline", "\n")
-        text = nl.join(t for _, t in c["lines"]) + ("" if c.get("trailing_newline", True) is False else nl)
+        text = nl.join(t for _, t in c["lines"]) + (
+            "" if c.get("trailing_newline", True) is False else nl
+        )
         rows = featurize(text)
-        out.append({"name": c["name"], "text": text, "tokens": len(rows), "hash": row_hash(rows)})
+        out.append(
+            {
+                "name": c["name"],
+                "text": text,
+                "tokens": len(rows),
+                "hash": row_hash(rows),
+            }
+        )
     for i, text in enumerate(FIXTURE_TEXTS):
         rows = featurize(text)
-        out.append({"name": f"fixture-{i}", "text": text, "tokens": len(rows), "hash": row_hash(rows)})
+        out.append(
+            {
+                "name": f"fixture-{i}",
+                "text": text,
+                "tokens": len(rows),
+                "hash": row_hash(rows),
+            }
+        )
     TEST_FIXTURES.mkdir(parents=True, exist_ok=True)
-    (TEST_FIXTURES / "features-hashes.json").write_text(json.dumps(out, ensure_ascii=False, indent=0))
+    (TEST_FIXTURES / "features-hashes.json").write_text(
+        json.dumps(out, ensure_ascii=False, indent=0)
+    )
     return len(out)
+
 
 FIXTURE_TEXTS = [
     "Hi Bob,\n\nThanks for the update, that works for me.\n\nBest,\nJohn Doe\nCEO, Acme Inc\n+1 (555) 123-4567\njohn@acme.com\nhttps://www.acme.com\n\nOn Mon, Jan 5, 2024 at 3:14 PM Bob Smith <bob@example.com> wrote:\n> Hi John,\n>\n> Can we move the meeting?\n>\n> Bob\n",
@@ -78,75 +101,54 @@ FIXTURE_TEXTS = [
 ]
 
 
-def load_model() -> tuple[EmailTagger, dict]:
-    ckpt = torch.load(RUNS / "latest.pt", map_location="cpu", weights_only=False)
-    model = EmailTagger(ckpt["dim"], ckpt["hidden"], ckpt.get("dilations"))
-    model.load_state_dict(ckpt["state"])
-    model.eval()
-    return model, ckpt
-
-
-def quantized_tensors(model: EmailTagger) -> dict[str, np.ndarray]:
-    return {k: v.numpy().astype(np.float32) for k, v in model.export_tensors().items()}
-
-
-def dequantized_model(model: EmailTagger) -> EmailTagger:
-    """A copy whose weights are exactly the int6 values the runtime will decode."""
-    from gpu_utils_training.quant import fake_quant
-
-    copy = EmailTagger(model.dim, model.hidden, model.dilations)
-    copy.load_state_dict(model.state_dict())
-    with torch.no_grad():
-        for p in copy.parameters():
-            p.copy_(torch.from_numpy(fake_quant(p.numpy())))
-    copy.eval()
-    copy.qat = False
-    return copy
-
-
-def logits_for(model: EmailTagger, text: str) -> tuple[list[list[int]], np.ndarray]:
-    rows = featurize(text)
-    if not rows:
-        return rows, np.zeros((0, len(LINE_KINDS) + len(BIO_LABELS)), dtype=np.float32)
-    ids = torch.tensor(rows, dtype=torch.long).unsqueeze(0)
-    mask = torch.ones(1, len(rows))
-    with torch.no_grad():
-        kind, bio = model(ids, mask)
-    return rows, torch.cat([kind, bio], dim=-1)[0].numpy()
+def fixture_texts(total: int = 28) -> list[str]:
+    """The hand-written texts above plus generated emails up to ``total`` cases."""
+    gen = EmailGen(4242)
+    texts = list(FIXTURE_TEXTS)
+    while len(texts) < total:
+        lines, _ = gen.email()
+        texts.append(render(lines, gen).text)
+    return texts
 
 
 def main() -> None:
-    model, ckpt = load_model()
-    tensors = quantized_tensors(model)
-    manifest = quant_export(
-        tensors,
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--run", default="default")
+    ap.add_argument("--random", action="store_true", help="export an untrained model")
+    args = ap.parse_args()
+    torch.manual_seed(0)
+    model = build()
+    checkpoint: dict[str, object] = {"run": None, "date": date.today().isoformat()}
+    if not args.random:
+        ckpt = load_checkpoint(model, RUNS / args.run / "best.pt")
+        checkpoint = {
+            "run": args.run,
+            "epoch": ckpt.get("epoch"),
+            "seed": ckpt.get("seed"),
+            "metrics": ckpt.get("metrics"),
+            "date": date.today().isoformat(),
+        }
+    fixtures = [{"input": text, "rows": featurize(text)} for text in fixture_texts()]
+    manifest = export_package(
+        model,
         MODEL_DIR,
-        {
-            "name": "gpu-email",
-            "labels": LINE_KINDS,
-            "fields": BIO_LABELS,
-            "hidden": model.dim,
-            "head": model.hidden,
-            "dilations": model.dilations,
-            "slots": NUM_SLOTS,
-            "rows": NUM_ROWS,
-            "checkpoint": {"seed": ckpt.get("seed"), "steps": ckpt.get("steps"), "epochs": ckpt.get("epochs"), "metrics": ckpt.get("metrics")},
-        },
+        LINE_KINDS,
+        {"name": "gpu-email", "fields": BIO_LABELS, "checkpoint": checkpoint},
+        fixtures,
+        slots=NUM_SLOTS,
     )
-    q = dequantized_model(model)
-    gen = EmailGen(4242)
-    texts = list(FIXTURE_TEXTS)
-    while len(texts) < 28:
-        lines, _ = gen.email()
-        texts.append(render(lines, gen).text)
-    fixtures = []
-    for text in texts:
-        rows, logits = logits_for(q, text)
-        fixtures.append({"text": text, "features": rows, "logits": [[round(float(v), 5) for v in r] for r in logits]})
-    (MODEL_DIR / "fixtures.json").write_text(json.dumps(fixtures, ensure_ascii=False))
-    size = (MODEL_DIR / "weights.txt").stat().st_size
     n_hashes = write_feature_hashes()
-    print(f"exported {manifest['parameters']} params, weights.txt {size} B, {len(fixtures)} fixtures, {n_hashes} feature hashes", file=sys.stderr)
+    size = (MODEL_DIR / "weights.txt").stat().st_size
+    print(
+        f"exported {manifest['parameters']:,} parameters (weights.txt {size:,} B), {len(fixtures)} fixtures and {n_hashes} feature hashes to {MODEL_DIR}"
+    )
+    print(
+        json.dumps(
+            {k: v for k, v in manifest.items() if k != "tensors"},
+            indent=1,
+            ensure_ascii=False,
+        )
+    )
 
 
 if __name__ == "__main__":

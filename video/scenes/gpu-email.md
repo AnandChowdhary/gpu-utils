@@ -6,7 +6,7 @@
   attribution, quote, signature, disclaimer, forward header, greeting, closing), the new
   reply text, and the author's contact fields.
 - **Hook**: an email thread is a stack of messages glued together by mail clients in a
-  dozen conventions; a 155K-parameter tagger sorts the lines in a few milliseconds.
+  dozen conventions; a 171K-parameter tagger sorts the lines in a few milliseconds.
 - **Target Audience**: Web developers; no ML or GPU background required.
 - **Estimated Length**: 50–60 seconds, silent, 16:9.
 - **Key Insight**: every token carries features about its *line* and its *document
@@ -17,7 +17,7 @@
 
 Start with one familiar top-posted reply. Split it into lines, then into tokens. Show the
 sparse feature ids each token receives (word hash, shape, line-level flags, distance to
-the attribution line). Send the same token cells through six dilated convolutions whose
+the attribution line). Send the same token cells through six dilated residual blocks whose
 receptive field visibly widens. Read two heads off the trunk: one paints each line with a
 kind, the other underlines name / title / phone / email inside the signature. Finish with
 the typed output: `reply`, `segments`, `contact`.
@@ -81,14 +81,14 @@ the typed output: `reply`, `segments`, `contact`.
 
 **Duration**: ~9 seconds
 
-**Purpose**: Show the trunk: six residual 1-D convolutions with dilation 1, 2, 4, 8, 16, 32.
+**Purpose**: Show the trunk: six residual dilated blocks with dilation 1, 2, 4, 8, 16, 32.
 
 ### Visual Elements
 
-- Caption: "Six dilated convolutions, kernel 3"
+- Caption: "Six dilated residual blocks, kernel 3"
 - The token strip stays; above it, six rows of accent bars connect each position to
   neighbours at growing offsets (1, 2, 4, 8, 16, 32), drawn as short arcs.
-- Footnote: "receptive field: 127 tokens · 155K parameters · int6"
+- Footnote: "receptive field: 127 tokens · 171K parameters · int6"
 
 ---
 
@@ -164,7 +164,7 @@ the typed output: `reply`, `segments`, `contact`.
   explicit "rule" steps, separate from the model.
 - The animation must not imply the output is deterministic in all cases; the footnote
   says "probabilistic tagger + exact rules".
-- Every number shown (155K parameters, six layers, dilations, receptive field 127,
+- Every number shown (171K parameters, six layers, dilations, receptive field 127,
   package size, latency) matches MODEL_CARD.md.
 
 ## Reference Material

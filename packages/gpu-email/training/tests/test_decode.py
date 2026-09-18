@@ -1,9 +1,10 @@
 import numpy as np
+from gpu_utils_training.decode import viterbi
+from gpu_utils_training.features import tokenize
 
 from gpu_email.data import EmailGen, encode_example, generate, label_tokens, render
-from gpu_email.decode import BIO_T, decode, viterbi
+from gpu_email.decode import BIO_T, decode
 from gpu_email.features import BIO_LABELS, LINE_KINDS, featurize_tokens, line_infos
-from gpu_utils_training.features import tokenize
 
 K = len(LINE_KINDS)
 B = len(BIO_LABELS)

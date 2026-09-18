@@ -1,4 +1,4 @@
-import { CharClass, viterbi } from "@gpu-utils/runtime";
+import { bioTransitions, CharClass, viterbi } from "@gpu-utils/runtime";
 import { EMAIL_RE, type EmailFeatures, type LineInfo, URL_RE } from "./features.ts";
 import { logitWidth, type Model } from "./model.ts";
 
@@ -195,25 +195,10 @@ interface FieldSpan {
   end: number;
 }
 
-function bioTransitions(fields: string[]): Float32Array {
-  const B = fields.length;
-  const t = new Float32Array(B * B);
-  for (let f = 0; f < B; f++) {
-    for (let to = 0; to < B; to++) {
-      const toLabel = fields[to]!;
-      if (toLabel.startsWith("I-")) {
-        const fromLabel = fields[f]!;
-        const ok = fromLabel !== "O" && fromLabel.slice(2) === toLabel.slice(2);
-        t[f * B + to] = ok ? 0 : NEG;
-      } else {
-        t[f * B + to] = 0;
-      }
-    }
-  }
-  return t;
-}
-
-/** BIO-decodes the contact head over one signature segment, then applies exact regexes. */
+/**
+ * BIO-decodes the contact head over one signature segment (Viterbi with the runtime's BIO
+ * transition table: O → I-X and I-X → I-Y are forbidden), then applies exact regexes.
+ */
 export function extractContact(
   model: Model,
   features: EmailFeatures,
