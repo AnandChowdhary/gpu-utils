@@ -275,6 +275,31 @@ def superlative(adj: str) -> str:
     return adj + "est"
 
 
+NEG_PREFIX_ENDINGS = ("ed", "en", "ing", "able", "ible", "ive", "ful", "ish", "ous")
+
+
+def negated_surface(f: Field, rng: random.Random, fentries: list[match.Entry], fi: int) -> str | None:
+    """"unopened", "nonbillable": a glued negation prefix that still resolves to the field."""
+    cands = [c for c in [f.name] + list(f.aliases) if " " not in c and "_" not in c and len(c) >= match.MIN_NEG_BASE]
+    rng.shuffle(cands)
+    for base in cands:
+        prefixes = ["un", "non"] if base.endswith(NEG_PREFIX_ENDINGS) else ["non"]
+        rng.shuffle(prefixes)
+        for prefix in prefixes:
+            word = prefix + base
+            if resolves_to(word, fentries, fi):
+                return word
+    return None
+
+
+def unit_noun(f: Field) -> str | None:
+    """A field word that reads as a unit after a number: "longer than 60 minutes"."""
+    for word in [f.unit] + [a for a in f.aliases if " " not in a] + [f.name]:
+        if word and " " not in word and "_" not in word and len(word) >= 4 and word.endswith("s"):
+            return word
+    return None
+
+
 def usable_adjectives(f: Field, schema: Schema | None = None) -> list[str]:
     """Polarity adjectives of a field that no other field in the schema also claims."""
     taken: set[str] = set()
@@ -470,6 +495,11 @@ def render_number(schema: Schema, f: Field, fi: int, rng: random.Random, fentrie
         else:
             pieces = [P(comp, "FIELD"), P("than", "OP"), P(value, "VALUE")]
             op = "gt" if polarity == "high" else "lt"
+        unit = unit_noun(f)
+        # "longer than 60 minutes": the unit noun is another word for the same field. Only
+        # emitted when it resolves back to that field, so the compiler never sees a stray word.
+        if unit and rng.random() < 0.4 and unit not in value and resolves_to(unit, fentries, fi):
+            pieces.append(P(unit, "FIELD"))
         return Clause("filter", pieces, {"field": f.name, "op": op, "_values": 1})
     if style < 0.12:
         a, b = number_value(f, rng), number_value(f, rng)
@@ -516,6 +546,9 @@ def render_number(schema: Schema, f: Field, fi: int, rng: random.Random, fentrie
         pieces = [P(surface, "FIELD")] + op_pieces + [P(value, "VALUE")]
     elif layout < 0.85:
         pieces = op_pieces + [P(value, "VALUE"), P(surface, "FIELD")]
+    elif f.year_like and fam in ("gte", "lte") and not negated and layout < 0.93:
+        suffix = rng.choice(["or newer", "or later"]) if fam == "gte" else rng.choice(["or older", "or earlier"])
+        pieces = [P(surface, "FIELD"), P(value, "VALUE")] + [P(w, "OP") for w in suffix.split(" ")]
     elif layout < 0.93 and fam in ("gte", "lte") and not negated:
         suffix = rng.choice(["or more", "and up", "or higher"]) if fam == "gte" else rng.choice(["or less", "or fewer", "and under"])
         pieces = [P(value, "VALUE")] + [P(w, "OP") for w in suffix.split(" ")] + [P(surface, "FIELD")]
@@ -594,6 +627,11 @@ def render_bool(schema: Schema, f: Field, fi: int, rng: random.Random, fentries,
     pieces: list[Piece] = []
     if style < 0.5:
         if negated:
+            if rng.random() < 0.45:
+                # "unarchived repos", "nonbillable hours": the negation is inside the word.
+                glued = negated_surface(f, rng, fentries, fi)
+                if glued is not None:
+                    return Clause("filter", [P(glued, "FIELD")], {"field": f.name, "op": "is_false"})
             pieces = [P(rng.choice(["not", "non", "isn't"]), "NEG"), P(surface, "FIELD")]
             return Clause("filter", pieces, {"field": f.name, "op": "is_false"})
         intro = rng.choice(["", "", "", "is", "only", "with", "are", "that are", "which are", "has"])

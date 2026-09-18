@@ -51,7 +51,13 @@ export interface Span {
   alias: boolean;
   value: number;
   owners: number[];
+  /** Matched a boolean field through a negation prefix ("unopened" -> "opened"). */
+  neg: boolean;
 }
+
+/** Negation prefixes stripped when matching a boolean field: "unarchived", "non-vip", "inactive". */
+const NEG_PREFIXES = ["un", "non", "dis", "im", "ir", "in"];
+const MIN_NEG_BASE = 3;
 
 const isWord = (t: Token) => t.cls === CharClass.Letter || t.cls === CharClass.Digit;
 
@@ -187,6 +193,7 @@ function matchAt(tokens: Token[], positions: number[], wi: number, entries: Entr
           alias: first.alias,
           value: first.value,
           owners,
+          neg: false,
         };
       }
     }
@@ -209,9 +216,12 @@ function matchAt(tokens: Token[], positions: number[], wi: number, entries: Entr
             alias: e.alias,
             value: e.value,
             owners,
+            neg: false,
           };
         }
       }
+      const negated = matchNegated(w, entries);
+      if (negated) return { ...negated, start, end };
       if (w.length >= MIN_PREFIX) {
         const hits = entries.filter(
           (e) =>
@@ -229,6 +239,7 @@ function matchAt(tokens: Token[], positions: number[], wi: number, entries: Entr
             alias: e.alias,
             value: e.value,
             owners: [e.field],
+            neg: false,
           };
         }
       }
@@ -246,10 +257,45 @@ function matchAt(tokens: Token[], positions: number[], wi: number, entries: Entr
             alias: e.alias,
             value: e.value,
             owners: [e.field],
+            neg: false,
           };
         }
       }
     }
+  }
+  return null;
+}
+
+/**
+ * "unarchived" / "inactive" / "nonbillable": a boolean field word carrying a negation
+ * prefix. Only boolean fields are tried, so ordinary words that happen to start with
+ * "in" or "un" cannot be turned into a field by accident.
+ */
+function matchNegated(
+  w: string,
+  entries: Entry[],
+): Omit<Span, "start" | "end"> | null {
+  for (const prefix of NEG_PREFIXES) {
+    if (!w.startsWith(prefix) || w.length - prefix.length < MIN_NEG_BASE) continue;
+    const base = w.slice(prefix.length);
+    const bforms = forms(base);
+    const hits = entries.filter(
+      (e) =>
+        e.kind === "boolean" &&
+        e.words.length === 1 &&
+        (e.words[0] === base || [...forms(e.words[0]!)].some((f) => bforms.has(f))),
+    );
+    if (hits.length === 0) continue;
+    const e = hits[0]!;
+    return {
+      field: e.field,
+      kind: e.kind,
+      quality: INFLECT,
+      alias: e.alias,
+      value: e.value,
+      owners: [...new Set(hits.map((h) => h.field))].sort((a, b) => a - b),
+      neg: true,
+    };
   }
   return null;
 }

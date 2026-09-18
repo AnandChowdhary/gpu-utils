@@ -24,6 +24,10 @@ MIN_PREFIX = 4
 MIN_TYPO = 5
 MAX_WORDS = 3
 CONNECTORS = ("-", "_")
+BOOL = "boolean"
+# Negation prefixes stripped when matching a boolean field: "unarchived", "nonbillable", "inactive".
+NEG_PREFIXES = ("un", "non", "dis", "im", "ir", "in")
+MIN_NEG_BASE = 3
 
 _CAMEL = re.compile(r"([a-z0-9])([A-Z])")
 
@@ -115,6 +119,7 @@ class Span:
     alias: bool
     value: int = -1
     owners: tuple[int, ...] = ()  # enum entries: every field owning this value
+    neg: bool = False  # matched a boolean field through a negation prefix ("unopened")
 
 
 def field_entries(schema: dict) -> list[Entry]:
@@ -155,6 +160,27 @@ def _connected(tokens: list[Token], a: int, b: int) -> bool:
     return True
 
 
+def _match_negated(w: str, entries: list[Entry]) -> tuple[Entry, tuple[int, ...]] | None:
+    """"unarchived" / "inactive" / "nonbillable": a boolean field word with a negation prefix.
+
+    Only boolean fields are tried, so ordinary words starting with "in" or "un" cannot be
+    turned into a field by accident. Mirrors matchNegated in match.ts.
+    """
+    for prefix in NEG_PREFIXES:
+        if not w.startswith(prefix) or len(w) - len(prefix) < MIN_NEG_BASE:
+            continue
+        base = w[len(prefix):]
+        bforms = forms(base)
+        hits = [
+            e
+            for e in entries
+            if e.kind == BOOL and len(e.words) == 1 and (e.words[0] == base or bforms & forms(e.words[0]))
+        ]
+        if hits:
+            return hits[0], tuple(sorted({h.field for h in hits}))
+    return None
+
+
 def _match_at(
     tokens: list[Token], positions: list[int], wi: int, entries: list[Entry], enum: bool
 ) -> Span | None:
@@ -189,6 +215,10 @@ def _match_at(
                     e = hits[0]
                     owners = tuple(sorted({h.field for h in hits}))
                     return Span(start, end, e.field, e.kind, INFLECT, e.alias, e.value, owners)
+            negated = _match_negated(w, entries)
+            if negated is not None:
+                e, owners = negated
+                return Span(start, end, e.field, e.kind, INFLECT, e.alias, e.value, owners, True)
             if len(w) >= MIN_PREFIX:
                 hits = [e for e in entries if len(e.words) == 1 and len(e.words[0]) >= MIN_PREFIX and e.words[0].startswith(w)]
                 keys = {(e.field, e.value) for e in hits}

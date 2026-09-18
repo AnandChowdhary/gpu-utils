@@ -234,7 +234,8 @@ export function parseNumber(text: string): number | null {
 /** Polarity of a comparative/superlative field word ("cheaper" → low, "tallest" → high), if any. */
 function polarityOf(word: string): "high" | "low" | undefined {
   for (const f of forms(word)) {
-    const p = POLARITY[f];
+    // "larger" reduces to "larg"; the silent "e" is restored here, not in the shared stemmer.
+    const p = POLARITY[f] ?? POLARITY[`${f}e`];
     if (p) return p;
   }
   return undefined;
@@ -416,7 +417,7 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
   const fieldRuns = runs(ctx, clause, "FIELD");
   const valueRuns = runs(ctx, clause, "VALUE");
   let timeRuns = runs(ctx, clause, "TIME_VALUE");
-  const negs = runs(ctx, clause, "NEG").length;
+  let negs = runs(ctx, clause, "NEG").length;
   if (fieldRuns.length === 0 && valueRuns.length === 0 && timeRuns.length === 0) return;
   const span = clauseSpan(ctx, clause);
   const opText = runs(ctx, clause, "OP")
@@ -439,6 +440,7 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
       return;
     }
     fi = m.field;
+    if (m.neg) negs++; // "unarchived repos": the negation is inside the field word
     if (words.length === 1) fieldWord = words[0]!;
     // "business or tech episodes": a weak text-field mention next to values that all belong to
     // one enum field is a carrier noun, not the field being filtered.
@@ -546,7 +548,7 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
       if (negatedUnsupported("between")) return;
       return push("between", [nums[0]!, nums[1]!]);
     }
-    return push(flip(numberOp(opText, fieldWord)), nums[0]!);
+    return push(flip(numberOp(opText, fieldWord, isYear(nums[0]!))), nums[0]!);
   }
 
   if (field.kind === "date") {
@@ -620,8 +622,18 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
   push("contains", v);
 }
 
-function numberOp(op: string, fieldWord = ""): FilterOp {
+/** A numeric value that reads as a calendar year ("vintage 2019", "published before 1800"). */
+const isYear = (v: number) => Number.isInteger(v) && v >= 1500 && v <= 2100;
+
+function numberOp(op: string, fieldWord = "", year = false): FilterOp {
   const has = (re: RegExp) => re.test(op);
+  // "2019 or older" on a year-like field is an upper bound, not a lower one.
+  if (year) {
+    if (has(/\bor (older|earlier)\b/)) return "lte";
+    if (has(/\bor (newer|later)\b/)) return "gte";
+    if (has(/\b(older|earlier)\b/)) return "lt";
+    if (has(/\b(newer|later)\b/)) return "gt";
+  }
   // "cheaper than 100" / "taller than 50": the comparative field word carries the direction.
   if (
     isComparative(fieldWord) &&

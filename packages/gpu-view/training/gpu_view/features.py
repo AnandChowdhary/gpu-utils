@@ -37,6 +37,7 @@ BLOCKS: list[tuple[str, int]] = [
     ("field_pos", 3),
     ("quality", 6),
     ("alias", 2),
+    ("field_neg", 2),
     ("enum_any", 2),
     ("enum_pos", 3),
     ("enum_unique", 2),
@@ -55,7 +56,7 @@ for _name, _size in BLOCKS:
     _cursor += _size
 FEATURE_ROWS = _cursor
 PADDING_ROW = FEATURE_ROWS
-SLOTS = 28
+SLOTS = 29
 
 FLAG_HAS_DIGIT, FLAG_ALL_DIGIT, FLAG_PUNCT, FLAG_UPPER, FLAG_FIRST, FLAG_LAST = 0, 1, 2, 3, 4, 5
 FLAG_PREV_DIGIT, FLAG_NEXT_DIGIT, FLAG_YEAR, FLAG_SUFFIX, FLAG_ER, FLAG_EST = 6, 7, 8, 9, 10, 11
@@ -158,6 +159,7 @@ def featurize(text: str, schema: dict) -> tuple[list[Token], list[list[int]]]:
         add("field_pos", 0 if f is None else (1 if i == f.start else 2))
         add("quality", f.quality + 1 if f else 0)
         add("alias", 1 if (f and f.alias) else 0)
+        add("field_neg", 1 if (f and f.neg) else 0)
 
         e = enum_at[i]
         add("enum_any", 1 if e else 0)

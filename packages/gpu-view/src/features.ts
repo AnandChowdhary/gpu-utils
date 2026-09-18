@@ -3,7 +3,8 @@
  * for byte (fixtures in test/fixtures/features.json).
  *
  * The model never sees a field name. Schema membership arrives as anonymous rows:
- * "matched a field of kind K (begin/inside, exact/stem/prefix/typo, via an alias)",
+ * "matched a field of kind K (begin/inside, exact/stem/prefix/typo, via an alias,
+ * through a negation prefix)",
  * "matched an enum value (unique owner? owned by the nearest preceding/following
  * field?)", and the kind of / distance to the nearest field match on either side.
  * The only exact word identities are the closed task lexicon (lexicon.ts); everything
@@ -45,6 +46,7 @@ export const BLOCKS: [string, number][] = [
   ["field_pos", 3],
   ["quality", 6],
   ["alias", 2],
+  ["field_neg", 2],
   ["enum_any", 2],
   ["enum_pos", 3],
   ["enum_unique", 2],
@@ -64,7 +66,7 @@ for (const [name, size] of BLOCKS) {
 }
 export const FEATURE_ROWS = cursor;
 export const PADDING_ROW = FEATURE_ROWS;
-export const SLOTS = 28;
+export const SLOTS = 29;
 
 const SUFFIXES = new Set(["k", "m", "b", "bn", "mm", "%"]);
 const DIGIT = /\p{Nd}/u;
@@ -160,6 +162,7 @@ export function featurize(text: string, schema: Schema): ViewFeatures {
     add("field_pos", f === null ? 0 : i === f.start ? 1 : 2);
     add("quality", f ? f.quality + 1 : 0);
     add("alias", f?.alias ? 1 : 0);
+    add("field_neg", f?.neg ? 1 : 0);
 
     const e = enumAt[i]!;
     const p = prevSpan[i]!;
