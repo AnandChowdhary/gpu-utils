@@ -1,9 +1,9 @@
 {
-  "format": 1,
-  "name": "__NAME__",
-  "hidden": 32,
-  "labels": ["O"],
-  "tensors": [],
-  "parameters": 0,
-  "checkpoint": null
+	"format": 1,
+	"name": "__NAME__",
+	"hidden": 32,
+	"labels": ["O"],
+	"tensors": [],
+	"parameters": 0,
+	"checkpoint": null
 }

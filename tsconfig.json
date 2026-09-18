@@ -1,14 +1,11 @@
 {
   "files": [],
   "references": [
-    {
-      "path": "packages/gpu-email"
-    },
-    {
-      "path": "packages/runtime"
-    },
-    {
-      "path": "tooling"
-    }
+    { "path": "packages/gpu-cite" },
+    { "path": "packages/gpu-email" },
+    { "path": "packages/gpu-paste" },
+    { "path": "packages/gpu-view" },
+    { "path": "packages/runtime" },
+    { "path": "tooling" }
   ]
 }

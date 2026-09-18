@@ -23,3 +23,7 @@ video/**/media/
 
 # Copied in by each package's prepack script
 packages/*/LICENSE
+
+# Rendered explainers are build artefacts until the website exists
+apps/website/public/*.mp4
+video/render-*.log
