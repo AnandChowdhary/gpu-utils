@@ -210,7 +210,7 @@ def evaluate_loghub(model: LogTagger, cache: Path, limit: int = 300) -> dict[str
         for ln, row, (tags, _kind) in zip(lines, rows, preds, strict=True):
             tokens = featurize(ln)[0]
             got: dict[str, list[str]] = defaultdict(list)
-            for s, e, role in spans_from_tags(list(tags)):
+            for s, e, role in sorted(spans_from_tags(list(tags))):
                 got[role].append(ln[tokens[s].start : tokens[e - 1].end])
             for col, field in LOGHUB_FIELDS.items():
                 gold = (row.get(col) or "").strip()

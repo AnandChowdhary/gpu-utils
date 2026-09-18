@@ -269,7 +269,7 @@ const PATTERNS: [RegExp, (m: RegExpExecArray) => string | undefined][] = [
  * zone are emitted without a suffix; named zones other than UTC/GMT are dropped.
  */
 export function normalizeTimestamp(raw: string): string | undefined {
-  const s = raw.trim().replace(/^[[(]|[\])]$/g, "");
+  const s = raw.trim().replace(/^[[(]|[\])]$/g, "").replace(/[,;:]$/, "");
   for (const [re, fn] of PATTERNS) {
     const m = re.exec(s);
     if (m) {

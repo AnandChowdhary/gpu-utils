@@ -35,8 +35,17 @@ fn token_of(wid: vec3<u32>) -> u32 {
   return wid.x + wid.y * GRID_X;
 }
 
+// Every entry point must statically reference every binding: "auto" bind group layouts only
+// contain the bindings an entry point uses, and runtime/program.ts binds the same buffer list
+// to every pass.
+fn touch() -> f32 {
+  return f32(params.tokens) + f32(offs[0]) + f32(features[0]) + f32(line_id[0]) + weights[0]
+    + state_a[0] + state_b[0] + logits[0];
+}
+
 @compute @workgroup_size(64)
 fn embed(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+  _ = touch();
   let p = token_of(wid);
   if (p >= params.tokens) { return; }
   let o = lid.x;
@@ -90,6 +99,7 @@ fn run_block(p: u32, o: u32, d: u32, base: u32, from_a: bool) {
 
 @compute @workgroup_size(64)
 fn block0(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+  _ = touch();
   let p = token_of(wid);
   if (p >= params.tokens) { return; }
   run_block(p, lid.x, 1u, 3u, true);
@@ -97,6 +107,7 @@ fn block0(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) l
 
 @compute @workgroup_size(64)
 fn block1(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+  _ = touch();
   let p = token_of(wid);
   if (p >= params.tokens) { return; }
   run_block(p, lid.x, 2u, 7u, false);
@@ -104,6 +115,7 @@ fn block1(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) l
 
 @compute @workgroup_size(64)
 fn block2(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+  _ = touch();
   let p = token_of(wid);
   if (p >= params.tokens) { return; }
   run_block(p, lid.x, 4u, 11u, true);
@@ -111,6 +123,7 @@ fn block2(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) l
 
 @compute @workgroup_size(64)
 fn block3(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+  _ = touch();
   let p = token_of(wid);
   if (p >= params.tokens) { return; }
   run_block(p, lid.x, 8u, 15u, false);
@@ -118,6 +131,7 @@ fn block3(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) l
 
 @compute @workgroup_size(64)
 fn block4(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+  _ = touch();
   let p = token_of(wid);
   if (p >= params.tokens) { return; }
   run_block(p, lid.x, 16u, 19u, true);
@@ -126,6 +140,7 @@ fn block4(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) l
 // After block4 the current state is in state_b.
 @compute @workgroup_size(64)
 fn heads(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+  _ = touch();
   let p = token_of(wid);
   if (p >= params.tokens) { return; }
   let o = lid.x;
