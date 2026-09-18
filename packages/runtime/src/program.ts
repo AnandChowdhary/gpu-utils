@@ -35,7 +35,6 @@ export async function createProgram(shader: string, entries: string[]): Promise<
   if (err) throw new Error(`WGSL compile failed: ${err.message}`);
 
   const buffers = new Map<string, GPUBuffer>();
-  const layout = pipelines.get(entries[0]!)!.getBindGroupLayout(0);
 
   return {
     device,
@@ -51,10 +50,21 @@ export async function createProgram(shader: string, entries: string[]): Promise<
       return buf;
     },
     async run(bindings, passes, readback) {
-      const bindGroup = device.createBindGroup({
-        layout,
-        entries: bindings.map((buffer, binding) => ({ binding, resource: { buffer } })),
-      });
+      // "auto" layouts are exclusive to the pipeline they came from (WebGPU spec), so each
+      // pass needs a bind group built from its own pipeline. Every entry point must therefore
+      // statically reference every binding.
+      const entriesList = bindings.map((buffer, binding) => ({ binding, resource: { buffer } }));
+      const bindGroups = new Map<string, GPUBindGroup>();
+      for (const p of passes) {
+        if (bindGroups.has(p.entry)) continue;
+        bindGroups.set(
+          p.entry,
+          device.createBindGroup({
+            layout: pipelines.get(p.entry)!.getBindGroupLayout(0),
+            entries: entriesList,
+          }),
+        );
+      }
       const staging = device.createBuffer({
         size: readback.size,
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
@@ -63,7 +73,7 @@ export async function createProgram(shader: string, entries: string[]): Promise<
       const pass = encoder.beginComputePass();
       for (const p of passes) {
         pass.setPipeline(pipelines.get(p.entry)!);
-        pass.setBindGroup(0, bindGroup);
+        pass.setBindGroup(0, bindGroups.get(p.entry)!);
         pass.dispatchWorkgroups(p.workgroups[0], p.workgroups[1] ?? 1, p.workgroups[2] ?? 1);
       }
       pass.end();
