@@ -78,6 +78,20 @@ async function score(cases: Case[]) {
 }
 
 describe("evaluation", () => {
+  it("CPU latency on a 15-token phrase", async () => {
+    const phrase = "bold red text, small, uppercase, blue on hover";
+    await parse(phrase, { backend: "cpu" });
+    const runs = 300;
+    const t0 = performance.now();
+    for (let i = 0; i < runs; i++) await parse(phrase, { backend: "cpu" });
+    const ms = (performance.now() - t0) / runs;
+    console.log(`cpu latency: ${ms.toFixed(3)} ms per parse (${runs} runs)`);
+    const out = resolve(root, "training/runs/eval.json");
+    const prev = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : {};
+    writeFileSync(out, `${JSON.stringify({ ...prev, cpuLatencyMs: ms }, null, 2)}\n`);
+    expect(ms).toBeLessThan(50);
+  });
+
   it("unfamiliar hand-written set", async () => {
     expect(unfamiliar.length).toBeGreaterThanOrEqual(60);
     const r = await score(unfamiliar);

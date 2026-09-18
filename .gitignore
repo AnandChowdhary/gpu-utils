@@ -23,3 +23,4 @@ video/**/media/
 
 # Copied in by each package's prepack script
 packages/*/LICENSE
+packages/*/training/*.log

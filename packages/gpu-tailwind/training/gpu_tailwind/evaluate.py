@@ -8,6 +8,7 @@ compiler; run `pnpm --filter gpu-tailwind eval` for those (scripts/eval.ts).
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 
 import torch
@@ -71,6 +72,12 @@ def main() -> None:
                 for s in gs:
                     if s not in ps:
                         fn[s[2]] += 1
+    result: dict[str, float] = {
+        "n": seq_n,
+        "token_acc": tok_ok / tok_n,
+        "seq_acc": seq_ok / seq_n,
+        "boundary_acc": b_ok / b_n,
+    }
     print(f"held-out: {seq_n} examples")
     print(f"token accuracy   {tok_ok / tok_n:.4f}")
     print(f"sequence exact   {seq_ok / seq_n:.4f}")
@@ -78,9 +85,10 @@ def main() -> None:
     for kind in ("PROP", "VAL", "VAR"):
         p = tp[kind] / max(1, tp[kind] + fp[kind])
         r = tp[kind] / max(1, tp[kind] + fn[kind])
-        print(
-            f"span {kind:5s} precision {p:.4f} recall {r:.4f} f1 {2 * p * r / max(1e-9, p + r):.4f}"
-        )
+        f1 = 2 * p * r / max(1e-9, p + r)
+        result[f"{kind}_precision"], result[f"{kind}_recall"], result[f"{kind}_f1"] = p, r, f1
+        print(f"span {kind:5s} precision {p:.4f} recall {r:.4f} f1 {f1:.4f}")
+    (RUNS / "tag_eval.json").write_text(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
