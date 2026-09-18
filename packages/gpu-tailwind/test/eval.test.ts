@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "../src/index.ts";
@@ -87,6 +87,7 @@ describe("evaluation", () => {
     const ms = (performance.now() - t0) / runs;
     console.log(`cpu latency: ${ms.toFixed(3)} ms per parse (${runs} runs)`);
     const out = resolve(root, "training/runs/eval.json");
+    mkdirSync(resolve(root, "training/runs"), { recursive: true });
     const prev = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : {};
     writeFileSync(out, `${JSON.stringify({ ...prev, cpuLatencyMs: ms }, null, 2)}\n`);
     expect(ms).toBeLessThan(50);
@@ -101,6 +102,7 @@ describe("evaluation", () => {
     console.log(r.misses.join("\n"));
     writeFileSync(resolve(root, "training/runs/unfamiliar_misses.txt"), `${r.misses.join("\n")}\n`);
     const out = resolve(root, "training/runs/eval.json");
+    mkdirSync(resolve(root, "training/runs"), { recursive: true });
     const prev = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : {};
     writeFileSync(
       out,
@@ -121,6 +123,7 @@ describe("evaluation", () => {
     );
     console.log(r.misses.slice(0, 10).join("\n"));
     const out = resolve(root, "training/runs/eval.json");
+    mkdirSync(resolve(root, "training/runs"), { recursive: true });
     const prev = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : {};
     writeFileSync(
       out,
