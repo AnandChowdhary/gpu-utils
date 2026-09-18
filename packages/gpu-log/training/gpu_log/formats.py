@@ -7,8 +7,8 @@ from collections.abc import Callable
 
 from . import vocab as V
 from .gen import (
-    Line, add_kv, duration, hexid, http_request, identifier, ip, java_logger, level_word, message, pad_level,
-    py_logger, source_name, thread_name, timestamp, uuid, word,
+    Line, add_kv, duration, hexid, hostname, http_request, identifier, ip, java_logger, level_word, message,
+    pad_level, py_logger, source_name, thread_name, timestamp, uuid, word,
 )
 
 Builder = Callable[[random.Random], Line]
@@ -42,7 +42,7 @@ def syslog_3164(rng: random.Random) -> Line:
     L = Line("entry")
     maybe_pri(L, rng)
     L.add(timestamp(rng, rng.choice([15, 15, 16])), "TS").add(" ")
-    L.add(rng.choice(V.HOSTS)).add(" ")
+    L.add(hostname(rng), "HOST").add(" ")
     proc = rng.choice(V.PROCS)
     L.add(proc, "SOURCE")
     pid_suffix(L, rng)
@@ -55,7 +55,9 @@ def syslog_5424(rng: random.Random) -> Line:
     L = Line("entry")
     L.add(f"<{rng.randint(0, 191)}>", "LEVEL").add("1 ")
     L.add(timestamp(rng, rng.choice([1, 2, 5, 6])), "TS").add(" ")
-    L.add(rng.choice(V.HOSTS + ["-"])).add(" ")
+    hh = hostname(rng)
+    L.add(hh, "HOST") if hh != "-" else L.add("-")
+    L.add(" ")
     L.add(rng.choice(V.PROCS + V.SERVICES + ["-"]), "SOURCE").add(" ")
     L.add(rng.choice([str(rng.randint(1, 99999)), "-"]), "THREAD").add(" ")
     L.add(rng.choice(["-", "ID47", "MSGID", word(rng).upper()])).add(" ")
@@ -81,7 +83,7 @@ def journal(rng: random.Random) -> Line:
     L = Line("entry")
     style = rng.choice([15, 4, 6, 20, 42])
     L.add(timestamp(rng, style), "TS").add(" ")
-    L.add(rng.choice(V.HOSTS)).add(" ")
+    L.add(hostname(rng), "HOST").add(" ")
     L.add(rng.choice(V.PROCS + ["systemd", "systemd", "kernel", "sshd"]), "SOURCE")
     pid_suffix(L, rng)
     L.add(": ")
@@ -104,7 +106,7 @@ def journal_marker(rng: random.Random) -> Line:
 def access_log(rng: random.Random) -> Line:
     L = Line("entry")
     if rng.random() < 0.2:
-        L.add(rng.choice(V.HOSTS + ["example.com", "api.example.com"])).add(" ")
+        L.add(rng.choice(V.HOSTS + ["example.com", "api.example.com"]), "HOST").add(" ")
     L.add(ip(rng), "SOURCE").add(" - ")
     L.add(rng.choice(["-", "-", "-", rng.choice(V.USERS)])).add(" [")
     L.add(timestamp(rng, 17), "TS").add("] \"")
@@ -190,7 +192,7 @@ def log4j(rng: random.Random) -> Line:
         L.add(" (").add(logger, "SOURCE").add(")")
         return L
     elif variant == 6:  # elasticsearch: [%d][%-5p][%c{1.}] [node] %m
-        L.add("[").add(ts, "TS").add("][").add(lw, "LEVEL").add(pad).add("][").add(logger, "SOURCE").add(" " * rng.randint(0, 12)).add("] [").add(rng.choice(V.HOSTS)).add("] ")
+        L.add("[").add(ts, "TS").add("][").add(lw, "LEVEL").add(pad).add("][").add(logger, "SOURCE").add(" " * rng.randint(0, 12)).add("] [").add(hostname(rng), "HOST").add("] ")
     elif variant == 7:  # spring boot: %d  %5p %pid --- [%15.15t] %-40.40logger{39} : %m
         L.add(ts, "TS").add("  ").add(" " * max(0, 5 - len(lw))).add(lw, "LEVEL").add(" ").add(str(rng.randint(1, 99999)), "THREAD").add(" --- [")
         L.add(" " * max(0, 15 - len(thread[:15]))).add(thread[:15], "THREAD").add("] ").add(logger[:40], "SOURCE").add(" " * max(0, 40 - len(logger[:40]))).add(" : ")
@@ -369,7 +371,7 @@ def node_log(rng: random.Random) -> Line:
         L.add("[").add(timestamp(rng, rng.choice([29, 1, 39])), "TS").add("] ").add(lw.upper(), "LEVEL").add(" (")
         if rng.random() < 0.5:
             L.add(rng.choice(V.NODE_MODULES), "SOURCE").add("/")
-        L.add(str(rng.randint(1, 99999)), "THREAD").add(" on ").add(rng.choice(V.HOSTS)).add("): ")
+        L.add(str(rng.randint(1, 99999)), "THREAD").add(" on ").add(hostname(rng), "HOST").add("): ")
     elif v == 1:  # winston: ts [level]: msg  / level: msg
         if rng.random() < 0.6:
             L.add(timestamp(rng, rng.choice([1, 7])), "TS").add(" ")
@@ -385,7 +387,7 @@ def node_log(rng: random.Random) -> Line:
             L.add("}")
         return L
     elif v == 2:  # bunyan pretty: [ts]  INFO: app/pid on host: msg
-        L.add("[").add(timestamp(rng, 1), "TS").add("] ").add(" " * max(0, 5 - len(lw))).add(lw.upper(), "LEVEL").add(": ").add(rng.choice(V.NODE_MODULES), "SOURCE").add("/").add(str(rng.randint(1, 99999)), "THREAD").add(" on ").add(rng.choice(V.HOSTS)).add(": ")
+        L.add("[").add(timestamp(rng, 1), "TS").add("] ").add(" " * max(0, 5 - len(lw))).add(lw.upper(), "LEVEL").add(": ").add(rng.choice(V.NODE_MODULES), "SOURCE").add("/").add(str(rng.randint(1, 99999)), "THREAD").add(" on ").add(hostname(rng), "HOST").add(": ")
     elif v == 3:  # nest: [Nest] pid  - date, time     LOG [Context] msg
         L.add("[Nest] ").add(str(rng.randint(1, 99999)), "THREAD").add("  - ").add(timestamp(rng, 23).replace(" ", ", ", 1), "TS").add("     ").add(rng.choice(["LOG", "ERROR", "WARN", "DEBUG", "VERBOSE"]), "LEVEL").add(" [").add(rng.choice(V.NODE_MODULES), "SOURCE").add("] ")
     elif v == 4:  # debug module: namespace msg +Nms

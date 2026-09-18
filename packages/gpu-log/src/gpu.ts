@@ -31,7 +31,7 @@ export async function forwardGpu(model: Model, batch: Batch): Promise<Float32Arr
     model.hidden !== 64 ||
     model.embedDim !== 32 ||
     model.featureCount !== 9 ||
-    model.tags !== 23 ||
+    model.tags !== 25 ||
     model.kinds !== 3 ||
     model.blocks.length !== 5
   ) {

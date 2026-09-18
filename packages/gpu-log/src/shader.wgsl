@@ -6,7 +6,7 @@
 const H: u32 = 64u;
 const E: u32 = 32u;
 const F: u32 = 9u;
-const T: u32 = 23u;
+const T: u32 = 25u;
 const K: u32 = 3u;
 const GRID_X: u32 = 32768u;
 

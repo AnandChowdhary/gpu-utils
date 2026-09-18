@@ -136,6 +136,9 @@ export function compileLine(
       case "SOURCE":
         if (!line.source) line.source = raw;
         break;
+      case "HOST":
+        if (!line.host) line.host = raw;
+        break;
       case "THREAD":
         if (!line.thread) line.thread = raw;
         break;
