@@ -125,7 +125,8 @@ describe("gpu-view examples", () => {
     expect(spec.diagnostics.length).toBeGreaterThan(0);
     const d = spec.diagnostics[0]!;
     expect(["unknown_field", "unresolved_value"]).toContain(d.code);
-    expect(["widgets", "5"]).toContain(text.slice(d.span.start, d.span.end));
+    // The report covers the whole unresolved run ("5 widgets"), or just the unknown word.
+    expect(["widgets", "5", "5 widgets"]).toContain(text.slice(d.span.start, d.span.end));
   });
   it("tolerates plurals, aliases and one-character typos in field names", async () => {
     const spec = await parse("active custmers with orderz over 10k, signup after 2024", {

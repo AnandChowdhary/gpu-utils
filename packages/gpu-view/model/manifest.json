@@ -1,256 +1,298 @@
 {
-	"format": 1,
-	"name": "gpu-view",
-	"hidden": 32,
-	"headGate": 16,
-	"conv": 5,
-	"labels": [
-		"O",
-		"FIELD",
-		"OP",
-		"VALUE",
-		"TIME_VALUE",
-		"CONJ",
-		"NEG",
-		"SORT_FIELD",
-		"SORT_DIR",
-		"GROUP_FIELD",
-		"AGG_FN",
-		"AGG_FIELD",
-		"LIMIT",
-		"CHART"
-	],
-	"featureRows": 639,
-	"slots": 28,
-	"blocks": [
-		{
-			"name": "shape",
-			"offset": 0,
-			"size": 8
-		},
-		{
-			"name": "length",
-			"offset": 8,
-			"size": 8
-		},
-		{
-			"name": "word",
-			"offset": 16,
-			"size": 128
-		},
-		{
-			"name": "skeleton",
-			"offset": 144,
-			"size": 64
-		},
-		{
-			"name": "keyword",
-			"offset": 208,
-			"size": 366
-		},
-		{
-			"name": "flags",
-			"offset": 574,
-			"size": 10
-		},
-		{
-			"name": "field_kind",
-			"offset": 584,
-			"size": 6
-		},
-		{
-			"name": "field_pos",
-			"offset": 590,
-			"size": 3
-		},
-		{
-			"name": "quality",
-			"offset": 593,
-			"size": 5
-		},
-		{
-			"name": "alias",
-			"offset": 598,
-			"size": 2
-		},
-		{
-			"name": "enum_any",
-			"offset": 600,
-			"size": 2
-		},
-		{
-			"name": "enum_pos",
-			"offset": 602,
-			"size": 3
-		},
-		{
-			"name": "enum_unique",
-			"offset": 605,
-			"size": 2
-		},
-		{
-			"name": "enum_prev",
-			"offset": 607,
-			"size": 2
-		},
-		{
-			"name": "enum_next",
-			"offset": 609,
-			"size": 2
-		},
-		{
-			"name": "prev_kind",
-			"offset": 611,
-			"size": 6
-		},
-		{
-			"name": "prev_dist",
-			"offset": 617,
-			"size": 6
-		},
-		{
-			"name": "next_kind",
-			"offset": 623,
-			"size": 6
-		},
-		{
-			"name": "next_dist",
-			"offset": 629,
-			"size": 6
-		},
-		{
-			"name": "position",
-			"offset": 635,
-			"size": 4
-		}
-	],
-	"checkpoint": {
-		"run": "default",
-		"seed": 0,
-		"epochs": 14,
-		"samples": 160000,
-		"date": "2026-09-18"
-	},
-	"tensors": [
-		{
-			"name": "embedding",
-			"offset": 0,
-			"length": 20448,
-			"shape": [639, 32],
-			"scale": 0.09947749876206921
-		},
-		{
-			"name": "encoder_bias",
-			"offset": 20448,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.005921552738835735
-		},
-		{
-			"name": "convolution",
-			"offset": 20480,
-			"length": 160,
-			"shape": [5, 32],
-			"scale": 0.03485483507956228
-		},
-		{
-			"name": "gate_weight",
-			"offset": 20640,
-			"length": 1024,
-			"shape": [32, 32],
-			"scale": 0.059531158016574
-		},
-		{
-			"name": "gate_bias",
-			"offset": 21664,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.11894774436950684
-		},
-		{
-			"name": "candidate_weight",
-			"offset": 21696,
-			"length": 1024,
-			"shape": [32, 32],
-			"scale": 0.04011564100942304
-		},
-		{
-			"name": "candidate_bias",
-			"offset": 22720,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.00689178224532835
-		},
-		{
-			"name": "combine_weight",
-			"offset": 22752,
-			"length": 2048,
-			"shape": [32, 64],
-			"scale": 0.041445916698824976
-		},
-		{
-			"name": "combine_bias",
-			"offset": 24800,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.009894992074658793
-		},
-		{
-			"name": "global_weight",
-			"offset": 24832,
-			"length": 1024,
-			"shape": [32, 32],
-			"scale": 0.04358465056265554
-		},
-		{
-			"name": "global_bias",
-			"offset": 25856,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.019163423968899633
-		},
-		{
-			"name": "head_gate_weight",
-			"offset": 25888,
-			"length": 1024,
-			"shape": [16, 64],
-			"scale": 0.03552052282517956
-		},
-		{
-			"name": "head_gate_bias",
-			"offset": 26912,
-			"length": 16,
-			"shape": [16],
-			"scale": 0.004977248849407319
-		},
-		{
-			"name": "head_hidden_weight",
-			"offset": 26928,
-			"length": 5120,
-			"shape": [64, 80],
-			"scale": 0.04044722741649997
-		},
-		{
-			"name": "head_hidden_bias",
-			"offset": 32048,
-			"length": 64,
-			"shape": [64],
-			"scale": 0.0059089146314128755
-		},
-		{
-			"name": "output_weight",
-			"offset": 32112,
-			"length": 960,
-			"shape": [15, 64],
-			"scale": 0.05268732578523697
-		},
-		{
-			"name": "output_bias",
-			"offset": 33072,
-			"length": 15,
-			"shape": [15],
-			"scale": 0.006059685541737464
-		}
-	],
-	"parameters": 33087
+  "format": 1,
+  "name": "gpu-view",
+  "family": "scan",
+  "featureRows": 748,
+  "paddingId": 748,
+  "hidden": 32,
+  "head": 64,
+  "scanLayers": 1,
+  "convTaps": 5,
+  "tags": 15,
+  "pooled": 0,
+  "slots": 29,
+  "labels": [
+    "O",
+    "FIELD",
+    "OP",
+    "VALUE",
+    "TIME_VALUE",
+    "CONJ",
+    "NEG",
+    "SORT_FIELD",
+    "SORT_DIR",
+    "GROUP_FIELD",
+    "AGG_FN",
+    "AGG_FIELD",
+    "LIMIT",
+    "CHART"
+  ],
+  "boundary": true,
+  "blocks": [
+    {
+      "name": "shape",
+      "offset": 0,
+      "size": 8
+    },
+    {
+      "name": "length",
+      "offset": 8,
+      "size": 8
+    },
+    {
+      "name": "word",
+      "offset": 16,
+      "size": 128
+    },
+    {
+      "name": "skeleton",
+      "offset": 144,
+      "size": 64
+    },
+    {
+      "name": "keyword",
+      "offset": 208,
+      "size": 470
+    },
+    {
+      "name": "flags",
+      "offset": 678,
+      "size": 12
+    },
+    {
+      "name": "field_kind",
+      "offset": 690,
+      "size": 6
+    },
+    {
+      "name": "field_pos",
+      "offset": 696,
+      "size": 3
+    },
+    {
+      "name": "quality",
+      "offset": 699,
+      "size": 6
+    },
+    {
+      "name": "alias",
+      "offset": 705,
+      "size": 2
+    },
+    {
+      "name": "field_neg",
+      "offset": 707,
+      "size": 2
+    },
+    {
+      "name": "enum_any",
+      "offset": 709,
+      "size": 2
+    },
+    {
+      "name": "enum_pos",
+      "offset": 711,
+      "size": 3
+    },
+    {
+      "name": "enum_unique",
+      "offset": 714,
+      "size": 2
+    },
+    {
+      "name": "enum_prev",
+      "offset": 716,
+      "size": 2
+    },
+    {
+      "name": "enum_next",
+      "offset": 718,
+      "size": 2
+    },
+    {
+      "name": "prev_kind",
+      "offset": 720,
+      "size": 6
+    },
+    {
+      "name": "prev_dist",
+      "offset": 726,
+      "size": 6
+    },
+    {
+      "name": "next_kind",
+      "offset": 732,
+      "size": 6
+    },
+    {
+      "name": "next_dist",
+      "offset": 738,
+      "size": 6
+    },
+    {
+      "name": "position",
+      "offset": 744,
+      "size": 4
+    }
+  ],
+  "checkpoint": {
+    "run": "default",
+    "epoch": 13,
+    "seed": 0,
+    "metrics": {
+      "dev_token_accuracy": 0.9980824544582934,
+      "dev_boundary_accuracy": 0.9978359128886454,
+      "dev_sequence_exact": 0.9495,
+      "transfer_token_accuracy": 0.9930214597009985,
+      "transfer_boundary_accuracy": 0.9942627020466707,
+      "transfer_sequence_exact": 0.858
+    },
+    "date": "2026-09-18"
+  },
+  "tensors": [
+    {
+      "name": "embed",
+      "offset": 0,
+      "length": 23936,
+      "shape": [
+        748,
+        32
+      ],
+      "scale": 0.08061807386336788
+    },
+    {
+      "name": "scan0.f.wa",
+      "offset": 23936,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.057165557338345434
+    },
+    {
+      "name": "scan0.f.ba",
+      "offset": 24960,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.102681944447179
+    },
+    {
+      "name": "scan0.f.wu",
+      "offset": 24992,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.04076377807124969
+    },
+    {
+      "name": "scan0.f.bu",
+      "offset": 26016,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.008123661241223734
+    },
+    {
+      "name": "scan0.b.wa",
+      "offset": 26048,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.05166612517449164
+    },
+    {
+      "name": "scan0.b.ba",
+      "offset": 27072,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.09510805529932823
+    },
+    {
+      "name": "scan0.b.wu",
+      "offset": 27104,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.03274113132107642
+    },
+    {
+      "name": "scan0.b.bu",
+      "offset": 28128,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.005680976375456779
+    },
+    {
+      "name": "conv0.w",
+      "offset": 28160,
+      "length": 320,
+      "shape": [
+        5,
+        64
+      ],
+      "scale": 0.06129632457610099
+    },
+    {
+      "name": "conv0.b",
+      "offset": 28480,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.025885193578658566
+    },
+    {
+      "name": "head.w",
+      "offset": 28544,
+      "length": 8192,
+      "shape": [
+        128,
+        64
+      ],
+      "scale": 0.044821919933442145
+    },
+    {
+      "name": "head.b",
+      "offset": 36736,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.005408149092428146
+    },
+    {
+      "name": "tags.w",
+      "offset": 36800,
+      "length": 960,
+      "shape": [
+        64,
+        15
+      ],
+      "scale": 0.06875990283104681
+    },
+    {
+      "name": "tags.b",
+      "offset": 37760,
+      "length": 15,
+      "shape": [
+        15
+      ],
+      "scale": 0.003349494068853317
+    }
+  ],
+  "parameters": 37775
 }

@@ -2,7 +2,7 @@
 
 ## Overview
 
-- **Topic**: A 33K-parameter tagger that reads "total revenue by region this quarter, top 10, as a bar chart" and emits a typed view spec, without ever seeing the app's field names.
+- **Topic**: A 38K-parameter tagger that reads "total revenue by region this quarter, top 10, as a bar chart" and emits a typed view spec, without ever seeing the app's field names.
 - **Hook**: The model is schema-blind. Your schema enters as anonymous "matched a field of kind number" features, so the same weights work on issues, wine cellars and greenhouses.
 - **Target Audience**: Web developers; no ML or GPU background required.
 - **Estimated Length**: 45–60 seconds, silent, 16:9.
@@ -69,9 +69,9 @@ Start with one phrase a user would type into a search bar. Split it into the tok
 
 ### Visual Elements
 
-- Caption: "h[t] = a[t]·h[t−1] + b[t], forward and backward"
+- Caption: "h[t] = a[t]·h[t−1] + (1−a[t])·u[t], forward and backward"
 - Accent-colored sweep left→right then right→left over the strips; strips brighten as context accumulates.
-- Footnote: "33,087 parameters, int6"
+- Footnote: "37,775 parameters, int6"
 
 ---
 
@@ -136,7 +136,7 @@ Start with one phrase a user would type into a search bar. Split it into the tok
 
 - The animation must not imply the model sees field names: the schema footnote is crossed out before features appear, and the tags shown are the kinds (`field:number`), never the names.
 - The animation must not imply the output is deterministic text generation: the model emits roles and boundaries; the spec is assembled by the compiler scene.
-- Every number shown (33,087 parameters, int6) matches MODEL_CARD.md.
+- Every number shown (37,775 parameters, int6) matches MODEL_CARD.md.
 - Roles shown are exactly the ones the shipped model predicts for this phrase (verified with `parse()`).
 
 ## Reference Material

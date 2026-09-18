@@ -37,7 +37,7 @@ ROLES = {
 BOUNDARIES = {0, 3, 4, 7, 12}
 SCHEMA_TAGS = {"revenue": "field:number", "region": "field:enum", "quarter": "time", "this": "time",
                "total": "lexicon", "top": "lexicon", "chart": "lexicon", "10": "digits"}
-PARAMS = "33,087 parameters, int6"
+PARAMS = "37,775 parameters, int6"
 
 
 class GpuViewPipeline(ExplainerScene):
@@ -81,7 +81,7 @@ class GpuViewPipeline(ExplainerScene):
         self.wait(1.5)
 
         # Scene 4: bidirectional scan.
-        cap = self.swap_caption(cap, "h[t] = a[t]·h[t−1] + b[t], forward and backward", FadeOut(foot))
+        cap = self.swap_caption(cap, "h[t] = a[t]·h[t−1] + (1−a[t])·u[t], forward and backward", FadeOut(foot))
         sweep = mono("▮", 20, ACCENT).move_to(strips[0].get_center() + LEFT * 0.4)
         self.play(FadeIn(sweep))
         self.play(sweep.animate.move_to(strips[-1].get_center() + RIGHT * 0.4), run_time=2.2)

@@ -11,7 +11,7 @@ import calendar
 import re
 from datetime import date, timedelta
 
-from .lexicon import MONTH_ABBREV, MONTHS
+from .lexicon import MONTH_ABBREV, MONTHS, SEASONS
 
 UNITS = {"day": "day", "days": "day", "week": "week", "weeks": "week", "month": "month",
          "months": "month", "year": "year", "years": "year", "quarter": "quarter",
@@ -191,7 +191,43 @@ def _resolve(t: str, today: date) -> tuple[date, date] | None:
         mi = _month_index(m[1])
         if mi:
             return month_range(int(m[2]) if m[2] else today.year, mi)
+    # "september 10 2026", "september 10, 2026", "sep 10", "10 september 2026", "10th of sep"
+    m = re.fullmatch(r"([a-z]+) (\d{1,2})(?:st|nd|rd|th)?,?(?: (\d{4}))?", t)
+    if m and _month_index(m[1]):
+        return _day(int(m[3]) if m[3] else today.year, _month_index(m[1]), int(m[2]))
+    m = re.fullmatch(r"(\d{1,2})(?:st|nd|rd|th)? (?:of )?([a-z]+),?(?: (\d{4}))?", t)
+    if m and _month_index(m[2]):
+        return _day(int(m[3]) if m[3] else today.year, _month_index(m[2]), int(m[1]))
+    m = re.fullmatch(r"(\d{4})/(\d{1,2})/(\d{1,2})", t)
+    if m:
+        return _day(int(m[1]), int(m[2]), int(m[3]))
+    # seasons (meteorological, northern hemisphere): "this summer", "last winter", "spring 2025"
+    m = re.fullmatch(r"(?:(this|last|previous|past|next|coming) )?(spring|summer|autumn|fall|winter)(?: (\d{4}))?", t)
+    if m:
+        season = m[2]
+        if m[3]:
+            year = int(m[3])
+        else:
+            year = today.year
+            if season == "winter" and today.month > 2:
+                year += 1
+            if m[1] in ("last", "previous", "past"):
+                year -= 1
+            elif m[1] in ("next", "coming"):
+                year += 1
+        start_m, end_m = SEASONS[season]
+        if season == "winter":
+            return date(year - 1, 12, 1), month_range(year, 2)[1]
+        return date(year, start_m, 1), month_range(year, end_m)[1]
     return None
+
+
+def _day(y: int, m: int, d: int) -> tuple[date, date] | None:
+    try:
+        v = date(y, m, d)
+    except ValueError:
+        return None
+    return v, v
 
 
 if __name__ == "__main__":

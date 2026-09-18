@@ -56,17 +56,23 @@ describe("gpu-view evaluation", () => {
     report("in-domain", rate, cases.length, failures, 5);
     expect(rate).toBeGreaterThan(0.6);
   });
-  it("unfamiliar hand-written phrases: spec exact match (spans ignored)", async () => {
-    const u = read<Unfamiliar>("eval/unfamiliar.json");
-    expect(u.cases.length).toBeGreaterThanOrEqual(60);
-    const cases: Gold[] = u.cases.map((c) => ({
-      text: c.text,
-      schema: u.schemas[c.schema]!,
-      now: u.now,
-      spec: c.spec,
-    }));
-    const { rate, failures } = await exact(cases, false);
-    report("unfamiliar", rate, cases.length, failures, failures.length);
-    expect(rate).toBeGreaterThan(0.4);
-  });
+  for (const [name, file] of [
+    ["unfamiliar v1 (contaminated: drove the v2 categories)", "eval/unfamiliar-v1.json"],
+    ["unfamiliar v2 (partially exposed during v2)", "eval/unfamiliar-v2.json"],
+    ["unfamiliar v3 (clean: written before any output on its schemas)", "eval/unfamiliar-v3.json"],
+  ] as const) {
+    it(`${name}: spec exact match (spans ignored)`, async () => {
+      const u = read<Unfamiliar>(file);
+      expect(u.cases.length).toBeGreaterThanOrEqual(60);
+      const cases: Gold[] = u.cases.map((c) => ({
+        text: c.text,
+        schema: u.schemas[c.schema]!,
+        now: u.now,
+        spec: c.spec,
+      }));
+      const { rate, failures } = await exact(cases, false);
+      report(name, rate, cases.length, failures, failures.length);
+      expect(rate).toBeGreaterThan(0.4);
+    });
+  }
 });

@@ -16,6 +16,8 @@ export interface SchemaField {
   kind: FieldKind;
   aliases?: string[];
   values?: string[];
+  /** Date field that bare time phrases ("this quarter") refer to when the schema has several. */
+  primary?: boolean;
 }
 
 export interface Schema {
@@ -24,8 +26,9 @@ export interface Schema {
 
 export const EXACT = 0;
 export const STEM = 1;
-export const PREFIX = 2;
-export const TYPO = 3;
+export const INFLECT = 2;
+export const PREFIX = 3;
+export const TYPO = 4;
 const MIN_PREFIX = 4;
 const MIN_TYPO = 5;
 const MAX_WORDS = 3;
@@ -48,7 +51,13 @@ export interface Span {
   alias: boolean;
   value: number;
   owners: number[];
+  /** Matched a boolean field through a negation prefix ("unopened" -> "opened"). */
+  neg: boolean;
 }
+
+/** Negation prefixes stripped when matching a boolean field: "unarchived", "non-vip", "inactive". */
+const NEG_PREFIXES = ["un", "non", "dis", "im", "ir", "in"];
+const MIN_NEG_BASE = 3;
 
 const isWord = (t: Token) => t.cls === CharClass.Letter || t.cls === CharClass.Digit;
 
@@ -68,6 +77,29 @@ export function stem(word: string): string {
   if (n >= 6 && (word.endsWith("shes") || word.endsWith("ches"))) return word.slice(0, -2);
   if (n >= 4 && word.endsWith("s") && !word.endsWith("ss")) return word.slice(0, -1);
   return word;
+}
+
+/**
+ * Stemmed base forms reachable by stripping comparative/superlative/participle endings:
+ * "rated" and "rating" share "rat"/"rate"; "cheapest" reaches "cheap". Mirrors match.py.
+ */
+export function forms(word: string): Set<string> {
+  const out = new Set([stem(word)]);
+  const n = word.length;
+  const cands: string[] = [];
+  if (n >= 6 && word.endsWith("iest")) cands.push(`${word.slice(0, -4)}y`);
+  if (n >= 6 && word.endsWith("est")) cands.push(word.slice(0, -3));
+  if (n >= 5 && word.endsWith("ier")) cands.push(`${word.slice(0, -3)}y`);
+  if (n >= 5 && word.endsWith("er")) cands.push(word.slice(0, -2));
+  if (n >= 5 && word.endsWith("ied")) cands.push(`${word.slice(0, -3)}y`);
+  if (n >= 5 && word.endsWith("ed")) cands.push(word.slice(0, -2), word.slice(0, -1));
+  if (n >= 6 && word.endsWith("ing")) cands.push(word.slice(0, -3), `${word.slice(0, -3)}e`);
+  for (const c of [...cands]) {
+    if (c.length >= 3 && c[c.length - 1] === c[c.length - 2] && !"aeiou".includes(c[c.length - 1]!))
+      cands.push(c.slice(0, -1));
+  }
+  for (const c of cands) if (c.length >= 3) out.add(stem(c));
+  return out;
 }
 
 export function withinOneEdit(a: string, b: string): boolean {
@@ -161,11 +193,35 @@ function matchAt(tokens: Token[], positions: number[], wi: number, entries: Entr
           alias: first.alias,
           value: first.value,
           owners,
+          neg: false,
         };
       }
     }
     if (n === 1) {
       const w = spanWords[0]!;
+      if (w.length >= 5) {
+        const qforms = forms(w);
+        const hits = entries.filter(
+          (e) => e.words.length === 1 && [...forms(e.words[0]!)].some((f) => qforms.has(f)),
+        );
+        if (hits.length > 0) {
+          const e = hits[0]!;
+          const owners = [...new Set(hits.map((h) => h.field))].sort((a, b) => a - b);
+          return {
+            start,
+            end,
+            field: e.field,
+            kind: e.kind,
+            quality: INFLECT,
+            alias: e.alias,
+            value: e.value,
+            owners,
+            neg: false,
+          };
+        }
+      }
+      const negated = matchNegated(w, entries);
+      if (negated) return { ...negated, start, end };
       if (w.length >= MIN_PREFIX) {
         const hits = entries.filter(
           (e) =>
@@ -183,6 +239,7 @@ function matchAt(tokens: Token[], positions: number[], wi: number, entries: Entr
             alias: e.alias,
             value: e.value,
             owners: [e.field],
+            neg: false,
           };
         }
       }
@@ -200,10 +257,42 @@ function matchAt(tokens: Token[], positions: number[], wi: number, entries: Entr
             alias: e.alias,
             value: e.value,
             owners: [e.field],
+            neg: false,
           };
         }
       }
     }
+  }
+  return null;
+}
+
+/**
+ * "unarchived" / "inactive" / "nonbillable": a boolean field word carrying a negation
+ * prefix. Only boolean fields are tried, so ordinary words that happen to start with
+ * "in" or "un" cannot be turned into a field by accident.
+ */
+function matchNegated(w: string, entries: Entry[]): Omit<Span, "start" | "end"> | null {
+  for (const prefix of NEG_PREFIXES) {
+    if (!w.startsWith(prefix) || w.length - prefix.length < MIN_NEG_BASE) continue;
+    const base = w.slice(prefix.length);
+    const bforms = forms(base);
+    const hits = entries.filter(
+      (e) =>
+        e.kind === "boolean" &&
+        e.words.length === 1 &&
+        (e.words[0] === base || [...forms(e.words[0]!)].some((f) => bforms.has(f))),
+    );
+    if (hits.length === 0) continue;
+    const e = hits[0]!;
+    return {
+      field: e.field,
+      kind: e.kind,
+      quality: INFLECT,
+      alias: e.alias,
+      value: e.value,
+      owners: [...new Set(hits.map((h) => h.field))].sort((a, b) => a - b),
+      neg: true,
+    };
   }
   return null;
 }

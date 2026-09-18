@@ -4,7 +4,7 @@
  * inclusive [from, to] pair of ISO dates. Weeks start on Monday; all arithmetic is on
  * UTC calendar dates.
  */
-import { MONTH_ABBREV, MONTHS } from "./lexicon.ts";
+import { MONTH_ABBREV, MONTHS, SEASONS } from "./lexicon.ts";
 
 export type DateRange = [string, string];
 
@@ -193,5 +193,37 @@ function resolveNormalized(t: string, today: Date): [Date, Date] | null {
     const mi = monthIndex(m[1]!);
     if (mi) return monthRange(m[2] ? Number(m[2]) : y, mi);
   }
+  // "september 10 2026", "september 10, 2026", "sep 10", "10 september 2026", "10th of sep"
+  m = /^([a-z]+) (\d{1,2})(?:st|nd|rd|th)?,?(?: (\d{4}))?$/.exec(t);
+  if (m && monthIndex(m[1]!)) return day(m[3] ? Number(m[3]) : y, monthIndex(m[1]!), Number(m[2]));
+  m = /^(\d{1,2})(?:st|nd|rd|th)? (?:of )?([a-z]+),?(?: (\d{4}))?$/.exec(t);
+  if (m && monthIndex(m[2]!)) return day(m[3] ? Number(m[3]) : y, monthIndex(m[2]!), Number(m[1]));
+  m = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec(t);
+  if (m) return day(Number(m[1]), Number(m[2]), Number(m[3]));
+  // Seasons (meteorological, northern hemisphere): "this summer", "last winter", "spring 2025".
+  m =
+    /^(?:(this|last|previous|past|next|coming) )?(spring|summer|autumn|fall|winter)(?: (\d{4}))?$/.exec(
+      t,
+    );
+  if (m) {
+    const season = m[2]!;
+    let year: number;
+    if (m[3]) year = Number(m[3]);
+    else {
+      year = y;
+      if (season === "winter" && today.getUTCMonth() + 1 > 2) year += 1;
+      if (m[1] === "last" || m[1] === "previous" || m[1] === "past") year -= 1;
+      else if (m[1] === "next" || m[1] === "coming") year += 1;
+    }
+    const [startM, endM] = SEASONS[season]!;
+    if (season === "winter") return [utc(year - 1, 12, 1), monthRange(year, 2)[1]];
+    return [utc(year, startM, 1), monthRange(year, endM)[1]];
+  }
   return null;
+}
+
+function day(y: number, m: number, d: number): [Date, Date] | null {
+  if (m < 1 || m > 12 || d < 1 || d > daysInMonth(y, m)) return null;
+  const v = utc(y, m, d);
+  return [v, v];
 }

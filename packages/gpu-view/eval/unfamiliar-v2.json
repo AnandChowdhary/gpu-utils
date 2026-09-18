@@ -1,0 +1,134 @@
+{
+  "note": "Second hand-written set over four schemas the generator never saw (conference talks, gym workouts, art auction lots, restaurant reservations). Written after the v2 generator changes and before the v2 model was evaluated; never used for tuning. Spans are not asserted.",
+  "now": "2026-09-17T12:00:00Z",
+  "schemas": {
+    "talks": {
+      "fields": [
+        { "name": "title", "kind": "text", "aliases": ["talk", "session"] },
+        { "name": "speaker", "kind": "text", "aliases": ["presenter", "given by"] },
+        { "name": "track", "kind": "enum", "values": ["frontend", "backend", "devops", "design", "leadership"] },
+        { "name": "length_min", "kind": "number", "aliases": ["length", "duration", "long", "short", "minutes"] },
+        { "name": "attendees", "kind": "number", "aliases": ["attendance", "audience", "popular", "attended"] },
+        { "name": "rating", "kind": "number", "aliases": ["rated", "score", "good"] },
+        { "name": "scheduled", "kind": "date", "aliases": ["scheduled for", "starts", "date"], "primary": true },
+        { "name": "submitted", "kind": "date", "aliases": ["submitted on", "proposed"] },
+        { "name": "recorded", "kind": "boolean", "aliases": ["on video"] },
+        { "name": "room", "kind": "enum", "values": ["main hall", "room a", "room b", "workshop space"] }
+      ]
+    },
+    "workouts": {
+      "fields": [
+        { "name": "exercise", "kind": "text", "aliases": ["movement", "lift"] },
+        { "name": "type", "kind": "enum", "values": ["cardio", "strength", "mobility", "hiit", "yoga"] },
+        { "name": "duration_min", "kind": "number", "aliases": ["duration", "minutes", "long", "short"] },
+        { "name": "calories", "kind": "number", "aliases": ["kcal", "burned", "burn"] },
+        { "name": "weight_kg", "kind": "number", "aliases": ["weight", "load", "heavy", "light", "kg"] },
+        { "name": "reps", "kind": "number", "aliases": ["repetitions"] },
+        { "name": "done_on", "kind": "date", "aliases": ["done", "logged", "performed"] },
+        { "name": "coach", "kind": "text", "aliases": ["trainer", "instructor"] },
+        { "name": "completed", "kind": "boolean", "aliases": ["finished"] },
+        { "name": "intensity", "kind": "enum", "values": ["easy", "moderate", "hard", "max effort"] }
+      ]
+    },
+    "auction": {
+      "fields": [
+        { "name": "artist", "kind": "text", "aliases": ["painter", "maker"] },
+        { "name": "medium", "kind": "enum", "values": ["oil", "watercolor", "sculpture", "photograph", "print"] },
+        { "name": "estimate", "kind": "number", "aliases": ["estimated", "valuation", "expensive", "cheap", "pricey"] },
+        { "name": "hammer_price", "kind": "number", "aliases": ["hammer", "sold for", "realized"] },
+        { "name": "year_made", "kind": "number", "aliases": ["made", "dated", "old", "new"] },
+        { "name": "sale_date", "kind": "date", "aliases": ["sale", "auctioned", "sold on"] },
+        { "name": "sold", "kind": "boolean" },
+        { "name": "lot", "kind": "text", "aliases": ["lot number"] },
+        { "name": "house", "kind": "enum", "values": ["sothebys", "christies", "phillips", "bonhams"] },
+        { "name": "height_cm", "kind": "number", "aliases": ["height", "tall", "cm"] }
+      ]
+    },
+    "reservations": {
+      "fields": [
+        { "name": "guest", "kind": "text", "aliases": ["name", "booked by", "diner"] },
+        { "name": "party_size", "kind": "number", "aliases": ["party", "people", "covers", "big", "small"] },
+        { "name": "table", "kind": "enum", "values": ["window", "patio", "bar", "private room"] },
+        { "name": "reserved_for", "kind": "date", "aliases": ["for", "date", "when"], "primary": true },
+        { "name": "created", "kind": "date", "aliases": ["made on", "booked on"] },
+        { "name": "status", "kind": "enum", "values": ["confirmed", "seated", "no show", "cancelled", "waitlist"] },
+        { "name": "spend", "kind": "number", "aliases": ["bill", "total", "expensive", "cheap"] },
+        { "name": "vip", "kind": "boolean" },
+        { "name": "occasion", "kind": "enum", "values": ["birthday", "anniversary", "business", "date night"] },
+        { "name": "notes", "kind": "text", "aliases": ["remarks", "requests"] }
+      ]
+    }
+  },
+  "cases": [
+    { "text": "frontend talks longer than 45 minutes", "schema": "talks", "spec": { "filters": [{ "field": "track", "op": "eq", "value": "frontend" }, { "field": "length_min", "op": "gt", "value": 45 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "highest rated devops sessions", "schema": "talks", "spec": { "filters": [{ "field": "track", "op": "eq", "value": "devops" }], "sort": [{ "field": "rating", "dir": "desc" }], "groupBy": [], "aggregate": [] } },
+    { "text": "talks in the main hall this summer, most popular first", "schema": "talks", "spec": { "filters": [{ "field": "room", "op": "eq", "value": "main hall" }, { "field": "scheduled", "op": "between", "value": ["2026-06-01", "2026-08-31"] }], "sort": [{ "field": "attendees", "dir": "desc" }], "groupBy": [], "aggregate": [] } },
+    { "text": "top 3 design talks by attendance", "schema": "talks", "spec": { "filters": [{ "field": "track", "op": "eq", "value": "design" }], "sort": [{ "field": "attendees", "dir": "desc" }], "groupBy": [], "aggregate": [], "limit": 3 } },
+    { "text": "average rating per track as a bar chart", "schema": "talks", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "track" }], "aggregate": [{ "fn": "avg", "field": "rating" }], "chart": "bar" } },
+    { "text": "sessions scheduled for october 12 2026 that are not recorded", "schema": "talks", "spec": { "filters": [{ "field": "scheduled", "op": "eq", "value": "2026-10-12" }, { "field": "recorded", "op": "is_false" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "shortest talks first, limit 10", "schema": "talks", "spec": { "filters": [], "sort": [{ "field": "length_min", "dir": "asc" }], "groupBy": [], "aggregate": [], "limit": 10 } },
+    { "text": "how many talks per room", "schema": "talks", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "room" }], "aggregate": [{ "fn": "count" }] } },
+    { "text": "talks given by Meera with more than 200 attendees", "schema": "talks", "spec": { "filters": [{ "field": "speaker", "op": "contains", "value": "Meera" }, { "field": "attendees", "op": "gt", "value": 200 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "backend or devops talks submitted after march 1 2026", "schema": "talks", "spec": { "filters": [{ "field": "track", "op": "in", "value": ["backend", "devops"] }, { "field": "submitted", "op": "gt", "value": "2026-03-01" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "total attendance by track, pie chart", "schema": "talks", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "track" }], "aggregate": [{ "fn": "sum", "field": "attendees" }], "chart": "pie" } },
+    { "text": "recorded leadership talks rated 4 or more", "schema": "talks", "spec": { "filters": [{ "field": "recorded", "op": "is_true" }, { "field": "track", "op": "eq", "value": "leadership" }, { "field": "rating", "op": "gte", "value": 4 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "talks without a speaker", "schema": "talks", "spec": { "filters": [{ "field": "speaker", "op": "is_empty" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "sessions in room a or room b next week", "schema": "talks", "spec": { "filters": [{ "field": "room", "op": "in", "value": ["room a", "room b"] }, { "field": "scheduled", "op": "between", "value": ["2026-09-21", "2026-09-27"] }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "longest talk in each track", "schema": "talks", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "track" }], "aggregate": [{ "fn": "max", "field": "length_min" }] } },
+    { "text": "titles containing kubernetes, newest first", "schema": "talks", "spec": { "filters": [{ "field": "title", "op": "contains", "value": "kubernetes" }], "sort": [{ "field": "scheduled", "dir": "desc" }], "groupBy": [], "aggregate": [] } },
+
+    { "text": "cardio workouts over 30 minutes", "schema": "workouts", "spec": { "filters": [{ "field": "type", "op": "eq", "value": "cardio" }, { "field": "duration_min", "op": "gt", "value": 30 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "heaviest lifts first", "schema": "workouts", "spec": { "filters": [], "sort": [{ "field": "weight_kg", "dir": "desc" }], "groupBy": [], "aggregate": [] } },
+    { "text": "strength sessions with a load of at least 80 kg", "schema": "workouts", "spec": { "filters": [{ "field": "type", "op": "eq", "value": "strength" }, { "field": "weight_kg", "op": "gte", "value": 80 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "total calories burned per week this year, line chart", "schema": "workouts", "spec": { "filters": [{ "field": "done_on", "op": "between", "value": ["2026-01-01", "2026-12-31"] }], "sort": [], "groupBy": [{ "field": "done_on" }], "aggregate": [{ "fn": "sum", "field": "calories" }], "chart": "line", "granularity": "week" } },
+    { "text": "workouts logged in the last 14 days that were not completed", "schema": "workouts", "spec": { "filters": [{ "field": "done_on", "op": "between", "value": ["2026-09-04", "2026-09-17"] }, { "field": "completed", "op": "is_false" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "hard or max effort hiit sessions", "schema": "workouts", "spec": { "filters": [{ "field": "intensity", "op": "in", "value": ["hard", "max effort"] }, { "field": "type", "op": "eq", "value": "hiit" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "average duration by type", "schema": "workouts", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "type" }], "aggregate": [{ "fn": "avg", "field": "duration_min" }] } },
+    { "text": "exercises coached by Diego, shortest first", "schema": "workouts", "spec": { "filters": [{ "field": "coach", "op": "contains", "value": "Diego" }], "sort": [{ "field": "duration_min", "dir": "asc" }], "groupBy": [], "aggregate": [] } },
+    { "text": "yoga done last winter", "schema": "workouts", "spec": { "filters": [{ "field": "type", "op": "eq", "value": "yoga" }, { "field": "done_on", "op": "between", "value": ["2025-12-01", "2026-02-28"] }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "more than 12 reps and lighter than 20 kg", "schema": "workouts", "spec": { "filters": [{ "field": "reps", "op": "gt", "value": 12 }, { "field": "weight_kg", "op": "lt", "value": 20 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "top 5 workouts by calories", "schema": "workouts", "spec": { "filters": [], "sort": [{ "field": "calories", "dir": "desc" }], "groupBy": [], "aggregate": [], "limit": 5 } },
+    { "text": "number of completed workouts per coach", "schema": "workouts", "spec": { "filters": [{ "field": "completed", "op": "is_true" }], "sort": [], "groupBy": [{ "field": "coach" }], "aggregate": [{ "fn": "count" }] } },
+    { "text": "mobility work with no trainer", "schema": "workouts", "spec": { "filters": [{ "field": "type", "op": "eq", "value": "mobility" }, { "field": "coach", "op": "is_empty" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "movements named squat", "schema": "workouts", "spec": { "filters": [{ "field": "exercise", "op": "eq", "value": "squat" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "max weight lifted per exercise, table", "schema": "workouts", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "exercise" }], "aggregate": [{ "fn": "max", "field": "weight_kg" }], "chart": "table" } },
+    { "text": "easy sessions between 10 and 20 minutes", "schema": "workouts", "spec": { "filters": [{ "field": "intensity", "op": "eq", "value": "easy" }, { "field": "duration_min", "op": "between", "value": [10, 20] }], "sort": [], "groupBy": [], "aggregate": [] } },
+
+    { "text": "oil paintings estimated above $50k", "schema": "auction", "spec": { "filters": [{ "field": "medium", "op": "eq", "value": "oil" }, { "field": "estimate", "op": "gt", "value": 50000 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "lots made between 1900 and 1950", "schema": "auction", "spec": { "filters": [{ "field": "year_made", "op": "between", "value": [1900, 1950] }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "cheapest sculptures first", "schema": "auction", "spec": { "filters": [{ "field": "medium", "op": "eq", "value": "sculpture" }], "sort": [{ "field": "estimate", "dir": "asc" }], "groupBy": [], "aggregate": [] } },
+    { "text": "unsold photographs from christies", "schema": "auction", "spec": { "filters": [{ "field": "medium", "op": "eq", "value": "photograph" }, { "field": "house", "op": "eq", "value": "christies" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "works by Rossi sold for more than the estimate", "schema": "auction", "spec": { "filters": [{ "field": "artist", "op": "contains", "value": "Rossi" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "average hammer price by house", "schema": "auction", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "house" }], "aggregate": [{ "fn": "avg", "field": "hammer_price" }] } },
+    { "text": "prints taller than 100 cm", "schema": "auction", "spec": { "filters": [{ "field": "medium", "op": "eq", "value": "print" }, { "field": "height_cm", "op": "gt", "value": 100 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "lots auctioned in spring 2025", "schema": "auction", "spec": { "filters": [{ "field": "sale_date", "op": "between", "value": ["2025-03-01", "2025-05-31"] }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "most expensive lot per artist", "schema": "auction", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "artist" }], "aggregate": [{ "fn": "max", "field": "estimate" }] } },
+    { "text": "sold watercolors, highest hammer first, top 20", "schema": "auction", "spec": { "filters": [{ "field": "sold", "op": "is_true" }, { "field": "medium", "op": "eq", "value": "watercolor" }], "sort": [{ "field": "hammer_price", "dir": "desc" }], "groupBy": [], "aggregate": [], "limit": 20 } },
+    { "text": "count of lots by medium as a pie", "schema": "auction", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "medium" }], "aggregate": [{ "fn": "count" }], "chart": "pie" } },
+    { "text": "pieces dated before 1800", "schema": "auction", "spec": { "filters": [{ "field": "year_made", "op": "lt", "value": 1800 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "bonhams or phillips sales on 2025-11-20", "schema": "auction", "spec": { "filters": [{ "field": "house", "op": "in", "value": ["bonhams", "phillips"] }, { "field": "sale_date", "op": "eq", "value": "2025-11-20" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "lot number 42", "schema": "auction", "spec": { "filters": [{ "field": "lot", "op": "contains", "value": "42" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "total realized per house this year", "schema": "auction", "spec": { "filters": [{ "field": "sale_date", "op": "between", "value": ["2026-01-01", "2026-12-31"] }], "sort": [], "groupBy": [{ "field": "house" }], "aggregate": [{ "fn": "sum", "field": "hammer_price" }] } },
+    { "text": "old sculptures, oldest first", "schema": "auction", "spec": { "filters": [{ "field": "medium", "op": "eq", "value": "sculpture" }], "sort": [{ "field": "year_made", "dir": "asc" }], "groupBy": [], "aggregate": [] } },
+    { "text": "estimates under 1,000 euros", "schema": "auction", "spec": { "filters": [{ "field": "estimate", "op": "lt", "value": 1000 }], "sort": [], "groupBy": [], "aggregate": [] } },
+
+    { "text": "confirmed reservations for tonight", "schema": "reservations", "spec": { "filters": [{ "field": "status", "op": "eq", "value": "confirmed" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "parties bigger than 6 on the patio", "schema": "reservations", "spec": { "filters": [{ "field": "party_size", "op": "gt", "value": 6 }, { "field": "table", "op": "eq", "value": "patio" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "vip guests booked for this saturday", "schema": "reservations", "spec": { "filters": [{ "field": "vip", "op": "is_true" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "no shows in the last 30 days by table", "schema": "reservations", "spec": { "filters": [{ "field": "status", "op": "eq", "value": "no show" }, { "field": "reserved_for", "op": "between", "value": ["2026-08-19", "2026-09-17"] }], "sort": [], "groupBy": [{ "field": "table" }], "aggregate": [] } },
+    { "text": "how many covers per occasion this month", "schema": "reservations", "spec": { "filters": [{ "field": "reserved_for", "op": "between", "value": ["2026-09-01", "2026-09-30"] }], "sort": [], "groupBy": [{ "field": "occasion" }], "aggregate": [{ "fn": "count", "field": "party_size" }] } },
+    { "text": "biggest spenders first, top 10", "schema": "reservations", "spec": { "filters": [], "sort": [{ "field": "spend", "dir": "desc" }], "groupBy": [], "aggregate": [], "limit": 10 } },
+    { "text": "anniversary or birthday dinners in the private room", "schema": "reservations", "spec": { "filters": [{ "field": "occasion", "op": "in", "value": ["anniversary", "birthday"] }, { "field": "table", "op": "eq", "value": "private room" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "reservations made on september 5 2026 that were cancelled", "schema": "reservations", "spec": { "filters": [{ "field": "created", "op": "eq", "value": "2026-09-05" }, { "field": "status", "op": "eq", "value": "cancelled" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "average bill for parties of 2", "schema": "reservations", "spec": { "filters": [{ "field": "party_size", "op": "eq", "value": 2 }], "sort": [], "groupBy": [], "aggregate": [{ "fn": "avg", "field": "spend" }] } },
+    { "text": "guests named Okafor", "schema": "reservations", "spec": { "filters": [{ "field": "guest", "op": "eq", "value": "Okafor" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "waitlist entries with special requests", "schema": "reservations", "spec": { "filters": [{ "field": "status", "op": "eq", "value": "waitlist" }, { "field": "notes", "op": "not_empty" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "spend per table type as a bar chart, cheapest first", "schema": "reservations", "spec": { "filters": [], "sort": [{ "field": "spend", "dir": "asc" }], "groupBy": [{ "field": "table" }], "aggregate": [{ "fn": "sum", "field": "spend" }], "chart": "bar" } },
+    { "text": "seated parties smaller than 4", "schema": "reservations", "spec": { "filters": [{ "field": "status", "op": "eq", "value": "seated" }, { "field": "party_size", "op": "lt", "value": 4 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "date night bookings next month, newest first", "schema": "reservations", "spec": { "filters": [{ "field": "occasion", "op": "eq", "value": "date night" }, { "field": "reserved_for", "op": "between", "value": ["2026-10-01", "2026-10-31"] }], "sort": [{ "field": "reserved_for", "dir": "desc" }], "groupBy": [], "aggregate": [] } },
+    { "text": "bar seats for 1 person", "schema": "reservations", "spec": { "filters": [{ "field": "table", "op": "eq", "value": "bar" }, { "field": "party_size", "op": "eq", "value": 1 }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "total spend by occasion last quarter", "schema": "reservations", "spec": { "filters": [{ "field": "reserved_for", "op": "between", "value": ["2026-04-01", "2026-06-30"] }], "sort": [], "groupBy": [{ "field": "occasion" }], "aggregate": [{ "fn": "sum", "field": "spend" }] } },
+    { "text": "non vip reservations without notes", "schema": "reservations", "spec": { "filters": [{ "field": "vip", "op": "is_false" }, { "field": "notes", "op": "is_empty" }], "sort": [], "groupBy": [], "aggregate": [] } },
+    { "text": "count reservations per status, sorted by count", "schema": "reservations", "spec": { "filters": [], "sort": [], "groupBy": [{ "field": "status" }], "aggregate": [{ "fn": "count" }] } }
+  ]
+}
