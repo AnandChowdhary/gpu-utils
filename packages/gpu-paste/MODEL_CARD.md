@@ -200,9 +200,13 @@ re-benchmarked here, not the number from the previous card.
 | CPU path, 1 KB paste (411 tokens), warm | 10.6 ms | 15.3 ms | +44 % |
 | CPU path, 8 KB paste (3,294 tokens, 7 windows), warm | 82 ms | 120 ms | +46 % |
 | First call (module import + int6 decode + one parse) | ≈ 23 ms | ≈ 19 ms | — |
-| WebGPU cold start (device + 7 pipelines + weight upload) | ≈ 50–100 ms (estimate; no GPU on the build box, kernels verified on lavapipe) | | |
-| WebGPU warm call, 1 KB paste | ≈ 1–3 ms, readback-dominated (estimate); all windows of a paste are now one batched dispatch | | |
-| Training (2 CPU threads) | 426 s | 556 s + ~90 s data generation | 8 epochs either way |
+| Training, 8 epochs (2 CPU threads) | 426 s | 556 s + ~90 s data generation | +30 % |
+
+WebGPU numbers are unchanged estimates (no GPU on the build box; the kernels are verified
+on Mesa lavapipe): ≈ 50–100 ms cold for the device, 7 pipelines and the weight upload, and
+≈ 1–3 ms readback-dominated warm for a 1 KB paste. What did change is that every 512-token
+window of one paste is now a single batched dispatch with one readback instead of one
+dispatch per window.
 
 The CPU path got ~45 % slower for ~3.5 % more parameters. About a third of that is real
 arithmetic (the family adds a 5-tap depthwise conv and a wider per-token head: 128 → 64
