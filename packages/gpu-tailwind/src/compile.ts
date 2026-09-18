@@ -189,6 +189,10 @@ function vocabulary(): Set<string> {
   for (const rule of [...T.vars.strong, ...T.vars.weak])
     for (const w of [...rule[1], ...rule[2]]) vocab.add(w);
   for (const w of [...T.vars.max, ...T.vars.min, ...T.vars.only]) vocab.add(w);
+  // Filler words the value parsers match on are part of the vocabulary too: without them
+  // "shade" is itself "corrected" to "shape" and "shadde" can never reach "shade".
+  for (const w of COLOR_FILLER) vocab.add(w);
+  for (const phrase of Object.keys(ALPHA_WORDS)) add(phrase.replace("-", " "));
   return vocab;
 }
 
@@ -1541,7 +1545,7 @@ const PATTERNS: [RegExp, string][] = [
   [/^bg-/, `^bg-(?:${COLOR})(?:/\\d{1,3})?$`],
   [
     /^border-/,
-    `^border-(?:0|2|4|8|\\[\\d+px\\]|(?:t|r|b|l|x|y)(?:-(?:0|2|4|8|\\[\\d+px\\]))?|(?:t|r|b|l|x|y)-(?:${COLOR})|(?:${COLOR})(?:/\\d{1,3})?)$`,
+    `^border-(?:0|2|4|8|\\[\\d+px\\]|(?:t|r|b|l|x|y)(?:-(?:0|2|4|8|\\[\\d+px\\]))?|(?:t|r|b|l|x|y)-(?:${COLOR})(?:/\\d{1,3})?|(?:${COLOR})(?:/\\d{1,3})?)$`,
   ],
   [
     /^rounded/,
