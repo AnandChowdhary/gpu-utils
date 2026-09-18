@@ -130,5 +130,6 @@ uv sync
 uv run python -m gpu_log.data       # generate + cache 160K synthetic lines, print samples
 uv run python -m gpu_log.train      # ~12 min on 2 CPU threads, QAT int6
 uv run python -m gpu_log.export     # write ../model/{manifest.json,weights.txt,fixtures.json}
-uv run python -m gpu_log.evaluate   # held-out, unfamiliar and Loghub sets
+uv run python -m gpu_log.evaluate   # held-out, both unfamiliar sets, 16K real Loghub lines
+uv run python -m gpu_log.evaluate --baseline   # ... and the v1 model on the same sets
 ```
