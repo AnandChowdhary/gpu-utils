@@ -67,8 +67,11 @@ split of every name token.
 
 ### Migration summary: custom model (v1) vs shared scan family
 
-Identical evaluation sets, identical scorer, identical featurizer; only the model and the
-runtime changed. v1 is the checkpoint merged to `main` (hand-written `nn.Module`, package-local
+Identical evaluation sets, identical featurizer, identical scoring. (`metrics.py` now delegates
+P/R/F1 to `gpu_utils_training.metrics.span_prf`, but that function is mathematically the same as
+the code it replaced — per-record set TP/FP/FN accumulated per label, micro from the global
+counts, macro as the mean of per-label F1 — so the two columns below are comparable.) Only the
+model and the runtime changed. v1 is the checkpoint merged to `main` (hand-written `nn.Module`, package-local
 `cpu.ts` forward and `shader.wgsl`); v2 is `ScanTagger` from `gpu_utils_training` on the
 canonical `scan_tagger.wgsl` kernel.
 
