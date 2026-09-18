@@ -1,6 +1,6 @@
 """Train gpu-tailwind with int6 quantization-aware training through the shared loop.
 
-    uv run python -m gpu_tailwind.train [--epochs 30] [--seed 0] [--minutes 16] [--run default]
+    uv run python -m gpu_tailwind.train [--epochs 30] [--seed 0] [--minutes 24] [--run default]
 
 Writes training/runs/<run>/{best.pt,last.pt,history.json}. CPU only, 2 threads by default.
 """
@@ -16,7 +16,7 @@ from .model import build
 
 
 def main() -> None:
-    ap = training_parser("Train gpu-tailwind", epochs=30, lr=4e-3, batch=128, minutes=16.0)
+    ap = training_parser("Train gpu-tailwind", epochs=30, lr=4e-3, batch=128, minutes=24.0)
     ap.add_argument("--limit", type=int, default=None, help="use only the first N training examples")
     args = ap.parse_args()
     train_set = encode(load("train", args.limit))
