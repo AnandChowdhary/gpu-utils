@@ -138,15 +138,35 @@ def parse_value(text: str) -> Value | None:
     return None
 
 
+def is_int(x: str, lo: int, hi: int) -> bool:
+    return bool(re.fullmatch(r"\d+", x)) and lo <= int(x) <= hi
+
+
+def is_spacing_num(x: str) -> bool:
+    if re.fullmatch(r"\d+", x):
+        return int(x) <= 96
+    return bool(re.fullmatch(r"\d+\.5", x)) and float(x) <= 12
+
+
+LENGTH_UNITS = ("px", "rem", "em", "vh", "vw", "ch")
+TIME_UNITS = ("ms", "s")
+
+
+def unit_ok(v: Value, units: tuple[str, ...]) -> bool:
+    return v.kind == "unit" and v.value.endswith(units)
+
+
 def spacing_value(k: str, v: Value | None, neg: bool) -> list[str]:
     if neg:
         return [f"{k}-0"]
     if v is None:
         return [f"{k}-0"] if k in INSETS else [f"{k}-4"]
     if v.kind == "num":
-        return [f"{k}-{v.value}"]
-    if v.kind in ("unit", "pct"):
-        return [f"{k}-[{v.value}{'%' if v.kind == 'pct' else ''}]"]
+        return [f"{k}-{v.value}"] if is_spacing_num(v.value) else []
+    if v.kind == "unit":
+        return [f"{k}-[{v.value}]"] if unit_ok(v, LENGTH_UNITS) else []
+    if v.kind == "pct":
+        return [f"{k}-[{v.value}%]"]
     if v.kind == "frac":
         return [f"{k}-{v.value}"] if k in INSETS else []
     if v.kind == "sz":
@@ -172,9 +192,11 @@ def sizing_value(k: str, v: Value | None, neg: bool) -> list[str]:
         return {"w": ["w-full"], "h": ["h-full"], "size": ["size-full"], "min-w": ["min-w-0"], "max-w": ["max-w-full"], "min-h": ["min-h-full"], "max-h": ["max-h-full"]}[k]
     horizontal = k in ("w", "min-w", "max-w", "size")
     if v.kind == "num":
-        return [f"{k}-{v.value}"]
-    if v.kind in ("unit", "pct"):
-        return [f"{k}-[{v.value}{'%' if v.kind == 'pct' else ''}]"]
+        return [f"{k}-{v.value}"] if is_spacing_num(v.value) else []
+    if v.kind == "unit":
+        return [f"{k}-[{v.value}]"] if unit_ok(v, LENGTH_UNITS) else []
+    if v.kind == "pct":
+        return [f"{k}-[{v.value}%]"]
     if v.kind == "frac":
         return [f"{k}-{v.value}"]
     if v.kind == "sz":
@@ -224,9 +246,9 @@ def text_value(v: Value | None, neg: bool) -> list[str]:
     if v.kind == "wt":
         return ["font-normal"] if neg else [f"font-{shift_weight(v.value, v.intensity)}"]
     if v.kind == "num":
-        return [f"text-[{v.value}px]"]
+        return [f"text-[{v.value}px]"] if is_int(v.value, 6, 200) else []
     if v.kind == "unit":
-        return [f"text-[{v.value}]"]
+        return [f"text-[{v.value}]"] if unit_ok(v, LENGTH_UNITS) else []
     if v.kind == "spec":
         return {"center": ["text-center"], "hcenter": ["text-center"], "vcenter": ["align-middle"], "sr-only": ["sr-only"]}.get(v.value, [])
     if v.kind == "kw":
@@ -328,9 +350,9 @@ def border_value(k: str, v: Value | None, neg: bool) -> list[str]:
     if v.kind == "mod":
         return [k, f"{k}-gray-{shift_shade(v.value, v.intensity)}"]
     if v.kind == "num":
-        return [k] if v.value == "1" else [f"{k}-{v.value}"]
+        return ([k] if v.value == "1" else [f"{k}-{v.value}"]) if v.value in ("0", "1", "2", "4", "8") else []
     if v.kind == "unit":
-        return [f"{k}-[{v.value}]"]
+        return [f"{k}-[{v.value}]"] if unit_ok(v, ("px",)) else []
     if v.kind == "sz":
         s = shift_size(v.value, v.intensity, "xs", "xl") if v.value in SIZES else v.value
         return {"none": [f"{k}-0"], "xs": [k], "sm": [k], "md": [f"{k}-2"], "lg": [f"{k}-4"], "xl": [f"{k}-8"], "full": [f"{k}-8"]}.get(s, [k])
@@ -353,9 +375,9 @@ def rounded_value(k: str, v: Value | None, neg: bool) -> list[str]:
             return [f"{k}-none"]
         return [f"{k}-{shift_size(v.value, v.intensity, 'xs', '4xl')}"]
     if v.kind == "num":
-        return [f"{k}-[{v.value}px]"]
+        return [f"{k}-[{v.value}px]"] if is_int(v.value, 0, 64) else []
     if v.kind == "unit":
-        return [f"{k}-[{v.value}]"]
+        return [f"{k}-[{v.value}]"] if unit_ok(v, LENGTH_UNITS) else []
     if v.kind == "kw" and v.value == "square":
         return [f"{k}-none"]
     return []
@@ -372,7 +394,7 @@ def ring_value(k: str, v: Value | None, neg: bool) -> list[str]:
     if v.kind == "mod":
         return [base, f"{k}-gray-{shift_shade(v.value, v.intensity)}"]
     if v.kind == "num":
-        return [f"{k}-{v.value}"]
+        return [f"{k}-{v.value}"] if v.value in ("0", "1", "2", "4", "8") else []
     if v.kind == "sz":
         s = shift_size(v.value, v.intensity, "xs", "xl") if v.value in SIZES else v.value
         return {"none": ["ring-0" if k == "ring" else "outline-hidden"], "xs": [f"{k}-1"], "sm": [f"{k}-1"], "md": [f"{k}-2"], "lg": [f"{k}-4"], "xl": [f"{k}-8"], "full": [f"{k}-8"]}.get(s, [base])
@@ -409,7 +431,7 @@ def opacity_value(v: Value | None, neg: bool) -> list[str]:
         return ["opacity-50"]
     if v.kind in ("num", "pct"):
         n = int(float(v.value) * 100) if v.kind == "num" and float(v.value) <= 1 and "." in v.value else int(float(v.value))
-        return [f"opacity-{n}"]
+        return [f"opacity-{n}"] if 0 <= n <= 100 and re.fullmatch(r"\d+(\.\d+)?", v.value) else []
     if v.kind == "frac":
         a, b = v.value.split("/")
         return [f"opacity-{round(int(a) * 100 / int(b))}"]
@@ -429,7 +451,7 @@ def z_value(v: Value | None, neg: bool) -> list[str]:
     if v is None:
         return ["z-10"]
     if v.kind == "num":
-        return [f"z-{v.value}"]
+        return [f"z-{v.value}"] if is_int(v.value, 0, 100) else []
     if v.kind == "kw":
         return {"top": ["z-50"], "first": ["z-50"], "bottom": ["z-0"], "last": ["z-0"], "auto": ["z-auto"], "negative": ["-z-10"]}.get(v.value, [])
     if v.kind == "sz":
@@ -460,7 +482,7 @@ def flex_value(v: Value | None, neg: bool) -> list[str]:
         if v.value == "reverse":
             return ["flex", "flex-row-reverse"]
     if v.kind == "num":
-        return [f"flex-{v.value}"]
+        return ["flex-1"] if v.value == "1" else []
     if v.kind == "sz" and v.value == "none":
         return ["flex-none"]
     if v.kind == "spec":
@@ -530,7 +552,7 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if v.kind == "sz":
             return {"none": ["leading-none"], "xs": ["leading-none"], "sm": ["leading-tight"], "md": ["leading-normal"], "lg": ["leading-relaxed"], "xl": ["leading-loose"], "2xl": ["leading-loose"]}.get(v.value, [])
         if v.kind == "num":
-            return [f"leading-{v.value}"]
+            return [f"leading-{v.value}"] if is_int(v.value, 3, 10) else []
         return []
     if k == "align":
         if v is None:
@@ -646,7 +668,7 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if v is None:
             return ["grid"]
         if v.kind == "num":
-            return ["grid", f"grid-cols-{v.value}"]
+            return ["grid", f"grid-cols-{v.value}"] if is_int(v.value, 1, 12) else []
         if v.kind == "spec" and v.value in ("center", "flex-center"):
             return ["grid", "place-items-center"]
         if v.kind == "kw" and v.value == "center":
@@ -656,31 +678,31 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if v is None:
             return ["grid", "grid-cols-2"]
         if v.kind == "num":
-            return ["grid", f"grid-cols-{v.value}"]
+            return ["grid", f"grid-cols-{v.value}"] if is_int(v.value, 1, 12) else []
         if v.kind == "sz" and v.value == "none":
             return ["grid-cols-none"]
         return []
     if k == "rows":
         if v is None:
             return ["grid", "grid-rows-2"]
-        return ["grid", f"grid-rows-{v.value}"] if v.kind == "num" else []
+        return ["grid", f"grid-rows-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 6) else []
     if k == "col-span":
         if v is None:
             return ["col-span-2"]
         if v.kind == "num":
-            return [f"col-span-{v.value}"]
+            return [f"col-span-{v.value}"] if is_int(v.value, 1, 12) else []
         if v.kind == "sz" and v.value == "full":
             return ["col-span-full"]
         return []
     if k == "row-span":
         if v is None:
             return ["row-span-2"]
-        return [f"row-span-{v.value}"] if v.kind == "num" else []
+        return [f"row-span-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 6) else []
     if k == "order":
         if v is None:
             return []
         if v.kind == "num":
-            return [f"order-{v.value}"]
+            return [f"order-{v.value}"] if is_int(v.value, 1, 12) else []
         return [f"order-{v.value}"] if v.kind == "kw" and v.value in ("first", "last") else []
     if k == "transition":
         if neg:
@@ -697,9 +719,11 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
             if v.value in ("linear", "ease-in", "ease-out", "ease-in-out"):
                 return ["transition", f"ease-{v.value}" if v.value == "linear" else v.value]
         if v.kind == "num":
-            return ["transition", f"duration-{v.value}"]
+            return ["transition", f"duration-{v.value}"] if is_int(v.value, 0, 5000) else []
         if v.kind == "unit" and v.value.endswith("ms"):
             return ["transition", f"duration-{v.value[:-2]}"]
+        if v.kind == "unit" and v.value.endswith("s"):
+            return ["transition", f"duration-{int(float(v.value[:-1]) * 1000)}"]
         if v.kind == "sz":
             if v.value == "none":
                 return ["transition-none"]
@@ -710,7 +734,7 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if v is None:
             return [f"{k}-300"] if k == "duration" else ["delay-150"]
         if v.kind == "num":
-            return [f"{k}-{v.value}"]
+            return [f"{k}-{v.value}"] if is_int(v.value, 0, 5000) else []
         if v.kind == "unit" and v.value.endswith("ms"):
             return [f"{k}-{v.value[:-2]}"]
         if v.kind == "unit" and v.value.endswith("s"):
@@ -782,9 +806,10 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
             return ["scale-105"]
         if v.kind == "num":
             f = float(v.value)
-            return [f"scale-{int(round(f * 100)) if f <= 3 else int(f)}"]
+            n = int(round(f * 100)) if f <= 3 else int(f)
+            return [f"scale-{n}"] if 0 <= n <= 200 else []
         if v.kind == "pct":
-            return [f"scale-{v.value}"]
+            return [f"scale-{v.value}"] if is_int(v.value, 0, 200) else []
         if v.kind == "sz":
             return {"none": ["scale-100"], "xs": ["scale-95"], "sm": ["scale-105"], "md": ["scale-110"], "lg": ["scale-125"], "xl": ["scale-150"], "2xl": ["scale-150"]}.get(v.value, [])
         return []
@@ -794,7 +819,7 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if v is None:
             return ["rotate-45"]
         if v.kind == "num":
-            return [f"rotate-{v.value}"]
+            return [f"rotate-{v.value}"] if is_int(v.value, 0, 360) else []
         if v.kind == "frac" and v.value == "1/2":
             return ["rotate-180"]
         if v.kind == "frac" and v.value == "1/4":
@@ -833,13 +858,13 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     if k == "columns":
         if v is None:
             return ["columns-2"]
-        return [f"columns-{v.value}"] if v.kind == "num" else []
+        return [f"columns-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 12) else []
     if k == "lineclamp":
         if neg:
             return ["line-clamp-none"]
         if v is None:
             return ["line-clamp-3"]
-        return [f"line-clamp-{v.value}"] if v.kind == "num" else []
+        return [f"line-clamp-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 6) else []
     if k == "container":
         return ["container", "mx-auto"]
     return []
