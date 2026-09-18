@@ -221,5 +221,9 @@ the source of truth and matches PyTorch on the same 24 fixtures at 1e-4.
   0.676 / 0.986 → 0.680 / 0.987.
 - Training command: `pnpm train` (`uv run python -m gpu_cite.train`); export: `pnpm export`
   (`uv run python -m gpu_cite.export --run default`).
+- Reproducibility: an independent rerun of the bare command from the same seed reached
+  exact match 0.680 / micro-F1 0.9863 in 16.6 min, against the promoted 0.680 / 0.9868. Runs
+  are not bit-identical (Torch CPU thread scheduling), but the metrics reproduce to ~0.05
+  points.
 - The previous, hand-written v1 checkpoint is the one merged to `main` before this migration;
   its numbers are reproduced in the migration summary above for comparison.
