@@ -141,7 +141,7 @@ export function decode(
   options: CompileOptions = {},
 ): ViewSpec {
   const k = model.manifest.labels.length;
-  const outs = k + 1;
+  const outs = model.manifest.tags; // roles + the clause-boundary column
   const n = features.tokens.length;
   const roleLogits = new Float32Array(n * k);
   const bounds: boolean[] = [];

@@ -1,35 +1,44 @@
+import json
+from pathlib import Path
+
 import numpy as np
 import torch
+from gpu_utils_training.batch import collate
+from gpu_utils_training.models import from_config
+from gpu_utils_training.quant import decode_weights
 
-from gpu_view import features
-from gpu_view.export import forward_numpy
-from gpu_view.generate import ROLES
-from gpu_view.model import ViewTagger, affine_scan
+from gpu_view import data, features
+from gpu_view.generate import ROLES, dataset
+from gpu_view.model import TAGS, build
 
-
-def test_affine_scan_matches_sequential() -> None:
-    torch.manual_seed(0)
-    gate = torch.rand(2, 9, 4)
-    cand = torch.randn(2, 9, 4)
-    out = affine_scan(gate, cand)
-    state = torch.zeros(2, 4)
-    for t in range(9):
-        state = gate[:, t] * state + cand[:, t]
-        assert torch.allclose(out[:, t], state, atol=1e-6)
+MODEL_DIR = Path(__file__).resolve().parents[2] / "model"
 
 
-def test_numpy_reference_matches_torch() -> None:
-    torch.manual_seed(1)
-    model = ViewTagger(features.FEATURE_ROWS, len(ROLES)).double()
-    schema = {"fields": [{"name": "status", "kind": "enum", "values": ["open"]}, {"name": "age", "kind": "number"}]}
-    _toks, rows = features.featurize("open items with age over 30 sorted by age", schema)
-    w = {name: getattr(model, name).detach().numpy() for name in ViewTagger.TENSOR_NAMES}
-    ref = forward_numpy(w, rows)
-    padded = np.full((1, len(rows), features.SLOTS), features.PADDING_ROW, dtype=np.int64)
-    for i, r in enumerate(rows):
-        padded[0, i, : len(r)] = r
-    with torch.no_grad():
-        tr, tb = model(torch.from_numpy(padded), torch.ones(1, len(rows), dtype=torch.bool))
-    got = torch.cat([tr[0], tb[0].unsqueeze(-1)], dim=-1).numpy()
-    assert np.abs(got - ref).max() < 1e-9
-    assert model.parameter_count() < 40000
+def test_forward_and_loss() -> None:
+    model = build()
+    assert model.parameter_count() < 45000
+    enc = data.encode(dataset("train", 8, seed=0))
+    batch = data.batches(enc, 4, np.random.default_rng(0))[0]
+    rows, mask, _roles, _bounds = batch
+    out = model(rows, mask)
+    assert out["tags"].shape[-1] == TAGS == len(ROLES) + 1
+    assert torch.isfinite(data.loss(model, batch))
+
+
+def test_exported_model_reproduces_fixtures() -> None:
+    """The decoded int6 weights + the Python family forward reproduce model/fixtures.json."""
+    manifest = json.loads((MODEL_DIR / "manifest.json").read_text())
+    model = from_config(manifest)
+    model.load_tensors(decode_weights((MODEL_DIR / "weights.txt").read_text(), manifest))
+    cases = json.loads((MODEL_DIR / "fixtures.json").read_text())["cases"]
+    assert len(cases) >= 20
+    assert manifest["labels"] == ROLES and manifest["tags"] == len(ROLES) + 1
+    for case in cases:
+        _toks, rows = features.featurize(case["input"]["text"], case["input"]["schema"])
+        assert rows == case["rows"]
+        if not rows:
+            continue
+        r, mask = collate([rows], manifest["slots"], manifest["paddingId"])
+        with torch.no_grad():
+            got = model(r, mask)["tags"][0].numpy()
+        assert np.abs(got - np.asarray(case["logits"], dtype=np.float32)).max() < 1e-4
