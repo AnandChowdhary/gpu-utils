@@ -881,10 +881,11 @@ def build(rng: random.Random) -> dict | None:
     return {"text": text, "labels": labels, "boundary": boundary, "classes": classes}
 
 
-def generate(n: int, seed: int) -> list[dict]:
+def generate(n: int, seed: int, exclude: set[str] | None = None) -> list[dict]:
+    """n unique examples. `exclude` holds texts already used by another split."""
     rng = random.Random(seed)
     out: list[dict] = []
-    seen: set[str] = set()
+    seen: set[str] = set(exclude or ())
     while len(out) < n:
         ex = build(rng)
         if ex is None or ex["text"] in seen or len(ex["text"]) > 220:
@@ -894,10 +895,21 @@ def generate(n: int, seed: int) -> list[dict]:
     return out
 
 
+def eval_texts() -> set[str]:
+    """Every hand-written evaluation phrase, so the generator can never emit one."""
+    evals = CACHE.parents[2] / "eval"
+    return {c["text"] for path in sorted(evals.glob("*.json")) for c in json.loads(path.read_text())}
+
+
 def main() -> None:
     CACHE.mkdir(parents=True, exist_ok=True)
+    # train first, then held-out excluding it: the grammar's head is dense enough that
+    # independent seeds collide, and a held-out set sharing 3% of its phrases with the
+    # training set is not held out.
+    used = eval_texts()
     for name, n, seed in (("train", 130000, 1), ("heldout", 6000, 2)):
-        rows = generate(n, seed)
+        rows = generate(n, seed, used)
+        used |= {r["text"] for r in rows}
         with (CACHE / f"{name}.jsonl").open("w") as f:
             for r in rows:
                 f.write(json.dumps(r) + "\n")

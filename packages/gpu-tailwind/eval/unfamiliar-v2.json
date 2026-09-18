@@ -35,7 +35,7 @@
   {"text": "overflow y scroll, max height 96", "classes": ["overflow-y-scroll", "max-h-96"]},
   {"text": "smooth 500ms transition of everything, ease out", "classes": ["transition-all", "duration-500", "ease-out"]},
   {"text": "scale to 110 on hover, 95 when pressed", "classes": ["hover:scale-110", "active:scale-95"]},
-  {"text": "an avatar that is a 12 by 12 circle with object cover", "classes": ["size-10", "rounded-full", "object-cover"]},
+  {"text": "an avatar that is a 12 by 12 circle with object cover", "classes": ["size-12", "rounded-full", "object-cover"]},
   {"text": "line height loose and text justified", "classes": ["leading-loose", "text-justify"]},
   {"text": "bold 3xl heading, tight tracking, gray 900", "classes": ["font-bold", "text-3xl", "tracking-tight", "text-gray-900"]},
   {"text": "keep the whitespace and use pre wrap", "classes": ["whitespace-pre-wrap"]},
@@ -65,7 +65,7 @@
   {"text": "grid with 3 rows and a row gap of 2", "classes": ["grid", "grid-rows-3", "gap-y-2"]},
   {"text": "bg-gray-100 and rounded-2xl, plus p-8", "classes": ["bg-gray-100", "rounded-2xl", "p-8"]},
   {"text": "flex 1, min width 0, shrink 0", "classes": ["flex-1", "min-w-0", "shrink-0"]},
-  {"text": "a divider with a teal 200 top border and 8 vertical margin", "classes": ["border-t", "border-gray-200", "border-teal-200", "my-8"]},
+  {"text": "a divider with a teal 200 top border and 8 vertical margin", "classes": ["border-t", "border-teal-200", "my-8"]},
   {"text": "the placeholder text should be gray 400 and italic", "classes": ["placeholder:text-gray-400", "placeholder:italic"]},
   {"text": "when checked, emerald 500 background and white check mark text", "classes": ["checked:bg-emerald-500", "checked:text-white"]},
   {"text": "blur the background slightly and dim it with black at 30 percent", "classes": ["blur-sm", "bg-black/30"]}
