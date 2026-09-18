@@ -86,12 +86,12 @@ timestamp/level/frame compiler that covers ~45 timestamp spellings and 8 stack-t
 
 | Measure | Value |
 |---|---|
-| Package (min + Brotli, incl. weights) | __SIZE__ |
+| Package (min + Brotli, incl. weights) | 97.5 KiB (99,840 B) |
 | Parameters | 150,042 (int6) |
-| CPU reference path, 10 MB file, memoisation off | __CPU_RAW__ |
-| CPU reference path, 10 MB file, memoisation on | __CPU_MEMO__ |
-| JSON / logfmt fast path only | __FAST__ |
-| WebGPU path (design estimate, see MODEL_CARD.md) | __GPU__ |
+| CPU reference path, 10 MB file, memoisation off | 0.018 MB/s (208 lines/s; 54.39 s per MB, ~9 min per 10 MB) |
+| CPU reference path, 10 MB file, memoisation on | 0.43 MB/s (23.09 s; 5K lines/s; the bench file has 20 distinct templates, so nearly every model line is memoised) |
+| JSON / logfmt fast path only | 20.8 MB/s |
+| WebGPU path (design estimate, see MODEL_CARD.md) | ~0.4 MB/s end to end (~25 s per 10 MB): the model itself drops from ~9 min to ~1–2 s, after which the CPU tokenizer/featurizer/Viterbi pass (~23 s per 10 MB on one core) dominates |
 
 Numbers from `node packages/gpu-log/bench/throughput.mjs` on this box (Node 24, one core).
 

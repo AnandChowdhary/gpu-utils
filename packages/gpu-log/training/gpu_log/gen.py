@@ -865,7 +865,37 @@ def add_kv(line: Line, rng: random.Random, n: int | None = None, style: str | No
             line.add("]")
 
 
+PKG_SEGMENTS = ["com", "org", "io", "net", "de", "co", "example", "acme", "app", "api", "core", "util", "service",
+                "web", "db", "http", "auth", "internal", "impl", "client", "server", "config", "model", "data", "cache",
+                "spring", "apache", "google", "netty", "kafka", "hibernate", "boot", "cloud", "aws", "sdk", "v1", "v2"]
+CLASS_WORDS = ["Foo", "Bar", "Main", "App", "Server", "Client", "Service", "Controller", "Handler", "Manager", "Repository",
+               "Factory", "Builder", "Filter", "Listener", "Worker", "Job", "Task", "Runner", "Loader", "Cache", "Pool",
+               "Config", "Router", "Mapper", "Reader", "Writer", "Parser", "Store", "Engine", "Scheduler", "Monitor", "Gateway"]
+
+
+def java_logger(rng: random.Random) -> str:
+    """Random dotted logger names: com.example.Foo, org.acme.api.UserService, c.e.d.App, Foo."""
+    n = rng.choice([1, 2, 2, 3, 3, 3, 4, 5])
+    segs = [rng.choice(PKG_SEGMENTS) if rng.random() < 0.8 else word(rng, rng.randint(2, 6)) for _ in range(n - 1)]
+    cls = rng.choice(CLASS_WORDS) if rng.random() < 0.5 else rng.choice(CLASS_WORDS) + rng.choice(CLASS_WORDS)
+    if rng.random() < 0.15:
+        cls = cls + "$" + rng.choice(["1", "Inner", "Builder", "Worker", str(rng.randint(1, 9))])
+    if rng.random() < 0.15 and segs:
+        segs = [s[0] for s in segs]  # %c{1.} abbreviation: c.e.d.App
+    return ".".join(segs + [cls])
+
+
+def py_logger(rng: random.Random) -> str:
+    n = rng.choice([1, 2, 2, 3, 4])
+    return ".".join(rng.choice(PKG_SEGMENTS + WORDS[:20]).lower() if rng.random() < 0.8 else word(rng) for _ in range(n))
+
+
 def source_name(rng: random.Random) -> str:
+    v = rng.random()
+    if v < 0.25:
+        return java_logger(rng)
+    if v < 0.35:
+        return py_logger(rng)
     pool = rng.choice([V.JAVA_LOGGERS, V.PY_LOGGERS, V.GO_PKGS, V.RUST_TARGETS, V.NODE_MODULES, V.SERVICES, V.PROCS])
     return rng.choice(pool)
 

@@ -7,8 +7,8 @@ from collections.abc import Callable
 
 from . import vocab as V
 from .gen import (
-    Line, add_kv, duration, hexid, http_request, identifier, ip, level_word, message, pad_level,
-    source_name, thread_name, timestamp, uuid, word,
+    Line, add_kv, duration, hexid, http_request, identifier, ip, java_logger, level_word, message, pad_level,
+    py_logger, source_name, thread_name, timestamp, uuid, word,
 )
 
 Builder = Callable[[random.Random], Line]
@@ -173,7 +173,7 @@ def log4j(rng: random.Random) -> Line:
     lw, _ = level_word(rng)
     lw, pad = pad_level(rng, lw)
     thread = thread_name(rng)
-    logger = rng.choice(V.JAVA_LOGGERS)
+    logger = rng.choice(V.JAVA_LOGGERS) if rng.random() < 0.5 else java_logger(rng)
     if variant == 0:  # %d [%t] %-5p %c - %m
         L.add(ts, "TS").add(" [").add(thread, "THREAD").add("] ").add(lw, "LEVEL").add(pad).add(" ").add(logger, "SOURCE").add(" - ")
     elif variant == 1:  # %d %-5p [%t] %c{1}: %m
@@ -222,7 +222,7 @@ def python_logging(rng: random.Random) -> Line:
     L = Line("entry")
     v = rng.randrange(9)
     lw = rng.choice(["DEBUG", "INFO", "INFO", "WARNING", "ERROR", "CRITICAL"])
-    name = rng.choice(V.PY_LOGGERS)
+    name = rng.choice(V.PY_LOGGERS) if rng.random() < 0.6 else py_logger(rng)
     if v == 0:  # basicConfig default: LEVEL:name:msg
         L.add(lw, "LEVEL").add(":").add(name, "SOURCE").add(":")
     elif v == 1:  # %(asctime)s - %(name)s - %(levelname)s - %(message)s

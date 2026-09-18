@@ -58,6 +58,7 @@ describe("normalizeTimestamp", () => {
     expect(normalizeTimestamp("2024-01-15 10:30:00.123 +05:30")).toBe(
       "2024-01-15T10:30:00.123+05:30",
     );
+    expect(normalizeTimestamp("2016-09-28 04:30:30,")).toBe("2016-09-28T04:30:30");
   });
   it("returns undefined without a year", () => {
     expect(normalizeTimestamp("Jan 15 10:30:00")).toBeUndefined();

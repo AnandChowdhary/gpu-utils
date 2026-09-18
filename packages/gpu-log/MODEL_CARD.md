@@ -38,7 +38,7 @@ kv tails in `=`, `: `, `[k=v]` and quoted styles, noise (trailing whitespace, in
 truncation, very long tails). Real logs are never used for training.
 
 Held-out set: 12,000 lines from the same generator with seed 2.
-Unfamiliar set: `training/data/unfamiliar.txt`, __UNF_N__ hand-written lines from formats the
+Unfamiliar set: `training/data/unfamiliar.txt`, 104 hand-written lines from formats the
 generator cannot produce (Loghub BGL/HPC/Thunderbird/Windows/HealthApp/Proxifier/OpenStack
 layouts, Envoy, HAProxy, Varnish, Rails, pm2, CEF, Cisco, IIS, Squid, Postfix, BIND, Ansible,
 Terraform, git, ffmpeg, cargo, pytest, jest, Jenkins, GitHub Actions, macOS unified log,
@@ -55,18 +55,47 @@ tag and the kind to be right.
 
 | Set | Lines | Token acc | Span F1 | Kind acc | Line exact |
 |---|---|---|---|---|---|
-| held-out (generated, seed 2) | 12,000 | __HO_TOK__ | __HO_F1__ | __HO_KIND__ | __HO_LINE__ |
-| unfamiliar (hand-written) | __UNF_N__ | __UNF_TOK__ | __UNF_F1__ | __UNF_KIND__ | __UNF_LINE__ |
+| held-out (generated, seed 2) | 12,000 | 0.9587 | 0.9955 | 0.9977 | 0.9782 |
+| unfamiliar (hand-written) | 104 | 0.7082 | 0.5095 | 0.8077 | 0.1346 |
 
 Per-role span F1 on the unfamiliar set:
 
-__UNF_ROLES__
+| Role | P | R | F1 | Spans |
+|---|---|---|---|---|
+| TS | 0.691 | 0.918 | 0.789 | 61 |
+| LEVEL | 0.604 | 0.707 | 0.652 | 41 |
+| SOURCE | 0.333 | 0.444 | 0.381 | 54 |
+| THREAD | 0.625 | 0.694 | 0.658 | 36 |
+| KEY | 0.400 | 0.389 | 0.394 | 36 |
+| VALUE | 0.324 | 0.324 | 0.324 | 37 |
+| MSG | 0.225 | 0.403 | 0.289 | 72 |
+| FN | 0.667 | 0.500 | 0.571 | 16 |
+| FILE | 0.800 | 0.500 | 0.615 | 24 |
+| LINE | 0.938 | 0.625 | 0.750 | 24 |
+| COL | 1.000 | 0.800 | 0.889 | 5 |
 
 Loghub 2k samples, first 300 lines per system, weak labels (level normalised to the enum;
 source counts if the predicted SOURCE contains or is contained in the CSV Component; message
 counts if the predicted MSG equals or prefixes the CSV Content):
 
-__LOGHUB__
+| System | Level | Source | Message |
+|---|---|---|---|
+| HDFS | 300/300 (100%) | 300/300 (100%) | 262/300 (87%) |
+| Hadoop | 300/300 (100%) | 300/300 (100%) | 57/300 (19%) |
+| Spark | 300/300 (100%) | 299/300 (100%) | 292/300 (97%) |
+| Zookeeper | 300/300 (100%) | 300/300 (100%) | 300/300 (100%) |
+| OpenSSH | n/a | 0/300 (0%) | 197/300 (66%) |
+| Linux | 0/300 (0%) | 300/300 (100%) | 299/300 (100%) |
+| Mac | n/a | 292/300 (97%) | 105/300 (35%) |
+| Apache | 300/300 (100%) | n/a | 181/300 (60%) |
+| Android | 300/300 (100%) | 273/300 (91%) | 230/300 (77%) |
+| BGL | 0/300 (0%) | 2/300 (1%) | 2/300 (1%) |
+| HPC | n/a | 71/300 (24%) | 20/300 (7%) |
+| Thunderbird | n/a | 147/300 (49%) | 61/300 (20%) |
+| Windows | 300/300 (100%) | 85/300 (28%) | 4/300 (1%) |
+| HealthApp | n/a | 300/300 (100%) | 133/300 (44%) |
+| Proxifier | n/a | n/a | 0/300 (0%) |
+| OpenStack | 300/300 (100%) | 300/300 (100%) | 71/300 (24%) |
 
 Systems whose layout is in the generator: HDFS, Hadoop, Spark, Zookeeper, OpenSSH, Linux, Mac
 (syslog), Apache, Android. The others (BGL, HPC, Thunderbird, Windows, HealthApp, Proxifier,
@@ -75,24 +104,28 @@ OpenStack) are unseen layouts.
 ## Size and latency
 | Measure | Value |
 |---|---|
-| Package (min + Brotli, incl. weights) | __SIZE__ (budget 120,000 B) |
-| CPU path, 10 MB / 113K lines, memoisation off | __CPU_RAW__ |
-| CPU path, 10 MB / 113K lines, memoisation on | __CPU_MEMO__ |
-| Fast paths only (JSON) | __FAST__ |
-| WebGPU, design estimate | __GPU__ |
+| Package (min + Brotli, incl. weights) | 97.5 KiB (99,840 B) (budget 120,000 B) |
+| CPU path, 10 MB / 113K lines, memoisation off | 0.018 MB/s (208 lines/s; 54.39 s per MB, ~9 min per 10 MB) |
+| CPU path, 10 MB / 113K lines, memoisation on | 0.43 MB/s (23.09 s; 5K lines/s; the bench file has 20 distinct templates, so nearly every model line is memoised) |
+| Fast paths only (JSON) | 20.8 MB/s |
+| WebGPU, design estimate | ~0.4 MB/s end to end (~25 s per 10 MB): the model itself drops from ~9 min to ~1–2 s, after which the CPU tokenizer/featurizer/Viterbi pass (~23 s per 10 MB on one core) dominates |
 | Cold start (device + 7 pipelines + 600 KB weight upload), estimate | ~40–80 ms on an integrated GPU |
 | Warm call, 1 KB input (~15 lines, 600 tokens) | CPU ~4 ms; GPU ~2–3 ms, dominated by readback, so "auto" uses the CPU below 256 tokens |
 
-WebGPU could not be executed on this machine (no adapter under Node; Dawn's Node bindings
-fail to load), so the GPU column is a design estimate: per token the model costs ~90K MACs
-(embedding 2K, blocks 82K, heads 6K); a 10 MB file is ~4.5M model tokens → ~0.4 TMAC, which
-an integrated GPU sustaining 0.5–1 TFLOPS on these small kernels finishes in ~1–2 s plus
-~35 dispatches of 131,072 tokens each with a 13.6 MB readback per dispatch. The
-tokenizer/featurizer and Viterbi stay on the CPU (~__CPU_PRE__ of the CPU-path time), so the
-end-to-end GPU estimate is ~__GPU__. The shader runs seven passes per dispatch (embed, five
-blocks ping-ponging two state buffers, heads) with one workgroup of 64 threads per token and
-the three tap vectors staged in workgroup memory; `bench/gpu-parity.mjs` builds a browser page
-that checks it against the CPU path on the fixtures.
+WebGPU could not be executed through the browser runtime on this machine (Node has no adapter
+and Dawn's Node bindings fail to load), so the GPU column is a design estimate; the WGSL
+itself is executed and checked against the CPU reference on a lavapipe (Mesa) adapter through
+wgpu-py in `training/tests/test_wgsl.py`. Per token the model costs ~90K MACs (embedding 2K,
+blocks 82K, heads 6K); a 10 MB file is ~4.5M model tokens → ~0.4 TMAC, which an integrated
+GPU sustaining 0.5–1 TFLOPS on these small kernels finishes in ~1–2 s across ~35 dispatches of
+131,072 tokens (13.6 MB readback each). The rest of the pipeline stays on the CPU: the
+memoised benchmark run, where the model is almost free, still needs 23 s per 10 MB for
+tokenising, hashing, packing and Viterbi on one core, so that is the end-to-end bound for the
+GPU path until the pre-pass is optimised (it is ~4% of the un-memoised CPU-path time). The
+shader runs seven passes per dispatch (embed, five blocks ping-ponging two state buffers,
+heads) with one workgroup of 64 threads per token and the three tap vectors staged in
+workgroup memory; `bench/gpu-parity.mjs` builds a browser page that checks it against the CPU
+path on the fixtures.
 
 ## Limitations and intended use
 Structuring logs for viewers, search and grouping. Not a substitute for a format-specific
@@ -104,7 +137,7 @@ shape and file extension.
 
 ## Checkpoint
 - Promoted: 2026-09-18, seed 1, 5 epochs over 160,000 lines, QAT from epoch 2, batch 48,
-  AdamW lr 2e-3 one-cycle, 2 CPU threads, __TRAIN_TIME__.
+  AdamW lr 2e-3 one-cycle, 2 CPU threads, 658 s.
 - Training command: `pnpm train` then `pnpm export` (`training/runs/latest.pt`, gitignored).
-- Fixtures: `model/fixtures.json`, __FIX_N__ cases with feature rows and logits from the
+- Fixtures: `model/fixtures.json`, 27 cases with feature rows and logits from the
   dequantized int6 tensors; `test/parity.test.ts` asserts the CPU path matches at 1e-4.

@@ -115,28 +115,67 @@ class LogTagger(nn.Module):
 def forward_numpy(t: dict[str, np.ndarray], feats: np.ndarray, blocks: int = 5) -> np.ndarray:
     """Reference float32 forward for ONE line from exported (dequantized) tensors.
 
-    feats: [L, F]. Returns [L, T + K]: tag logits then per-token kind logits. This is the
-    exact computation src/cpu.ts performs, and what model/fixtures.json is generated from.
+    feats: [L, F]. Returns [L, T + K]: tag logits then per-token kind logits. Accumulation
+    order is exactly the one src/cpu.ts uses (sequential over inputs, float32 multiply then
+    add), so model/fixtures.json reproduces the TypeScript path to ~1e-6 rather than BLAS
+    reordering noise.
     """
     feats = np.asarray(feats)
     L = feats.shape[0]
-    x = t["embed"][feats].sum(1).astype(np.float32)  # [L, E]
-    x = x @ t["proj_w"] + t["proj_b"]
+    f32 = np.float32
+    embed = t["embed"].astype(f32)
+    E = embed.shape[1]
+    x = np.zeros((L, t["proj_w"].shape[1]), dtype=f32)
+    for p in range(L):
+        s = np.zeros(E, dtype=f32)
+        for f in feats[p]:
+            s += embed[f]
+        acc = t["proj_b"].astype(f32).copy()
+        for e in range(E):
+            acc += f32(s[e]) * t["proj_w"][e].astype(f32)
+        x[p] = acc
+    H = x.shape[1]
     for i in range(blocks):
         d = 1 << i
-        w1, b1, w2, b2 = t[f"block{i}_w1"], t[f"block{i}_b1"], t[f"block{i}_w2"], t[f"block{i}_b2"]
-        h = np.tile(b1, (L, 1)).astype(np.float32)
-        for tap, off in enumerate((-d, 0, d)):
-            for p in range(L):
+        w1, b1, w2, b2 = (t[f"block{i}_w1"].astype(f32), t[f"block{i}_b1"].astype(f32), t[f"block{i}_w2"].astype(f32), t[f"block{i}_b2"].astype(f32))
+        y = np.zeros_like(x)
+        for p in range(L):
+            h = b1.copy()
+            for tap, off in enumerate((-d, 0, d)):
                 q = p + off
                 if 0 <= q < L:
-                    h[p] += x[q] @ w1[tap]
-        h = np.maximum(h, 0)
-        x = x + h @ w2 + b2
-    hh = np.maximum(x @ t["head_h_w"] + t["head_h_b"], 0)
-    tags = hh @ t["head_tag_w"] + t["head_tag_b"]
-    kind = x @ t["head_kind_w"] + t["head_kind_b"]
-    return np.concatenate([tags, kind], axis=1).astype(np.float32)
+                    for j in range(H):
+                        v = x[q, j]
+                        if v != 0:
+                            h += v * w1[tap, j]
+            h = np.maximum(h, f32(0))
+            acc = x[p] + b2
+            for j in range(H):
+                if h[j] > 0:
+                    acc += h[j] * w2[j]
+            y[p] = acc
+        x = y
+    T = t["head_tag_w"].shape[1]
+    K = t["head_kind_w"].shape[1]
+    out = np.zeros((L, T + K), dtype=f32)
+    hw, hb = t["head_h_w"].astype(f32), t["head_h_b"].astype(f32)
+    tw, tb = t["head_tag_w"].astype(f32), t["head_tag_b"].astype(f32)
+    kw, kb = t["head_kind_w"].astype(f32), t["head_kind_b"].astype(f32)
+    for p in range(L):
+        hh = hb.copy()
+        for j in range(H):
+            hh += x[p, j] * hw[j]
+        hh = np.maximum(hh, f32(0))
+        tags = tb.copy()
+        for j in range(H):
+            if hh[j] > 0:
+                tags += hh[j] * tw[j]
+        kind = kb.copy()
+        for j in range(H):
+            kind += x[p, j] * kw[j]
+        out[p, :T] = tags
+        out[p, T:] = kind
+    return out
 
 
 def dequantized(t: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

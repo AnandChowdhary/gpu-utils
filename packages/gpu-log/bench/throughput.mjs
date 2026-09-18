@@ -48,12 +48,22 @@ for (const backend of ["cpu", "webgpu"]) {
   }
 }
 
+// Raw model throughput without memoisation, on the first MB (the full file would take minutes on the CPU).
+{
+  const raw = text.slice(0, 1024 * 1024);
+  const t0 = performance.now();
+  const r = await parse(raw, { backend: "cpu", memoize: false });
+  const ms = performance.now() - t0;
+  console.log(
+    `cpu, memoize off, 1 MB: ${(ms / 1000).toFixed(2)} s -> ${(Buffer.byteLength(raw) / 1048576 / (ms / 1000)).toFixed(3)} MB/s, ${(r.lines.length / (ms / 1000)).toFixed(0)} lines/s (${r.stats.model} model lines)`,
+  );
+}
+
 // Where does CPU time go? Time the model-free part by disabling the model lines.
 const t1 = performance.now();
-const jsonOnly = lines
-  .filter((l) => l.startsWith("{"))
-  .join("\n")
-  .repeat(Math.ceil((MB * 1048576) / 800));
+const jsonOnly = `${lines.filter((l) => l.startsWith("{")).join("\n")}\n`.repeat(
+  Math.ceil((MB * 1048576) / 120),
+);
 const r2 = await parse(jsonOnly, { backend: "cpu" });
 console.log(
   `json fast path only: ${(Buffer.byteLength(jsonOnly) / 1048576 / ((performance.now() - t1) / 1000)).toFixed(1)} MB/s over ${r2.lines.length} lines`,
