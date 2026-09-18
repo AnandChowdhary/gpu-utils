@@ -64,10 +64,12 @@ digit counts, title-case ratio, whether it looks like an email/URL/phone, keywor
 "Sent from my", header keys such as `From:`/`Von:`/`De :`/`差出人:`, legal-disclaimer words,
 greeting and closing words, month and weekday names in six languages) and a handful about
 the *document* (any `>` line above, a `-- ` line above, lines since the last attribution
-marker, lines until the next quote-ish line, paragraph index). The summed embeddings go
-through six residual dilated 1-D convolutions (kernel 3, dilations 1–32, a 127-token
-receptive field) and two heads: a line-kind classifier and a BIO tagger for NAME, TITLE,
-COMPANY, PHONE, EMAIL, URL and ADDRESS.
+marker, lines until the next quote-ish line, paragraph index). The model is the shared
+gpu-utils *conv family* (`ConvTagger`): the summed embeddings are projected to 48 channels
+and go through six residual dilated 1-D convolution blocks (kernel 3, dilations 1–32, a
+127-token receptive field), then one per-token head whose 23 logits are read as two
+outputs: 8 line-kind columns and 15 BIO columns for NAME, TITLE, COMPANY, PHONE, EMAIL,
+URL and ADDRESS.
 
 Decoding is rules first where a rule is exact, model for the rest: lines that start with
 `>` are quotes, a line that is exactly `--`/`-- ` is the RFC 3676 signature delimiter and
@@ -80,25 +82,28 @@ kind per line. Consecutive lines of one kind become a segment; `reply` is the re
 greeting and closing lines joined; `contact` is BIO-decoded from the first signature block
 that follows the author's own text.
 
-The WebGPU path (`src/shader.wgsl`) runs the same embed → 6 × conv → head pipeline with one
-thread per (token, channel) and is checked against the PyTorch fixtures on a real adapter
-(`training/tests/test_wgsl.py`) and, through them, against the TypeScript CPU path.
+Both forward passes come from `@gpu-utils/runtime`: the CPU path is `convTaggerForward`
+(the reference) and the WebGPU path is `runConvTagger` on the canonical `conv_tagger.wgsl`
+kernel (one workgroup per token, multi-pass). The kernel is checked against the PyTorch
+fixtures on a real adapter (`training/tests/test_wgsl.py`, Mesa lavapipe in CI) and, through
+them, against the TypeScript CPU path (`test/parity.test.ts`). This package has no model
+code of its own beyond the featurizer and the decoder.
 
 ## Size and speed
 
 | Measure | Value |
 |---|---|
-| Parameters | 155,207 (int6, per-tensor scales) |
-| Package (min + Brotli, incl. weights) | 92.9 KiB / budget 117.2 KiB (120,000 B) |
-| Featurize + CPU forward + decode, 1 KB email (≈530 tokens), Node 24 | ≈ 38 ms |
-| Same, 10 KB email (≈5,300 tokens) | ≈ 385 ms |
+| Parameters | 170,519 (int6, per-tensor scales) |
+| Package (min + Brotli, incl. weights) | SIZE_TBD KiB / budget 117.2 KiB (120,000 B) |
+| Featurize + CPU forward + decode, 1 KB email (≈530 tokens), Node 24 | ≈ LAT1_TBD ms |
+| Same, 10 KB email (≈5,300 tokens) | ≈ LAT10_TBD ms |
 | WebGPU, 10 KB email (estimate; not measured in CI) | ≈ 5–10 ms warm, 100–300 ms cold |
 
 The budget is 120,000 bytes rather than the 40 KB default because this is a whole-document
-dilated-CNN model, not a short-query affine-scan tagger: line and document features need a
-2,267-row embedding table and six 48-channel conv layers to cover Gmail, Outlook, Apple
+conv-family model, not a short-query scan-family tagger: line and document features need a
+2,267-row embedding table and six 48-channel residual blocks to cover Gmail, Outlook, Apple
 Mail, Thunderbird, mobile and non-English conventions in one model. Most of the size is the
-embedding table (109K of the 155K parameters).
+embedding table (109K of the 171K parameters).
 
 ## Limitations
 
@@ -117,10 +122,8 @@ embedding table (109K of the 155K parameters).
   Polish, Japanese and Chinese; see MODEL_CARD.md for the unfamiliar-set numbers on Korean,
   Czech, Finnish, Danish, Turkish, Greek and Traditional Chinese.
 
-Held-out generated set: 99.3% line-kind accuracy, 98.9% reply exact match, contact F1
-0.96–0.997. Hand-written unfamiliar set (71 emails, styles the generator cannot produce):
-89.1% line-kind accuracy, 71.8% reply exact match, contact F1 0.5–0.9. Real fixtures from
-email_reply_parser and talon: 28/34 replies exact. See [MODEL_CARD.md](./MODEL_CARD.md).
+EVAL_SUMMARY_TBD See [MODEL_CARD.md](./MODEL_CARD.md) for the full tables, including the
+numbers of the previous custom-model release side by side.
 
 ## Training
 
@@ -128,11 +131,15 @@ email_reply_parser and talon: 28/34 replies exact. See [MODEL_CARD.md](./MODEL_C
 cd packages/gpu-email/training
 uv sync
 uv run python -m gpu_email.data       # 60K synthetic emails + downloads the eval fixtures
-uv run python -m gpu_email.train      # 3 epochs, QAT from 40%, ~16 min on 2 CPU threads
-uv run python -m gpu_email.export     # ../model/{manifest.json,weights.txt,fixtures.json}
-uv run python -m gpu_email.evaluate   # held-out, unfamiliar and external sets
-uv run pytest                         # featurizer, decoder, and WGSL (needs a WebGPU adapter)
+uv run python -m gpu_email.train      # 2 epochs, int6 QAT from epoch 1, 18 min budget on 2 CPU threads
+uv run python -m gpu_email.export     # ../model/{manifest.json,weights.txt,fixtures.json} + row hashes
+uv run python -m gpu_email.evaluate   # held-out, unfamiliar and external sets (--exported for ../model)
+uv run pytest                         # featurizer, decoder, model fixtures, and WGSL (needs a WebGPU adapter)
 ```
+
+The model, training loop, quantization, metrics, Viterbi, export and WGSL harness all come
+from `gpu_utils_training` (`tooling/python`); `training/gpu_email/` only holds the
+featurizer, the generator, the decoder mirror and the evaluation sets.
 
 `src/keywords.ts` is generated from `training/gpu_email/features.py` by
 `uv run python -m gpu_email.gen_keywords` (then `pnpm lint:fix`); the keyword tables and
