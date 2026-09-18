@@ -202,15 +202,41 @@ def shift_shade(shade: str, by: int) -> str:
     return SHADES[i]
 
 
+COLOR_FILLER = {"a", "an", "the", "shade", "shades", "of", "in", "at", "but", "tone", "tint", "version", "variant", "color", "colour", "coloured", "colored", "with", "opacity", "alpha", "transparency"}
+ALPHA_WORDS: dict[str, str] = {"translucent": "50", "semi transparent": "50", "semi-transparent": "50", "see through": "50", "half transparent": "50", "mostly transparent": "25", "slightly transparent": "75", "barely transparent": "90", "very transparent": "25", "faintly": "25"}
+
+
 def parse_color(words: list[str]) -> Value | None:
-    """[modifiers] hue [shade] | hue-shade | shade hue."""
+    """[alpha words] [modifiers] hue [shade] | hue-shade | shade hue, with "at N%" style alpha."""
     if not words:
         return None
-    joined = "".join(words)
-    m = re.fullmatch(r"([a-z]+)-?(\d{2,3})", joined)
-    if m and m.group(1) in HUES and m.group(2) in SHADES:
-        return Value("col", f"{m.group(1)}-{m.group(2)}")
     ws = list(words)
+    alpha: str | None = None
+    for i in range(len(ws) - 1):
+        if re.fullmatch(r"\d+", ws[i]) and ws[i + 1] == "%":
+            alpha = ws[i]
+            del ws[i : i + 2]
+            break
+    if alpha is None and len(ws) >= 3 and ws[-2] == "/" and re.fullmatch(r"\d+", ws[-1]):
+        alpha = ws[-1]
+        ws = ws[:-2]
+    for phrase, a in ALPHA_WORDS.items():
+        pw = phrase.split(" ")
+        if len(ws) > len(pw) and ws[: len(pw)] == pw:
+            alpha = alpha if alpha is not None else a
+            ws = ws[len(pw) :]
+            break
+    ws = [w for w in ws if w not in COLOR_FILLER]
+    if not ws:
+        return None
+    joined = "".join(ws)
+    m = re.fullmatch(r"([a-z]+)-?(\d{2,3})", joined)
+
+    def with_alpha(v: str) -> Value:
+        return Value("col", f"{v}/{alpha}" if alpha is not None else v)
+
+    if m and m.group(1) in HUES and m.group(2) in SHADES:
+        return with_alpha(f"{m.group(1)}-{m.group(2)}")
     shade = None
     if ws and ws[-1] in SHADES:
         shade = ws.pop()
@@ -218,16 +244,19 @@ def parse_color(words: list[str]) -> Value | None:
         shade = ws.pop(0)
     if not ws:
         return None
-    hue = ws[-1]
-    if hue not in HUES:
+    hue_index = next((i for i, w in enumerate(ws) if w in HUES), -1)
+    if hue_index < 0:
+        if len(ws) == 1 and ws[0] in ("white", "black", "transparent"):
+            return with_alpha(ws[0])
         return None
-    mods = ws[:-1]
+    hue = ws[hue_index]
+    mods = ws[:hue_index] + ws[hue_index + 1 :]
     if mods:
         mod = MOD_OF.get(" ".join(mods))
         if mod is None:
             return None
         shade = shade or mod
-    return Value("col", f"{hue}-{shade or '500'}")
+    return with_alpha(f"{hue}-{shade or '500'}")
 
 
 def parse_value(text: str) -> Value | None:
@@ -907,12 +936,49 @@ def simple_kw(
     return []
 
 
+GRADIENT_DIR = {"row": "r", "col": "b", "row-reverse": "l", "col-reverse": "t", "right": "r", "left": "l", "top": "t", "bottom": "b", "diagonal": "br", "reverse": "l"}
+GRADIENT_SPEC = {"top-right": "tr", "bottom-right": "br", "bottom-left": "bl", "top-left": "tl"}
+
+
+def gradient_direction(v: Value) -> str | None:
+    if v.kind == "kw":
+        return GRADIENT_DIR.get(v.value)
+    if v.kind == "spec":
+        return GRADIENT_SPEC.get(v.value)
+    return None
+
+
+def _colour_name(v: Value) -> str:
+    return v.value if v.kind == "col" else f"gray-{shift_shade(v.value, v.intensity)}"
+
+
+def emit_gradient(values: list[Value]) -> list[str]:
+    """Joint emission for the gradient property (mirror of emitGradient in compile.ts)."""
+    colours = [_colour_name(v) for v in values if v.kind in ("col", "mod")]
+    direction = next((d for d in (gradient_direction(v) for v in values) if d is not None), "r")
+    out = [f"bg-linear-to-{direction}"]
+    if len(colours) >= 1:
+        out.append(f"from-{colours[0]}")
+    if len(colours) >= 3:
+        out.append(f"via-{colours[1]}")
+    if len(colours) >= 2:
+        out.append(f"to-{colours[-1]}")
+    return out
+
+
 def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     """Classes for one (property, value) pair. Mirror of emit() in src/compile.ts."""
     if k.startswith("preset:"):
         return PRESETS[k[7:]].split()
     if v is not None and v.kind == "lit":
         return [v.value]
+    if k == "gradient":
+        if v is None:
+            return ["bg-linear-to-r"]
+        if v.kind in ("col", "mod"):
+            return [f"from-{_colour_name(v)}"]
+        d = gradient_direction(v)
+        return [f"bg-linear-to-{d}"] if d else []
     if k in SPACING or k in INSETS:
         return spacing_value(k, v, neg)
     if k in SIZING:
@@ -1474,6 +1540,8 @@ def accepts(k: str, v: Value) -> bool:
 
 
 __all__ = [
+    "emit_gradient",
+    "gradient_direction",
     "HUES",
     "MOD_OF",
     "PROP_OF",

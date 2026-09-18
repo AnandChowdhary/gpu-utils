@@ -16,9 +16,11 @@ from pathlib import Path
 
 from gpu_utils_training.features import tokenize
 
+from .labels import LABELS
 from .lexicon import (
     GLUE_WORDS,
     NEG_WORDS,
+    NOISE_CLAUSES,
     PROPS,
     SEP_WORDS,
     SPELLING,
@@ -39,7 +41,6 @@ from .semantics import (
     standalone,
 )
 
-LABELS = ["O", "B-PROP", "I-PROP", "B-VAL", "I-VAL", "B-VAR", "I-VAR", "SEP", "NEG"]
 CACHE = Path(__file__).resolve().parents[1] / "data" / "cache"
 
 # families the generator samples (weight); presets are rarer
@@ -313,24 +314,63 @@ def render_number(rng: random.Random, n: str) -> str:
     return n
 
 
+ALPHA_FORMS = [
+    "translucent {c}",
+    "semi transparent {c}",
+    "see through {c}",
+    "{c} at {n}%",
+    "{c} at {n} percent",
+    "{c} with {n}% opacity",
+    "{c} {n}% opacity",
+    "{n}% {c}",
+    "{c}/{n}",
+    "{c} at {n}% opacity",
+]
+SHADE_FORMS = [
+    "a lighter shade of {h}",
+    "a darker shade of {h}",
+    "{h} but darker",
+    "{h} but lighter",
+    "shade {n} of {h}",
+    "{h} at {n}",
+    "{h} in shade {n}",
+    "the darker {h}",
+    "the lighter {h}",
+    "very light {h}",
+    "very dark {h}",
+    "{h} {n} shade",
+    "a pale {h}",
+    "a deep {h}",
+]
+ALPHAS = ["10", "20", "25", "30", "40", "50", "60", "70", "75", "80", "90"]
+
+
 def sample_color(rng: random.Random) -> tuple[str, Value]:
     r = rng.random()
-    if r < 0.12:
+    if r < 0.10:
         key = rng.choice([k for k in VAL_PHRASES if k.startswith("col:")])
         return rng.choice(VAL_PHRASES[key]), Value("col", key[4:])
-    hue = rng.choice(
-        HUES[:22] + ["blue", "gray", "red", "green", "slate", "white", "black"]
-    )
+    hue = rng.choice(HUES[:22] + ["blue", "gray", "red", "green", "slate", "white", "black"])
+    if r < 0.20:
+        base = hue if hue in ("white", "black") else rng.choice([hue, f"{hue} {rng.choice(SHADES)}"])
+        n = rng.choice(ALPHAS)
+        phrase = rng.choice(ALPHA_FORMS).format(c=base, n=n)
+        pv = parse_value(phrase)
+        if pv is not None:
+            return phrase, pv
     if hue in ("white", "black"):
         return hue, Value("col", hue)
+    if r < 0.32:
+        phrase = rng.choice(SHADE_FORMS).format(h=hue, n=rng.choice(SHADES))
+        pv = parse_value(phrase)
+        if pv is not None:
+            return phrase, pv
     r = rng.random()
     if r < 0.45:
         return hue, Value("col", f"{hue}-500")
     if r < 0.65:
         shade = rng.choice(SHADES)
-        form = rng.choice(
-            [f"{hue} {shade}", f"{hue}-{shade}", f"{hue}{shade}", f"{shade} {hue}"]
-        )
+        form = rng.choice([f"{hue} {shade}", f"{hue}-{shade}", f"{hue}{shade}", f"{shade} {hue}"])
         return form, Value("col", f"{hue}-{shade}")
     mod = rng.choice(MOD_PHRASES)
     return f"{mod} {hue}", Value("col", f"{hue}-{MOD_OF[mod]}")
@@ -524,7 +564,11 @@ def unit(rng: random.Random) -> tuple[list[Piece], list[str]]:
     if r < 0.04:
         lit = rng.choice(LITERALS)
         return [Piece(lit, "VAL", key=lit)], [lit]
-    if r < 0.30:
+    if r < 0.085:
+        return unit_two_colours(rng), []
+    if r < 0.115:
+        return unit_gradient(rng), []
+    if r < 0.33:
         s = sample_standalone(rng)
         if s is None:
             return [], []
@@ -576,21 +620,80 @@ def unit(rng: random.Random) -> tuple[list[Piece], list[str]]:
     return pieces, cls
 
 
-def apply_variant(classes: list[str], variant: str | None) -> list[str]:
-    if variant is None:
-        return classes
-    if variant == "only-mobile":
-        if all(c in ("block", "visible", "flex") for c in classes):
-            return ["sm:hidden"]
-        return [f"max-sm:{c}" for c in classes]
-    if variant == "only-desktop":
-        if all(c in ("block", "visible", "flex") for c in classes):
-            return ["max-lg:hidden"]
-        return [f"lg:{c}" for c in classes]
-    return [f"{variant}:{c}" for c in classes]
+ON_GLUE = ["on a", "on an", "on", "over a", "over", "against a", "against", "on top of a", "sitting on a", "over the"]
+TEXT_WORDS = ["text", "copy", "words", "font", "lettering", "label text", "the text", "text color", "foreground"]
+BG_WORDS = ["background", "bg", "surface", "backdrop", "fill", "background color", "background colour"]
 
 
-def segment(rng: random.Random) -> Segment:
+def sample_plain_color(rng: random.Random) -> tuple[str, Value] | None:
+    for _ in range(10):
+        phrase, v = sample_color(rng)
+        if v.kind == "col":
+            return phrase, v
+    return None
+
+
+def unit_two_colours(rng: random.Random) -> list[Piece]:
+    """'white text on a blue background', 'black on yellow', 'white on a slate 900 surface'."""
+    a = sample_plain_color(rng)
+    b = sample_plain_color(rng)
+    if a is None or b is None:
+        return []
+    pieces: list[Piece] = [Piece(a[0], "VAL")]
+    form = rng.random()
+    if form < 0.6:
+        pieces.append(Piece(rng.choice(TEXT_WORDS), "PROP", key="text"))
+    pieces.append(Piece(rng.choice(ON_GLUE), "O"))
+    pieces.append(Piece(b[0], "VAL"))
+    if form < 0.3 or (0.6 <= form < 0.85):
+        pieces.append(Piece(rng.choice(BG_WORDS), "PROP", key="bg"))
+    return pieces
+
+
+DIRECTION_PHRASES = [
+    ("kw:row", ["horizontal", "left to right", "sideways", "across"]),
+    ("kw:col", ["vertical", "top to bottom", "downward", "from top to bottom"]),
+    ("kw:diagonal", ["diagonal", "diagonally", "at an angle", "corner to corner"]),
+    ("kw:row-reverse", ["right to left"]),
+    ("kw:col-reverse", ["bottom to top", "upward"]),
+    ("spec:top-right", ["to the top right", "towards the top right"]),
+    ("spec:bottom-left", ["to the bottom left", "towards the bottom left"]),
+    ("spec:top-left", ["to the top left"]),
+]
+
+
+def unit_gradient(rng: random.Random) -> list[Piece]:
+    """'gradient from A to B', 'vertical gradient from A via B to C', 'A to B gradient'."""
+    cols = [sample_plain_color(rng) for _ in range(rng.choice([1, 2, 2, 2, 3]))]
+    if any(c is None for c in cols):
+        return []
+    prop = Piece(rng.choice(PROPS["gradient"]), "PROP", key="gradient")
+    direction: Piece | None = None
+    if rng.random() < 0.45:
+        key, phrases = rng.choice(DIRECTION_PHRASES)
+        phrase = rng.choice(phrases)
+        pv = parse_value(phrase)
+        if pv is not None and f"{pv.kind}:{pv.value}" == key:
+            direction = Piece(phrase, "VAL")
+    stops: list[Piece] = []
+    words = ["from", "via", "to"] if len(cols) == 3 else ["from", "to"] if len(cols) == 2 else ["from"]
+    for w, c in zip(words, cols, strict=True):
+        assert c is not None
+        if rng.random() < 0.85:
+            stops.append(Piece(rng.choice([w, w, {"from": "starting at", "to": "ending in", "via": "through"}[w]]), "O"))
+        stops.append(Piece(c[0], "VAL"))
+    order = rng.random()
+    if order < 0.6:
+        pieces = ([direction] if direction else []) + [prop] + stops
+    elif order < 0.8:
+        pieces = [prop] + ([direction] if direction else []) + stops
+    else:
+        pieces = stops + ([direction] if direction else []) + [prop]
+    return pieces
+
+
+def segment(rng: random.Random, lead: str | None = None, allow_variant: bool = True) -> Segment:
+    """Pieces of one segment. ``lead`` forces a leading variant phrase (carry-over examples)."""
     seg = Segment()
     n_units = rng.choices([1, 2, 3], weights=[0.6, 0.3, 0.1], k=1)[0]
     classes: list[str] = []
@@ -604,9 +707,18 @@ def segment(rng: random.Random) -> Segment:
         for c in cls:
             if c not in classes:
                 classes.append(c)
+    if rng.random() < 0.12:
+        seg.pieces.append(Piece(rng.choice(NOISE_CLAUSES), "O"))
     if not seg.pieces:
         return seg
-    if rng.random() < 0.32:
+    if lead is not None:
+        phrase = rng.choice(VARIANT_PHRASES[lead])
+        if resolve_variant(words_of(phrase)) == lead:
+            seg.variant = lead
+            seg.pieces.insert(0, Piece(phrase, "VAR"))
+            if rng.random() < 0.5:
+                seg.pieces.insert(1, Piece(rng.choice([":", ",", "make it", "use", "it gets", "switch to", "-"]), "O"))
+    elif allow_variant and rng.random() < 0.32:
         vk = wchoice(rng, VARIANT_WEIGHTS)
         phrase = rng.choice(VARIANT_PHRASES[vk])
         if resolve_variant(words_of(phrase)) == vk:
@@ -638,9 +750,6 @@ def segment(rng: random.Random) -> Segment:
                         "O",
                     ),
                 )
-    # gold classes come from the compiler mirror on the clean pieces, so ambiguous
-    # pairings resolve identically on both sides
-    seg.classes = compile_pieces([(p.role, p.text, p.key) for p in seg.pieces])
     if seg.pieces:
         seg.pieces[0].boundary = True
     return seg
@@ -697,9 +806,21 @@ def casing(rng: random.Random, text: str) -> str:
 
 def build(rng: random.Random) -> dict | None:
     n_seg = rng.choices([1, 2, 3, 4, 5], weights=[0.3, 0.3, 0.2, 0.13, 0.07], k=1)[0]
-    segs = [s for s in (segment(rng) for _ in range(n_seg)) if s.pieces]
+    if rng.random() < 0.15 and n_seg >= 2:
+        # leading variant phrase scoping over the following segments ("on hover, blue and bold")
+        lead = wchoice(rng, VARIANT_WEIGHTS)
+        segs = [segment(rng, lead=lead, allow_variant=False)]
+        segs += [segment(rng, allow_variant=rng.random() < 0.25) for _ in range(n_seg - 1)]
+        segs = [s for s in segs if s.pieces]
+    else:
+        segs = [s for s in (segment(rng) for _ in range(n_seg)) if s.pieces]
     if not segs:
         return None
+    # gold classes come from the compiler mirror on the clean pieces (with the variant
+    # carry across segments), so ambiguous pairings resolve identically on both sides
+    carry: list[str] = []
+    for s in segs:
+        s.classes = compile_pieces([(p.role, p.text, p.key) for p in s.pieces], carry)
     pieces: list[Piece] = []
     if rng.random() < 0.22:
         pieces.append(Piece(rng.choice(INTROS), "O"))
@@ -760,10 +881,11 @@ def build(rng: random.Random) -> dict | None:
     return {"text": text, "labels": labels, "boundary": boundary, "classes": classes}
 
 
-def generate(n: int, seed: int) -> list[dict]:
+def generate(n: int, seed: int, exclude: set[str] | None = None) -> list[dict]:
+    """n unique examples. `exclude` holds texts already used by another split."""
     rng = random.Random(seed)
     out: list[dict] = []
-    seen: set[str] = set()
+    seen: set[str] = set(exclude or ())
     while len(out) < n:
         ex = build(rng)
         if ex is None or ex["text"] in seen or len(ex["text"]) > 220:
@@ -773,10 +895,21 @@ def generate(n: int, seed: int) -> list[dict]:
     return out
 
 
+def eval_texts() -> set[str]:
+    """Every hand-written evaluation phrase, so the generator can never emit one."""
+    evals = CACHE.parents[2] / "eval"
+    return {c["text"] for path in sorted(evals.glob("*.json")) for c in json.loads(path.read_text())}
+
+
 def main() -> None:
     CACHE.mkdir(parents=True, exist_ok=True)
+    # train first, then held-out excluding it: the grammar's head is dense enough that
+    # independent seeds collide, and a held-out set sharing 3% of its phrases with the
+    # training set is not held out.
+    used = eval_texts()
     for name, n, seed in (("train", 130000, 1), ("heldout", 6000, 2)):
-        rows = generate(n, seed)
+        rows = generate(n, seed, used)
+        used |= {r["text"] for r in rows}
         with (CACHE / f"{name}.jsonl").open("w") as f:
             for r in rows:
                 f.write(json.dumps(r) + "\n")

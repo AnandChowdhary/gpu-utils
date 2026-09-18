@@ -21,7 +21,8 @@ import torch
 from torch import nn
 
 from .features import ROWS, featurize
-from .train import RUNS, load
+from .batches import load
+from .evaluate import RUNS
 
 MIN_FREQ = 20
 D = 48

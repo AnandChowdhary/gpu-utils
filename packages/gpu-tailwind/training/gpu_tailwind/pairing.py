@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .lexicon import resolve_variant, words_of
-from .semantics import Value, emit, parse_value, standalone
+from .semantics import Value, emit, emit_gradient, parse_value, standalone
 
 VARIANT_ORDER = [
     "sm",
@@ -81,9 +81,15 @@ def apply_variants(classes: list[str], variants: list[str]) -> list[str]:
     return [f"{prefix}:{c}" for c in classes]
 
 
-def compile_pieces(pieces: list[tuple[str, str, str | None]]) -> list[str]:
+def compile_pieces(pieces: list[tuple[str, str, str | None]], carry: list[str] | None = None) -> list[str]:
     """pieces: (role, clean_text, key) with role in PROP VAL VAR NEG O; key is the prop
-    family for PROP pieces, the literal class for literal VAL pieces, else None."""
+    family for PROP pieces, the literal class for literal VAL pieces, else None.
+    ``carry`` (mutated) holds the variants of a leading variant phrase from an earlier
+    segment; mirror of compileSegment's carry rules in decode.ts."""
+    if carry is None:
+        carry = []
+    content = [p for p in pieces if p[0] != "O"]
+    leading = bool(content) and content[0][0] == "VAR"
     variants: list[str] = []
     props: list[Unit] = []
     vals: list[Unit] = []
@@ -109,6 +115,12 @@ def compile_pieces(pieces: list[tuple[str, str, str | None]]) -> list[str]:
                 vals.append(Unit(idx, None, value, pending))
         pending = False
         idx += 1
+    own = bool(variants)
+    if own and leading:
+        carry[:] = list(variants)
+    elif own:
+        carry[:] = []
+    effective = variants if own else list(carry)
     assigned: dict[int, list[Unit]] = {}
     loose: list[Unit] = []
     for v in vals:
@@ -134,16 +146,25 @@ def compile_pieces(pieces: list[tuple[str, str, str | None]]) -> list[str]:
             if c not in classes:
                 classes.append(c)
 
+    loose_colours = [u for u in loose if u.value is not None and u.value.kind == "col"]
+    two_colours = len(loose_colours) == 2 and not any(
+        emit(p.key or "", loose_colours[0].value, False) for p in props  # type: ignore[arg-type]
+    )
     for u in sorted(props + loose, key=lambda u: u.index):
-        if u.key is not None:
+        if u.key == "gradient":
+            values = sorted(assigned.get(u.index, []), key=lambda v: v.index)
+            push(emit_gradient([v.value for v in values if v.value is not None]))
+        elif u.key is not None:
             values = assigned.get(u.index, [])
             if not values:
                 push(emit(u.key, None, u.neg))
             else:
                 for v in values:
                     push(emit(u.key, v.value, u.neg or v.neg))
+        elif two_colours and u is loose_colours[0]:
+            push([f"text-{u.value.value}"])  # type: ignore[union-attr]
         else:
             push(standalone(u.value, u.neg))  # type: ignore[arg-type]
     if not classes:
         return []
-    return apply_variants(classes, variants)
+    return apply_variants(classes, effective)

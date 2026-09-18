@@ -24,12 +24,12 @@ def test_skeleton() -> None:
 
 
 def test_features_match_exported_fixtures() -> None:
-    if not FIXTURES.exists():
-        return
-    fixtures = json.loads(FIXTURES.read_text())
-    assert len(fixtures) >= 20
-    for case in fixtures:
-        assert featurize(case["text"]) == case["features"], case["text"]
+    """model/fixtures.json is written by export_package in the canonical
+    {"cases": [{"input", "rows", ...}]} format; test/parity.test.ts checks the same rows."""
+    cases = json.loads(FIXTURES.read_text())["cases"]
+    assert len(cases) >= 20
+    for case in cases:
+        assert featurize(case["input"]) == case["rows"], case["input"]
 
 
 def test_semantics_examples() -> None:

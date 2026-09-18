@@ -1830,3 +1830,9 @@ VALUES: dict[str, list[str]] = {
         "read by screen readers only",
     ],
 }
+
+# v2 additions
+VALUES["kw:diagonal"] = ["diagonal", "diagonally", "at an angle", "corner to corner", "angled", "to the bottom right corner", "slanted direction"]
+VALUES["kw:hidden"] += ["hide it", "hide this", "hide them", "hide the element", "make it disappear", "hidden away", "tucked away", "not on screen"]
+VALUES["kw:visible"] += ["show it", "show this", "reveal it", "reveals it", "make it visible", "bring it back", "unhide", "unhidden"]
+VALUES["kw:spin"] += ["spin animation", "spinning animation", "spins forever", "keeps spinning", "spinning icon", "spinner icon", "spin it", "make it spin", "rotating loader", "endless spin", "spins around"]

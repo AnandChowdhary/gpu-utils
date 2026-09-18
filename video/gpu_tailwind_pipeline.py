@@ -7,8 +7,8 @@ from manim import DOWN, LEFT, RIGHT, UP, FadeIn, FadeOut, LaggedStart, Line, Rec
 
 from style import ACCENT, MUTED, ExplainerScene, TokenCell, activation_strip, mono, note
 
-PARAMS = "45,218 parameters"
-SIZE = "52.3 KiB Brotli"
+PARAMS = "45,394 parameters"
+SIZE = "54.9 KiB Brotli"
 
 PROPERTY = "#60A5FA"
 VALUE = "#34D399"
