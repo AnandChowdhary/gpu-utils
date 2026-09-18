@@ -296,7 +296,69 @@ export function compile(
     compileLimit(ctx, clause);
     compileChart(ctx, clause);
   }
+  normalize(ctx);
   return spec;
+}
+
+/**
+ * Cross-clause clean-up. Clauses are compiled independently, so a phrase whose clause
+ * boundaries land inside one logical constraint ("north and east bench", "sorted by height,
+ * tallest first") produces redundant or contradictory entries. These rules are pure
+ * spec algebra — each one rewrites a spec that could never be what the user meant:
+ *
+ * - two `eq` filters on the same enum/text field are ANDed and so always empty: they are one
+ *   value list (`in`);
+ * - `not_empty` on a field that carries another constraint is implied by it;
+ * - the same field sorted twice is one sort key, and the later clause carries the direction
+ *   the user spelled out ("sorted by height, tallest first");
+ * - the same aggregate asked for twice is one aggregate.
+ */
+function normalize(ctx: Ctx): void {
+  const spec = ctx.spec;
+  const kindOf = (name: string) => ctx.schema.fields.find((f) => f.name === name)?.kind;
+
+  const merged: ViewFilter[] = [];
+  for (const f of spec.filters) {
+    const prev = merged[merged.length - 1];
+    const listable = kindOf(f.field) === "enum" || kindOf(f.field) === "text";
+    if (
+      prev &&
+      listable &&
+      prev.field === f.field &&
+      f.op === "eq" &&
+      (prev.op === "eq" || prev.op === "in") &&
+      typeof f.value === "string"
+    ) {
+      const values = prev.op === "in" ? (prev.value as (string | number)[]) : [prev.value!];
+      merged[merged.length - 1] = {
+        field: f.field,
+        op: "in",
+        value: [...values, f.value],
+        span: { start: Math.min(prev.span.start, f.span.start), end: Math.max(prev.span.end, f.span.end) },
+      };
+      continue;
+    }
+    merged.push(f);
+  }
+  spec.filters = merged.filter(
+    (f) => f.op !== "not_empty" || !merged.some((g) => g !== f && g.field === f.field),
+  );
+
+  const sort: ViewSort[] = [];
+  for (const s of spec.sort) {
+    const at = sort.findIndex((x) => x.field === s.field);
+    if (at < 0) sort.push(s);
+    else sort[at] = { ...sort[at]!, dir: s.dir };
+  }
+  spec.sort = sort;
+
+  const seen = new Set<string>();
+  spec.aggregate = spec.aggregate.filter((a) => {
+    const key = `${a.fn} ${a.field ?? ""}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function runs(ctx: Ctx, clause: number[], role: Role): Run[] {
@@ -461,7 +523,9 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
     const v = runText(ctx, valueRuns[0]!).toLowerCase();
     if (TRUE_WORDS.has(v)) return push(flip("is_true"));
     if (FALSE_WORDS.has(v)) return push(flip("is_false"));
-    return diag(ctx, "unknown_value", `"${v}" is not a boolean value`, runSpan(ctx, valueRuns[0]!));
+    // "active customers": the flag still constrains the view; only the stray word is reported.
+    diag(ctx, "unknown_value", `"${v}" is not a boolean value`, runSpan(ctx, valueRuns[0]!));
+    return push(flip(EMPTY_RE.test(opText) ? "is_false" : "is_true"));
   }
 
   if (field.kind === "number") {
