@@ -24,7 +24,7 @@ const record = await parse(
 //   year: 2006, volume: "18", issue: "7", pages: { from: "1527", to: "1554" },
 //   doi: "10.1162/neco.2006.18.7.1527",
 //   spans: { authors: [0, 37], year: [40, 44], title: [47, 93], container: [95, 113], volume: [115, 117], ... },
-//   diagnostics: { confidence: 0.99, typeConfidence: 1.0, etAl: false, warnings: [], tags: [...], tokens: [...] },
+//   diagnostics: { confidence: 1.0, typeConfidence: 1.0, etAl: false, warnings: [], tags: [...], tokens: [...] },
 // }
 
 // Many references, one per line; every span is an offset into the original text.

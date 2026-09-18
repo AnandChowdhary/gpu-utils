@@ -212,7 +212,8 @@ the source of truth and matches PyTorch on the same 24 fixtures at 1e-4.
 ## Checkpoint
 - Promoted: `training/runs/default` — 2026-09-18, seed 0, epoch 4 of 5 (best held-out exact
   match), 15.6 min on 2 threads, `gpu_utils_training.loop.train` (AdamW, warm-up + cosine,
-  lr 4e-3, batch 128), CRF NLL + 0.5·name-part CE + 0.5·type CE, int6 QAT from epoch 1.
+  peak lr 3e-3, batch 128), CRF NLL + 0.5·name-part CE + 0.5·type CE, int6 QAT from epoch 1.
+  These are the parser defaults, so a bare `pnpm train` reproduces this checkpoint.
 - Per-epoch held-out exact match / micro-F1: 0.378 / 0.971 → 0.542 / 0.981 → 0.632 / 0.984 →
   0.676 / 0.986 → 0.680 / 0.987.
 - Training command: `pnpm train` (`uv run python -m gpu_cite.train`); export: `pnpm export`

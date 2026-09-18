@@ -1,9 +1,11 @@
 """Train gpu-cite with int6 quantization-aware training through the shared loop.
 
-    uv run python -m gpu_cite.train [--epochs 4] [--seed 0] [--minutes 19] [--run default]
+    uv run python -m gpu_cite.train [--epochs 5] [--seed 0] [--minutes 19] [--run default]
 
-Default config (seed 0, 4 epochs over 120K synthetic references, batch 128) runs in under
-20 minutes on two CPU threads and writes ``runs/<run>/{best.pt,last.pt,history.json}``.
+Default config (seed 0, 5 epochs over 120K synthetic references, batch 128) runs in about
+16 minutes on two CPU threads and writes ``runs/<run>/{best.pt,last.pt,history.json}``.
+These are the defaults that produced the promoted checkpoint, so the bare command above
+reproduces it.
 The loss is the linear-chain CRF NLL over the BIO columns + 0.5 x name-part cross-entropy
 on name tokens + 0.5 x document-type cross-entropy on the pooled head.
 """
@@ -95,7 +97,7 @@ def loss(model: nn.Module, batch: Batch) -> Tensor:
 
 
 def main() -> None:
-    ap = training_parser("Train gpu-cite", epochs=4, lr=3e-3, batch=128, minutes=19)
+    ap = training_parser("Train gpu-cite", epochs=5, lr=3e-3, batch=128, minutes=19)
     ap.add_argument("--hidden", type=int, default=32)
     ap.add_argument("--limit", type=int, default=0, help="use only the first N training examples (smoke tests)")
     args = ap.parse_args()
