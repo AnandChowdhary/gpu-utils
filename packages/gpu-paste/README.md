@@ -91,13 +91,18 @@ contacts is still `csv`; its e-mails come from the regex and its names from the 
 
 | Measure | Value |
 |---|---|
-| Package (min + Brotli, incl. int6 weights and WGSL) | 51.0 KiB (52,224 B); budget 60,000 B |
-| Weights alone (66,339 int6 params, Brotli) | ~38 KB |
-| Parameters | 66,339 |
-| CPU path, short contact (12 tokens), Node 24 | 0.5 ms warm |
-| CPU path, 1 KB paste (425 tokens), Node 24 | 13–14 ms warm (≈ 30 µs / token) |
+| Package (min + Brotli, incl. int6 weights and the scan kernel) | 53.7 KiB (54,974 B); budget 60,000 B |
+| Weights alone (68,659 int6 params, Brotli) | 39,195 B |
+| Parameters | 68,659 |
+| CPU path, short contact (23 tokens), Node 24 | 0.95 ms warm |
+| CPU path, 1 KB paste (411 tokens), Node 24 | 15 ms warm (≈ 37 µs / token) |
 | WebGPU cold start (device + 7 pipelines + weight upload) | ≈ 50–100 ms (estimate, no GPU on the build box) |
-| WebGPU warm call, 1 KB paste | ≈ 1–3 ms, dominated by readback (estimate) |
+| WebGPU warm call, 1 KB paste | ≈ 1–3 ms, dominated by readback (estimate); every 512-token window of a paste is one batched dispatch |
+
+Moving onto the shared family cost 2,320 parameters, 2.8 KiB of Brotli and ~45 % of the CPU
+forward pass (the runtime's generic per-token head is wider and is not specialised the way
+the deleted hand-written one was); it gained a little accuracy and deleted ~700 lines of
+model and kernel code. MODEL_CARD.md has the before/after table.
 
 The budget is 60 KB rather than the default 40 KB because the package also ships ~14 KB
 (Brotli) of deterministic parsers: 148 CSS color names, ~40 currencies, date grammars in
