@@ -29,8 +29,16 @@ struct Params { n: u32, slots: u32, layers: u32, _pad: u32 }
 
 fn relu(x: f32) -> f32 { return max(x, 0.0); }
 
+// Every entry point must statically reference every binding: "auto" bind group layouts
+// only contain the bindings an entry point uses, and runtime/program.ts binds the same
+// buffer list to each pipeline. Folded away by the compiler.
+fn touch() -> f32 {
+  return f32(params.n) + f32(offsets[0]) + f32(features[0]) + weights[0] + state[0] + logits[0];
+}
+
 @compute @workgroup_size(64)
 fn embed(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   let gid = id.x;
   if (gid >= params.n * DIM) { return; }
   let t = gid / DIM;
@@ -45,6 +53,7 @@ fn embed(@builtin(global_invocation_id) id: vec3<u32>) {
 }
 
 fn conv_layer(l: u32, gid: u32) {
+  _ = touch();
   if (gid >= params.n * DIM) { return; }
   let t = gid / DIM;
   let co = gid % DIM;
@@ -75,6 +84,7 @@ fn conv_layer(l: u32, gid: u32) {
 
 @compute @workgroup_size(64)
 fn head(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   let t = id.x;
   if (t >= params.n) { return; }
   let xBase = params.layers * params.n * DIM + t * DIM;
