@@ -179,4 +179,8 @@ def test_wgsl_long_input_crosses_chunks(device) -> None:
             0
         ].numpy()
     assert dequantized is not None
-    assert np.abs(got - ref).max() < 1e-3
+    # 300+ tokens compose hundreds of float32 affine maps in a different order than the
+    # sequential reference; allow accumulation-order noise but require identical decisions
+    assert np.allclose(got, ref, rtol=1e-4, atol=1e-3), float(np.abs(got - ref).max())
+    assert (got[:, :-1].argmax(1) == ref[:, :-1].argmax(1)).all()
+    assert ((got[:, -1] > 0) == (ref[:, -1] > 0)).all()

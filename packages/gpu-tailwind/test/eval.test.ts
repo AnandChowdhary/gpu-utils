@@ -99,6 +99,7 @@ describe("evaluation", () => {
       `unfamiliar: exact ${r.exact.toFixed(3)} P ${r.precision.toFixed(3)} R ${r.recall.toFixed(3)} F1 ${r.f1.toFixed(3)} (n=${r.n})`,
     );
     console.log(r.misses.join("\n"));
+    writeFileSync(resolve(root, "training/runs/unfamiliar_misses.txt"), `${r.misses.join("\n")}\n`);
     const out = resolve(root, "training/runs/eval.json");
     const prev = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : {};
     writeFileSync(
