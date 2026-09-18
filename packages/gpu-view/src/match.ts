@@ -271,10 +271,7 @@ function matchAt(tokens: Token[], positions: number[], wi: number, entries: Entr
  * prefix. Only boolean fields are tried, so ordinary words that happen to start with
  * "in" or "un" cannot be turned into a field by accident.
  */
-function matchNegated(
-  w: string,
-  entries: Entry[],
-): Omit<Span, "start" | "end"> | null {
+function matchNegated(w: string, entries: Entry[]): Omit<Span, "start" | "end"> | null {
   for (const prefix of NEG_PREFIXES) {
     if (!w.startsWith(prefix) || w.length - prefix.length < MIN_NEG_BASE) continue;
     const base = w.slice(prefix.length);

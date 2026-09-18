@@ -330,12 +330,16 @@ function normalize(ctx: Ctx): void {
       (prev.op === "eq" || prev.op === "in") &&
       typeof f.value === "string"
     ) {
-      const values = prev.op === "in" ? (prev.value as (string | number)[]) : [prev.value!];
+      const values: (string | number)[] =
+        prev.op === "in" ? (prev.value as (string | number)[]) : [prev.value as string | number];
       merged[merged.length - 1] = {
         field: f.field,
         op: "in",
         value: [...values, f.value],
-        span: { start: Math.min(prev.span.start, f.span.start), end: Math.max(prev.span.end, f.span.end) },
+        span: {
+          start: Math.min(prev.span.start, f.span.start),
+          end: Math.max(prev.span.end, f.span.end),
+        },
       };
       continue;
     }
