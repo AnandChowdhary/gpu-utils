@@ -43,3 +43,13 @@
   `tests/fixtures/signature/emails/stripped/*` are downloaded at evaluation time by the
   same script and used only to evaluate gpu-email (reply and signature extraction). Not
   committed, not used for training. https://github.com/mailgun/talon
+
+## gpu-tailwind
+
+- [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss) default theme
+  (`tailwindcss@4.3.3/theme.css`, Copyright (c) Tailwind Labs, Inc., MIT). Vendored as
+  `packages/gpu-tailwind/training/data/tailwind-theme.txt` and compiled into the class
+  vocabulary table (`src/table.json`) that ships in the package. Utility naming follows the
+  Tailwind v4 documentation; no Tailwind code is included.
+- No real NL→Tailwind dataset was used; all training phrases are synthetic
+  (`training/gpu_tailwind/data.py`), and the unfamiliar evaluation set is hand-written.

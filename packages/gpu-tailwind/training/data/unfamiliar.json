@@ -1,0 +1,214 @@
+[
+  {
+    "text": "card with rounded corners, subtle shadow, blue on hover, hidden on mobile",
+    "classes": ["rounded-lg", "bg-white", "p-4", "shadow-sm", "hover:bg-blue-500", "max-sm:hidden"]
+  },
+  {
+    "text": "centered flex row with gap 4",
+    "classes": ["flex", "items-center", "justify-center", "flex-row", "gap-4"]
+  },
+  {
+    "text": "bold red text, small, uppercase",
+    "classes": ["font-bold", "text-red-500", "text-sm", "uppercase"]
+  },
+  {
+    "text": "full width on small screens, half on large",
+    "classes": ["max-sm:w-full", "lg:w-1/2"]
+  },
+  {
+    "text": "sticky header at the top with a bottom border",
+    "classes": ["sticky", "top-0", "border-b"]
+  },
+  {
+    "text": "three column grid on desktop, one column on phones",
+    "classes": ["lg:grid", "lg:grid-cols-3", "max-sm:grid", "max-sm:grid-cols-1"]
+  },
+  { "text": "grey muted caption text that's tiny", "classes": ["text-gray-500", "text-xs"] },
+  { "text": "when the mouse is over it, lift the shadow to large", "classes": ["hover:shadow-lg"] },
+  {
+    "text": "an avatar that's a circle, 12 wide and 12 tall",
+    "classes": ["size-10", "rounded-full", "object-cover", "w-12", "h-12"]
+  },
+  {
+    "text": "overlay covering the parent with 50% opacity",
+    "classes": ["fixed", "inset-0", "bg-black/50", "opacity-50"]
+  },
+  {
+    "text": "dark mode: white text on a gray 900 background",
+    "classes": ["dark:text-white", "dark:bg-gray-900"]
+  },
+  {
+    "text": "input with a blue focus ring and no outline",
+    "classes": [
+      "rounded-md",
+      "border",
+      "border-gray-300",
+      "px-3",
+      "py-2",
+      "focus:ring-2",
+      "focus:ring-blue-500",
+      "outline-hidden"
+    ]
+  },
+  { "text": "smooth colour transition, 300ms", "classes": ["transition-colors", "duration-300"] },
+  {
+    "text": "text truncated with an ellipsis on one line",
+    "classes": ["truncate", "whitespace-nowrap"]
+  },
+  {
+    "text": "letter spacing wide and line height relaxed",
+    "classes": ["tracking-wide", "leading-relaxed"]
+  },
+  {
+    "text": "pill shaped green badge",
+    "classes": [
+      "rounded-full",
+      "inline-flex",
+      "items-center",
+      "px-2",
+      "py-0.5",
+      "text-xs",
+      "font-medium",
+      "bg-green-500"
+    ]
+  },
+  {
+    "text": "absolutely positioned in the top right corner",
+    "classes": ["absolute", "top-0", "right-0"]
+  },
+  { "text": "z index 50 so it sits above everything", "classes": ["z-50"] },
+  { "text": "scroll vertically when the content overflows", "classes": ["overflow-y-auto"] },
+  { "text": "padding of 24px all round with 8px margin", "classes": ["p-[24px]", "m-[8px]"] },
+  {
+    "text": "make the button semi bold, italic and underlined on hover",
+    "classes": [
+      "inline-flex",
+      "items-center",
+      "justify-center",
+      "rounded-md",
+      "px-4",
+      "py-2",
+      "font-medium",
+      "font-semibold",
+      "italic",
+      "hover:underline"
+    ]
+  },
+  {
+    "text": "flex column, items stretched, space between",
+    "classes": ["flex", "flex-col", "items-stretch", "justify-between"]
+  },
+  {
+    "text": "max width prose and centred horizontally",
+    "classes": ["max-w-prose", "flex", "justify-center"]
+  },
+  { "text": "opacity 25 when disabled", "classes": ["disabled:opacity-25"] },
+  {
+    "text": "very rounded, thick indigo border",
+    "classes": ["rounded-2xl", "border-4", "border", "border-indigo-500"]
+  },
+  {
+    "text": "hidden until medium screens then shown as flex",
+    "classes": ["max-md:hidden", "md:flex"]
+  },
+  { "text": "screen height, no scrolling", "classes": ["h-screen", "overflow-hidden"] },
+  {
+    "text": "amber 400 background with black text and a dark amber border",
+    "classes": ["bg-amber-400", "text-black", "border", "border-amber-700"]
+  },
+  { "text": "spin animation for the loading icon", "classes": ["animate-spin"] },
+  {
+    "text": "cursor not allowed and 40 percent opacity",
+    "classes": ["cursor-not-allowed", "opacity-40"]
+  },
+  {
+    "text": "heading: 4xl, extra bold, tight tracking",
+    "classes": ["text-4xl", "font-extrabold", "tracking-tight"]
+  },
+  { "text": "monospace font in a light gray box", "classes": ["font-mono", "bg-gray-200"] },
+  { "text": "grid of 4 columns with a gap of 6", "classes": ["grid", "grid-cols-4", "gap-6"] },
+  {
+    "text": "fixed to the bottom, full width, white background, top shadow",
+    "classes": ["fixed", "bottom-0", "w-full", "bg-white", "shadow-md"]
+  },
+  {
+    "text": "capitalise each word and space the letters wider",
+    "classes": ["capitalize", "tracking-wider"]
+  },
+  {
+    "text": "rose coloured text that goes darker when hovered",
+    "classes": ["text-rose-500", "hover:text-rose-700"]
+  },
+  {
+    "text": "no shadow, no border, no rounding",
+    "classes": ["shadow-none", "border-0", "rounded-none"]
+  },
+  { "text": "inline block with 2 horizontal padding", "classes": ["inline-block", "px-2"] },
+  { "text": "keyboard focus shows a 2px ring", "classes": ["focus-visible:ring-2"] },
+  { "text": "hide it when printing", "classes": ["print:hidden"] },
+  { "text": "ring 4 in sky 300 on focus", "classes": ["focus:ring-4", "focus:ring-sky-300"] },
+  { "text": "zebra striped rows with a slate 50 background", "classes": ["even:bg-slate-50"] },
+  { "text": "aspect ratio 16:9 and object cover", "classes": ["aspect-video", "object-cover"] },
+  {
+    "text": "scale up 5% on hover with a quick transition",
+    "classes": ["hover:scale-105", "transition", "duration-150"]
+  },
+  { "text": "text 2xl on tablets, 3xl on desktop", "classes": ["md:text-2xl", "lg:text-3xl"] },
+  { "text": "first child gets no top margin", "classes": ["first:mt-0"] },
+  { "text": "select none and pointer cursor", "classes": ["select-none", "cursor-pointer"] },
+  {
+    "text": "narrow container, 28rem max, centered with auto margins",
+    "classes": ["container", "mx-auto", "max-w-[28rem]"]
+  },
+  {
+    "text": "the label is upper case, tracking widest, 10px",
+    "classes": ["uppercase", "tracking-widest", "text-[10px]"]
+  },
+  { "text": "translucent black backdrop", "classes": ["bg-black/50"] },
+  {
+    "text": "wrap the flex items, gap x 2, gap y 4",
+    "classes": ["flex", "flex-wrap", "gap-x-2", "gap-y-4"]
+  },
+  { "text": "min height of the screen", "classes": ["min-h-screen"] },
+  { "text": "make the text balance and pretty wrap", "classes": ["text-balance", "text-pretty"] },
+  {
+    "text": "gradient-free plain white surface with a hairline gray border",
+    "classes": ["bg-white", "border", "border-gray-500"]
+  },
+  {
+    "text": "green when checked, red when invalid",
+    "classes": ["checked:bg-green-500", "invalid:bg-red-500"]
+  },
+  {
+    "text": "group hover reveals it: opacity 0 normally, 100 when parent hovered",
+    "classes": ["opacity-0", "group-hover:opacity-100"]
+  },
+  { "text": "line clamp 3 lines", "classes": ["line-clamp-3"] },
+  { "text": "self aligned to the end, order last", "classes": ["self-end", "order-last"] },
+  {
+    "text": "bg transparent, border dashed, text emerald 600",
+    "classes": ["bg-transparent", "border", "border-dashed", "text-emerald-600"]
+  },
+  {
+    "text": "extra large shadow, 3xl rounded, 12 padding",
+    "classes": ["shadow-xl", "rounded-3xl", "p-12"]
+  },
+  {
+    "text": "backdrop blur and pointer events none",
+    "classes": ["blur-sm", "pointer-events-none"]
+  },
+  { "text": "vertical margin 8 on lg and up", "classes": ["lg:my-8"] },
+  {
+    "text": "text right aligned, semibold, teal 700",
+    "classes": ["text-right", "font-semibold", "text-teal-700"]
+  },
+  {
+    "text": "when the form field has an error make the border red 500",
+    "classes": ["invalid:border", "invalid:border-red-500"]
+  },
+  { "text": "reduce motion: no transition", "classes": ["motion-reduce:transition-none"] },
+  {
+    "text": "relative, overflow clipped, rounded xl",
+    "classes": ["relative", "overflow-hidden", "rounded-xl"]
+  }
+]
