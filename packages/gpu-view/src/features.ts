@@ -115,7 +115,7 @@ export function featurize(text: string, schema: Schema): ViewFeatures {
     const add = (block: string, v: number) => r.push(OFFSET[block]! + v);
 
     add("shape", tok.shape);
-    add("length", lengthBucket(tok.text.length));
+    add("length", lengthBucket(Array.from(tok.text).length)); // code points, like Python len()
     add("word", hashToken(tok.text, WORD_BUCKETS));
     add("skeleton", hashToken(skeleton(tok.text), SKEL_BUCKETS));
     add("keyword", KEYWORD_ID.get(low) ?? KEYWORD_COUNT);

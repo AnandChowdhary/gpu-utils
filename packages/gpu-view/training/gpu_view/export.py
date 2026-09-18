@@ -120,8 +120,13 @@ def main() -> None:
             {"name": "assignee", "kind": "text", "aliases": ["assigned"]},
             {"name": "priority", "kind": "enum", "values": ["low", "high"]}]}),
     ]
-    model.qat = True
+    # Cross-check the NumPy reference against torch *on the decoded int6 weights*: that is what
+    # ships. (Re-running fake-quant in float64 flips weights that sit on rounding ties.)
+    model.qat = False
     model.double()
+    with torch.no_grad():
+        for name in ViewTagger.TENSOR_NAMES:
+            getattr(model, name).copy_(torch.from_numpy(w[name]))
     worst = 0.0
     for ex_text, ex_schema in [(e.text, e.schema) for e in examples] + hand:
         toks, rows = features.featurize(ex_text, ex_schema)

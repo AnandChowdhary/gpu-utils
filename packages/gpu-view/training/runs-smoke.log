@@ -1,9 +1,0 @@
-/home/vercel-sandbox/gpu-utils-wt/gpu-view/packages/gpu-view/training/gpu_view/train.py:106: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
-Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
-  losses.append(float(loss))
-train: 20000 examples → train-20000-0.npz
-parameters: 33,087  feature rows: 639
-{"epoch": 1, "loss": 1.293583584439223, "dev": {"token_accuracy": 0.965305600545563, "boundary_accuracy": 0.9591111868837553, "sequence_exact": 0.342}, "transfer": {"token_accuracy": 0.9539406635715094, "boundary_accuracy": 0.9484769561771034, "sequence_exact": 0.274}, "elapsed_s": 6}
-{"epoch": 2, "loss": 0.12961960194786643, "dev": {"token_accuracy": 0.984002500497258, "boundary_accuracy": 0.9814167590145768, "sequence_exact": 0.618}, "transfer": {"token_accuracy": 0.9701619295663005, "boundary_accuracy": 0.9707564262257955, "sequence_exact": 0.4405}, "elapsed_s": 13}
-{"epoch": 3, "loss": 0.0827309020148341, "dev": {"token_accuracy": 0.9864177535305316, "boundary_accuracy": 0.9834342056658995, "sequence_exact": 0.6555}, "transfer": {"token_accuracy": 0.9723983693805911, "boundary_accuracy": 0.9730494847695618, "sequence_exact": 0.4725}, "elapsed_s": 21}
-saved /home/vercel-sandbox/gpu-utils-wt/gpu-view/packages/gpu-view/training/runs/smoke/model.pt

@@ -1036,10 +1036,8 @@ def compile_filter(clause: Clause, s: dict, text: str, span: dict, schema: Schem
             return [{**base, "op": "neq", "value": v} for v in s["value"]]
         return [{**base, "value": s["value"]}]
     # text
-    if op == "eq" and s.get("value") == "me":
-        return [{**base, "value": "me"}]
-    if op == "neq" and s.get("value") == "me":
-        return [{**base, "value": "me"}]
+    if s.get("value") == "me":
+        return [{**base, "value": values[0]}]  # as rendered, e.g. "Me" after casing noise
     if s.get("_expand"):
         return [{**base, "op": "neq", "value": v} for v in values]
     if op == "in":

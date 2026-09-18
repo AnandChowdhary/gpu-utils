@@ -1,0 +1,32 @@
+Using CPython 3.12.13
+Creating virtual environment at: .venv
+Activate with: source .venv/bin/activate
+/home/vercel-sandbox/gpu-utils-wt/gpu-view/video/.venv/lib/python3.12/site-packages/pydub/utils.py:300: SyntaxWarning: invalid escape sequence '\('
+  m = re.match('([su]([0-9]{1,2})p?) \(([0-9]{1,2}) bit\)$', token)
+/home/vercel-sandbox/gpu-utils-wt/gpu-view/video/.venv/lib/python3.12/site-packages/pydub/utils.py:301: SyntaxWarning: invalid escape sequence '\('
+  m2 = re.match('([su]([0-9]{1,2})p?)( \(default\))?$', token)
+/home/vercel-sandbox/gpu-utils-wt/gpu-view/video/.venv/lib/python3.12/site-packages/pydub/utils.py:310: SyntaxWarning: invalid escape sequence '\('
+  elif re.match('(flt)p?( \(default\))?$', token):
+/home/vercel-sandbox/gpu-utils-wt/gpu-view/video/.venv/lib/python3.12/site-packages/pydub/utils.py:314: SyntaxWarning: invalid escape sequence '\('
+  elif re.match('(dbl)p?( \(default\))?$', token):
+Manim Community v0.19.2
+
+Animation 0: FadeIn(Text('A phrase in a search bar')):   0%|          | 0/21 [00:00<?, ?it/s]                                                                                             [09/18/26 07:50:57] INFO     Animation 0 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/480p15/partial_movie_fi                         
+                             les/GpuViewPipeline/271356                         
+                             9302_708894464_223132457.m                         
+                             p4'                                                
+Animation 1: LaggedStart(Group):   0%|          | 0/24 [00:00<?, ?it/s]Animation 1: LaggedStart(Group):  46%|████▌     | 11/24 [00:00<00:00, 99.93it/s]Animation 1: LaggedStart(Group):  88%|████████▊ | 21/24 [00:00<00:00, 93.89it/s]                                                                                [09/18/26 07:50:58] INFO     Animation 1 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/480p15/partial_movie_fi                         
+                             les/GpuViewPipeline/212294                         
+                             6644_300658370_2469331662.                         
+                             mp4'                                               
+Animation 2: FadeIn(Text('schema: revenue:number  region:enum  closed_at:date')):   0%|          | 0/24 [00:00<?, ?it/s]Animation 2: FadeIn(Text('schema: revenue:number  region:enum  closed_at:date')):  58%|█████▊    | 14/24 [00:00<00:00, 131.05it/s]                                                                                                                                  

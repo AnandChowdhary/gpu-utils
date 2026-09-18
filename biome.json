@@ -2,7 +2,7 @@
   "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
-    "includes": ["**", "!**/dist", "!**/model/*.json", "!**/training/runs", "!video/media"]
+    "includes": ["**", "!**/dist", "!**/model/*.json", "!**/eval/*.json", "!**/test/fixtures/*.json", "!**/training/runs", "!video/media"]
   },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "linter": {
