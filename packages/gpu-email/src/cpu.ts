@@ -23,14 +23,18 @@ export function forwardCpu(model: Model, features: FeatureRows): Float32Array {
   if (n === 0) return out;
 
   const emb = weight(model, "emb");
+  // Activations are kept in float32 (like PyTorch); per-token accumulators in a local
+  // buffer keep the hot loop free of typed-array read-modify-write traffic.
   let x = new Float32Array(n * D);
+  const acc = new Float64Array(D);
   for (let i = 0; i < n; i++) {
     const row = features.rows[i]!;
-    const base = i * D;
-    for (const id of row) {
-      const off = id * D;
-      for (let d = 0; d < D; d++) x[base + d] = x[base + d]! + emb[off + d]!;
+    acc.fill(0);
+    for (let s = 0; s < row.length; s++) {
+      const off = row[s]! * D;
+      for (let d = 0; d < D; d++) acc[d] = acc[d]! + emb[off + d]!;
     }
+    x.set(acc, i * D);
   }
 
   const dilations = model.manifest.dilations;
@@ -38,26 +42,23 @@ export function forwardCpu(model: Model, features: FeatureRows): Float32Array {
     const dil = dilations[l]!;
     const w = weight(model, `conv${l}.w`); // [3, D_in, D_out]
     const b = weight(model, `conv${l}.b`);
-    const y = new Float32Array(n * D);
+    const next = new Float32Array(n * D);
     for (let i = 0; i < n; i++) {
-      const yBase = i * D;
+      for (let d = 0; d < D; d++) acc[d] = b[d]!;
       for (let k = 0; k < 3; k++) {
         const j = i + (k - 1) * dil;
         if (j < 0 || j >= n) continue;
         const xBase = j * D;
-        for (let ci = 0; ci < D; ci++) {
+        let wBase = k * D * D;
+        for (let ci = 0; ci < D; ci++, wBase += D) {
           const v = x[xBase + ci]!;
           if (v === 0) continue;
-          const wBase = (k * D + ci) * D;
-          for (let co = 0; co < D; co++) y[yBase + co] = y[yBase + co]! + v * w[wBase + co]!;
+          for (let co = 0; co < D; co++) acc[co] = acc[co]! + v * w[wBase + co]!;
         }
       }
-    }
-    const next = new Float32Array(n * D);
-    for (let i = 0; i < n; i++) {
       const base = i * D;
       for (let d = 0; d < D; d++) {
-        const a = y[base + d]! + b[d]!;
+        const a = Math.fround(acc[d]!);
         next[base + d] = x[base + d]! + (a > 0 ? a : 0);
       }
     }
