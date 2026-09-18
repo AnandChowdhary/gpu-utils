@@ -39,7 +39,11 @@ const OFF_POS = OFFSETS[6]!;
 const OFF_RPOS = OFFSETS[7]!;
 const OFF_COL = OFFSETS[8]!;
 
+const DIGIT = /^\p{Nd}$/u;
+
+/** ASCII code, non-ASCII -> 128, decimal digits collapsed to "0" (like hashToken). */
 function charBucket(ch: string): number {
+  if (DIGIT.test(ch)) return 48;
   const code = ch.codePointAt(0)!;
   return code < 128 ? code : 128;
 }

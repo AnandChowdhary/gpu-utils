@@ -3,9 +3,9 @@ import { grid, weightOffsets } from "../src/gpu.ts";
 import { MODEL } from "../src/model.ts";
 
 /**
- * The WebGPU path cannot run under Node without a device; test/gpu-parity.mjs runs the real
- * shader against the CPU path when Dawn bindings are available. Here we check the pieces that
- * must agree with shader.wgsl: the offset table order and the dispatch grid.
+ * The WebGPU path cannot run under Node without a device; bench/gpu-parity.mjs builds a browser
+ * page that runs the real shader against the CPU path on the fixtures. Here we check the pieces
+ * that must agree with shader.wgsl: the offset table order and the dispatch grid.
  */
 describe("gpu plumbing", () => {
   it("lays out weight offsets in the order the shader reads them", () => {

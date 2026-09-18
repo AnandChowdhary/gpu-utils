@@ -33,6 +33,9 @@ EMBED_ROWS = _acc
 
 
 def _char_bucket(ch: str) -> int:
+    """ASCII code, non-ASCII -> 128, decimal digits collapsed to '0' (like hash_token)."""
+    if ch.isdigit():
+        return 48
     code = ord(ch)
     return code if code < 128 else 128
 

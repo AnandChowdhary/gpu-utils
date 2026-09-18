@@ -180,3 +180,21 @@ describe("parse", () => {
     expect(r2.stats.model).toBe(1);
   });
 });
+
+describe("memoization", () => {
+  it("reuses model output for repeated templates and matches the unmemoized result", async () => {
+    const text = [
+      "2024-01-15 10:30:00,123 INFO app: user 42 logged in",
+      "2024-02-17 11:45:09,001 WARN app: user 77 logged in",
+      "\tat a.b.C.d(C.java:12)",
+      "\tat e.f.G.h(G.java:99)",
+    ].join("\n");
+    const a = await parse(text, { backend: "cpu" });
+    const b = await parse(text, { backend: "cpu", memoize: false });
+    expect(a.stats.memoized).toBe(2);
+    expect(b.stats.memoized).toBe(0);
+    expect(a.lines).toEqual(b.lines);
+    expect(a.lines[1]!.level).toBe("warn");
+    expect(a.lines[3]!.frame?.line).toBe(99);
+  });
+});

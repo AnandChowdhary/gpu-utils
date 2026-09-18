@@ -43,5 +43,14 @@ export interface LogLine {
 export interface LogParseResult {
   lines: LogLine[];
   /** How many lines went through each path (useful for tuning and tests). */
-  stats: { json: number; logfmt: number; model: number; blank: number; backend: "cpu" | "webgpu" };
+  stats: {
+    json: number;
+    logfmt: number;
+    /** Lines that needed the model (including memoised repeats). */
+    model: number;
+    /** Model lines answered from an identical feature sequence seen earlier in the call. */
+    memoized: number;
+    blank: number;
+    backend: "cpu" | "webgpu";
+  };
 }
