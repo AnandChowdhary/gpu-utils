@@ -1,0 +1,888 @@
+[
+  {
+    "text": "Hey — quick one. Can you get the deck over to Rowan Achterberg before Thursday? Legal at Bramblewick & Sons want it for the €48k renewal.",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Rowan Achterberg"
+      },
+      {
+        "kind": "date",
+        "text": "Thursday"
+      },
+      {
+        "kind": "company",
+        "text": "Bramblewick & Sons"
+      },
+      {
+        "kind": "money",
+        "text": "€48k"
+      }
+    ]
+  },
+  {
+    "text": "Flat 3, 14 Coronation Gardens\nLeeds LS6 2QT",
+    "kind": "address",
+    "spans": [
+      {
+        "kind": "address",
+        "text": "Flat 3, 14 Coronation Gardens\nLeeds LS6 2QT"
+      }
+    ]
+  },
+  {
+    "text": "Yuki Tanaka\nProduct Designer @ Loom\nyuki@loom.com | +81 90-1234-5678",
+    "kind": "contact",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Yuki Tanaka"
+      },
+      {
+        "kind": "company",
+        "text": "Loom"
+      },
+      {
+        "kind": "email",
+        "text": "yuki@loom.com"
+      },
+      {
+        "kind": "phone",
+        "text": "+81 90-1234-5678"
+      }
+    ]
+  },
+  {
+    "text": "{\"orderId\": 88213, \"items\": [{\"sku\": \"A-1\", \"qty\": 2}], \"paid\": true}",
+    "kind": "json",
+    "spans": []
+  },
+  {
+    "text": "id,name,email,joined\n1,Ada Lovelace,ada@analytical.engine,1843-10-12\n2,Grace Hopper,grace@navy.mil,1944-07-01",
+    "kind": "csv",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Ada Lovelace"
+      },
+      {
+        "kind": "email",
+        "text": "ada@analytical.engine"
+      },
+      {
+        "kind": "date",
+        "text": "1843-10-12"
+      },
+      {
+        "kind": "person",
+        "text": "Grace Hopper"
+      },
+      {
+        "kind": "email",
+        "text": "grace@navy.mil"
+      },
+      {
+        "kind": "date",
+        "text": "1944-07-01"
+      }
+    ]
+  },
+  {
+    "text": "sku\tqty\tprice\nA-100\t3\t12.50\nB-220\t1\t99.00",
+    "kind": "tsv",
+    "spans": []
+  },
+  {
+    "text": "## Release notes\n\n### Fixed\n- crash when the clipboard is empty\n- `parse()` now trims trailing newlines\n\n### Added\n- `backend: \"cpu\"` option",
+    "kind": "markdown",
+    "spans": []
+  },
+  {
+    "text": "<ul class=\"nav\">\n  <li><a href=\"/\">Home</a></li>\n  <li><a href=\"/about\">About</a></li>\n</ul>",
+    "kind": "html",
+    "spans": []
+  },
+  {
+    "text": "impl Iterator for Fib {\n    type Item = u64;\n    fn next(&mut self) -> Option<u64> {\n        let r = self.a;\n        self.a = self.b;\n        self.b += r;\n        Some(r)\n    }\n}",
+    "kind": "code",
+    "spans": []
+  },
+  {
+    "text": "https://news.ycombinator.com/item?id=39421043",
+    "kind": "url",
+    "spans": [
+      {
+        "kind": "url",
+        "text": "https://news.ycombinator.com/item?id=39421043"
+      }
+    ]
+  },
+  {
+    "text": "first.last+newsletter@sub.example.co.uk",
+    "kind": "email",
+    "spans": [
+      {
+        "kind": "email",
+        "text": "first.last+newsletter@sub.example.co.uk"
+      }
+    ]
+  },
+  {
+    "text": "+353 1 234 5678",
+    "kind": "phone",
+    "spans": [
+      {
+        "kind": "phone",
+        "text": "+353 1 234 5678"
+      }
+    ]
+  },
+  {
+    "text": "Thu, 21 Nov 2024 09:30:00 +0100",
+    "kind": "datetime",
+    "spans": [
+      {
+        "kind": "date",
+        "text": "Thu, 21 Nov 2024 09:30:00 +0100"
+      }
+    ]
+  },
+  {
+    "text": "hsl(210, 40%, 50%)",
+    "kind": "color",
+    "spans": [
+      {
+        "kind": "color",
+        "text": "hsl(210, 40%, 50%)"
+      }
+    ]
+  },
+  {
+    "text": "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+    "kind": "uuid",
+    "spans": [
+      {
+        "kind": "uuid",
+        "text": "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+      }
+    ]
+  },
+  {
+    "text": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+    "kind": "jwt",
+    "spans": []
+  },
+  {
+    "text": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+    "kind": "ip",
+    "spans": [
+      {
+        "kind": "ip",
+        "text": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+      }
+    ]
+  },
+  {
+    "text": "10.0.0.1:8080",
+    "kind": "ip",
+    "spans": [
+      {
+        "kind": "ip",
+        "text": "10.0.0.1:8080"
+      }
+    ]
+  },
+  {
+    "text": "~/Projects/gpu-utils/packages/gpu-paste/src/index.ts",
+    "kind": "path",
+    "spans": []
+  },
+  {
+    "text": "C:\\Users\\anand\\Downloads\\invoice (3).pdf",
+    "kind": "path",
+    "spans": []
+  },
+  {
+    "text": "1 234,56 kr",
+    "kind": "money",
+    "spans": [
+      {
+        "kind": "money",
+        "text": "1 234,56 kr"
+      }
+    ]
+  },
+  {
+    "text": "-$3.2M",
+    "kind": "money",
+    "spans": [
+      {
+        "kind": "money",
+        "text": "-$3.2M"
+      }
+    ]
+  },
+  {
+    "text": "1,299.00",
+    "kind": "number",
+    "spans": []
+  },
+  {
+    "text": "42%",
+    "kind": "number",
+    "spans": []
+  },
+  {
+    "text": "☐ passport\n☐ chargers\n☑ sunscreen\n☐ the good headphones",
+    "kind": "list",
+    "spans": []
+  },
+  {
+    "text": "cumin, coriander, smoked paprika, a whole head of garlic, and whatever chillies are left",
+    "kind": "list",
+    "spans": []
+  },
+  {
+    "text": "   \n\t\n",
+    "kind": "empty",
+    "spans": []
+  },
+  {
+    "text": "Ok so the plan: Maya picks up the van from Hertz on Sat, we load out at 7, and Deepak's cousin (the one from Rotterdam) meets us at the venue.",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Maya"
+      },
+      {
+        "kind": "company",
+        "text": "Hertz"
+      },
+      {
+        "kind": "date",
+        "text": "Sat"
+      },
+      {
+        "kind": "person",
+        "text": "Deepak"
+      }
+    ]
+  },
+  {
+    "text": "Sehr geehrte Frau Dr. Wagner,\n\nanbei die Rechnung Nr. 2024-118 über 1.850,00 € zahlbar bis zum 30.09.2024.\n\nMit freundlichen Grüßen\nTobias Brenner\nBrenner Sanitär GmbH & Co. KG",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Dr. Wagner"
+      },
+      {
+        "kind": "money",
+        "text": "1.850,00 €"
+      },
+      {
+        "kind": "date",
+        "text": "30.09.2024"
+      },
+      {
+        "kind": "person",
+        "text": "Tobias Brenner"
+      },
+      {
+        "kind": "company",
+        "text": "Brenner Sanitär GmbH & Co. KG"
+      }
+    ]
+  },
+  {
+    "text": "Apartamento 402, Torre B\nCalle 93 # 11-27\nBogotá, Colombia",
+    "kind": "address",
+    "spans": [
+      {
+        "kind": "address",
+        "text": "Apartamento 402, Torre B\nCalle 93 # 11-27\nBogotá, Colombia"
+      }
+    ]
+  },
+  {
+    "text": "〒150-0002 東京都渋谷区渋谷2丁目21−1",
+    "kind": "address",
+    "spans": [
+      {
+        "kind": "address",
+        "text": "〒150-0002 東京都渋谷区渋谷2丁目21−1"
+      }
+    ]
+  },
+  {
+    "text": "Unit 7/22 Wattle Cres, Port Macquarie NSW 2444",
+    "kind": "address",
+    "spans": [
+      {
+        "kind": "address",
+        "text": "Unit 7/22 Wattle Cres, Port Macquarie NSW 2444"
+      }
+    ]
+  },
+  {
+    "text": "B-14, Sector 62\nNoida, Uttar Pradesh 201301\nIndia",
+    "kind": "address",
+    "spans": [
+      {
+        "kind": "address",
+        "text": "B-14, Sector 62\nNoida, Uttar Pradesh 201301\nIndia"
+      }
+    ]
+  },
+  {
+    "text": "Sent from my iPhone\n\nOlu Adeyemi | Partnerships\nKano Bikes Ltd\n+234 803 555 0192\nwww.kanobikes.ng",
+    "kind": "contact",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Olu Adeyemi"
+      },
+      {
+        "kind": "company",
+        "text": "Kano Bikes Ltd"
+      },
+      {
+        "kind": "phone",
+        "text": "+234 803 555 0192"
+      },
+      {
+        "kind": "url",
+        "text": "www.kanobikes.ng"
+      }
+    ]
+  },
+  {
+    "text": "Dr. Ingrid Solberg-Haugen",
+    "kind": "contact",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Dr. Ingrid Solberg-Haugen"
+      }
+    ]
+  },
+  {
+    "text": "Priya Natarajan <priya.n@fastmail.fm>",
+    "kind": "contact",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Priya Natarajan"
+      },
+      {
+        "kind": "email",
+        "text": "priya.n@fastmail.fm"
+      }
+    ]
+  },
+  {
+    "text": "Landlord: Mr Kowalski, 07700 900123 (only after 6pm)",
+    "kind": "contact",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Mr Kowalski"
+      },
+      {
+        "kind": "phone",
+        "text": "07700 900123"
+      },
+      {
+        "kind": "date",
+        "text": "after 6pm"
+      }
+    ]
+  },
+  {
+    "text": "SELECT c.name, SUM(o.total) AS revenue\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.created_at >= '2024-01-01'\nGROUP BY 1\nHAVING SUM(o.total) > 1000\nORDER BY revenue DESC;",
+    "kind": "code",
+    "spans": [
+      {
+        "kind": "date",
+        "text": "2024-01-01"
+      }
+    ]
+  },
+  {
+    "text": "#!/usr/bin/env python3\nimport argparse, pathlib\n\np = argparse.ArgumentParser()\np.add_argument(\"src\", type=pathlib.Path)\nargs = p.parse_args()\nprint(sum(1 for _ in args.src.rglob(\"*.py\")))",
+    "kind": "code",
+    "spans": []
+  },
+  {
+    "text": "kubectl get pods -n prod | grep -v Running | awk '{print $1}' | xargs kubectl delete pod -n prod",
+    "kind": "code",
+    "spans": []
+  },
+  {
+    "text": "const debounce = (fn, ms = 300) => {\n  let t;\n  return (...args) => {\n    clearTimeout(t);\n    t = setTimeout(() => fn(...args), ms);\n  };\n};",
+    "kind": "code",
+    "spans": []
+  },
+  {
+    "text": "resource \"aws_s3_bucket\" \"logs\" {\n  bucket = \"acme-prod-logs\"\n  tags = {\n    Team = \"platform\"\n  }\n}",
+    "kind": "code",
+    "spans": []
+  },
+  {
+    "text": "> **Warning**\n> This API is deprecated and will be removed in v3. Use [`parseMany`](./docs/parse-many.md) instead.",
+    "kind": "markdown",
+    "spans": []
+  },
+  {
+    "text": "| Region | Q1 | Q2 |\n|:--|--:|--:|\n| EMEA | 1.2M | 1.4M |\n| APAC | 0.8M | 1.1M |",
+    "kind": "markdown",
+    "spans": []
+  },
+  {
+    "text": "Shopping for the BBQ\n\n* 2 kg chicken thighs\n* charcoal (the big bag)\n* lemons x6\n* ice!!",
+    "kind": "list",
+    "spans": []
+  },
+  {
+    "text": "Things I said I'd do this week\n1) call Mum\n2) cancel the gym\n3) finally fix the bike light\n4) reply to Hana re: Lisbon",
+    "kind": "list",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Hana"
+      }
+    ]
+  },
+  {
+    "text": "Kavya Menon — ok\nTom — out Fri\nBjörn — travelling until the 14th\nAisha — TBC",
+    "kind": "list",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Kavya Menon"
+      },
+      {
+        "kind": "person",
+        "text": "Tom"
+      },
+      {
+        "kind": "date",
+        "text": "Fri"
+      },
+      {
+        "kind": "person",
+        "text": "Björn"
+      },
+      {
+        "kind": "date",
+        "text": "the 14th"
+      },
+      {
+        "kind": "person",
+        "text": "Aisha"
+      }
+    ]
+  },
+  {
+    "text": "lol no way",
+    "kind": "prose",
+    "spans": []
+  },
+  {
+    "text": "Reminder: your appointment with Dr. Okafor is on Wed 5 Feb at 2:15pm. Reply STOP to opt out.",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Dr. Okafor"
+      },
+      {
+        "kind": "date",
+        "text": "Wed 5 Feb at 2:15pm"
+      }
+    ]
+  },
+  {
+    "text": "Your Uber receipt: £14.20 for the trip on 3 Jan. Driver: Samir.",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "company",
+        "text": "Uber"
+      },
+      {
+        "kind": "money",
+        "text": "£14.20"
+      },
+      {
+        "kind": "date",
+        "text": "3 Jan"
+      },
+      {
+        "kind": "person",
+        "text": "Samir"
+      }
+    ]
+  },
+  {
+    "text": "We regret to inform you that Ravensworth Holdings plc has entered administration as of 1 October 2024. Creditors should contact FRP Advisory on 020 3005 4000.",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "company",
+        "text": "Ravensworth Holdings plc"
+      },
+      {
+        "kind": "date",
+        "text": "1 October 2024"
+      },
+      {
+        "kind": "company",
+        "text": "FRP Advisory"
+      },
+      {
+        "kind": "phone",
+        "text": "020 3005 4000"
+      }
+    ]
+  },
+  {
+    "text": "fixed in a3f9c2e, closes #412 cc @mira",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "commit",
+        "text": "a3f9c2e"
+      },
+      {
+        "kind": "issue_ref",
+        "text": "#412"
+      },
+      {
+        "kind": "mention",
+        "text": "@mira"
+      }
+    ]
+  },
+  {
+    "text": "new brand blue is #1E40AF, old one was rgb(37, 99, 235) #design",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "color",
+        "text": "#1E40AF"
+      },
+      {
+        "kind": "color",
+        "text": "rgb(37, 99, 235)"
+      },
+      {
+        "kind": "hashtag",
+        "text": "#design"
+      }
+    ]
+  },
+  {
+    "text": "server 192.168.1.254 stopped responding at 2024-06-30T23:59:59Z, failover to 192.168.1.253 ok",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "ip",
+        "text": "192.168.1.254"
+      },
+      {
+        "kind": "date",
+        "text": "2024-06-30T23:59:59Z"
+      },
+      {
+        "kind": "ip",
+        "text": "192.168.1.253"
+      }
+    ]
+  },
+  {
+    "text": "Meet at Café Landtmann, Universitätsring 4, 1010 Wien — Saturday 11ish",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "company",
+        "text": "Café Landtmann"
+      },
+      {
+        "kind": "address",
+        "text": "Universitätsring 4, 1010 Wien"
+      },
+      {
+        "kind": "date",
+        "text": "Saturday 11ish"
+      }
+    ]
+  },
+  {
+    "text": "next tuesday afternoon",
+    "kind": "datetime",
+    "spans": [
+      {
+        "kind": "date",
+        "text": "next tuesday afternoon"
+      }
+    ]
+  },
+  {
+    "text": "R$ 2.499,90",
+    "kind": "money",
+    "spans": [
+      {
+        "kind": "money",
+        "text": "R$ 2.499,90"
+      }
+    ]
+  },
+  {
+    "text": "(0)30 / 12 34 56 78",
+    "kind": "phone",
+    "spans": [
+      {
+        "kind": "phone",
+        "text": "(0)30 / 12 34 56 78"
+      }
+    ]
+  },
+  {
+    "text": "Willkommen! Hier ist der Ablauf für morgen:\n- 09:00 Begrüßung\n- 09:30 Vortrag von Prof. Lehmann\n- 12:00 Mittagessen (Restaurant Zur Linde)",
+    "kind": "list",
+    "spans": [
+      {
+        "kind": "date",
+        "text": "morgen"
+      },
+      {
+        "kind": "date",
+        "text": "09:00"
+      },
+      {
+        "kind": "date",
+        "text": "09:30"
+      },
+      {
+        "kind": "person",
+        "text": "Prof. Lehmann"
+      },
+      {
+        "kind": "date",
+        "text": "12:00"
+      },
+      {
+        "kind": "company",
+        "text": "Restaurant Zur Linde"
+      }
+    ]
+  },
+  {
+    "text": "Kontakt\nMarta Nowak\nul. Długa 12/4\n80-827 Gdańsk\ntel. 58 301 22 33",
+    "kind": "contact",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Marta Nowak"
+      },
+      {
+        "kind": "address",
+        "text": "ul. Długa 12/4\n80-827 Gdańsk"
+      },
+      {
+        "kind": "phone",
+        "text": "58 301 22 33"
+      }
+    ]
+  },
+  {
+    "text": "Ristorante Da Enzo\nVia dei Vascellari 29\n00153 Roma RM\n06 581 6800",
+    "kind": "contact",
+    "spans": [
+      {
+        "kind": "company",
+        "text": "Ristorante Da Enzo"
+      },
+      {
+        "kind": "address",
+        "text": "Via dei Vascellari 29\n00153 Roma RM"
+      },
+      {
+        "kind": "phone",
+        "text": "06 581 6800"
+      }
+    ]
+  },
+  {
+    "text": "package main\n\nimport (\n\t\"context\"\n\t\"log/slog\"\n)\n\nfunc run(ctx context.Context) error {\n\tslog.InfoContext(ctx, \"starting\")\n\treturn nil\n}",
+    "kind": "code",
+    "spans": []
+  },
+  {
+    "text": ".btn:focus-visible {\n  outline: 2px solid var(--ring);\n  outline-offset: 2px;\n}",
+    "kind": "code",
+    "spans": []
+  },
+  {
+    "text": "- [ ] write the model card\n- [ ] record the demo\n- [x] ship it",
+    "kind": "markdown",
+    "spans": []
+  },
+  {
+    "text": "Ingredients\nFor the dough:\n500g strong flour\n10g salt\n7g yeast\n\nFor the topping:\nSan Marzano tomatoes\nfior di latte",
+    "kind": "list",
+    "spans": []
+  },
+  {
+    "text": "hello?",
+    "kind": "prose",
+    "spans": []
+  },
+  {
+    "text": "ETA 20 min, stuck behind a tractor on the A303",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "date",
+        "text": "20 min"
+      }
+    ]
+  },
+  {
+    "text": "Booking ref: 7HK2LP\nGuest: Ms Chloé Dubois-Martin\nCheck-in: 14 Aug 2025 · Check-out: 17 Aug 2025\nTotal paid: CHF 1'240.00",
+    "kind": "prose",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Ms Chloé Dubois-Martin"
+      },
+      {
+        "kind": "date",
+        "text": "14 Aug 2025"
+      },
+      {
+        "kind": "date",
+        "text": "17 Aug 2025"
+      },
+      {
+        "kind": "money",
+        "text": "CHF 1'240.00"
+      }
+    ]
+  },
+  {
+    "text": "Attendees: Lin Wei (Bytedance), Fatima Al-Sayed, J. Okonkwo\nApologies: Sven",
+    "kind": "list",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Lin Wei"
+      },
+      {
+        "kind": "company",
+        "text": "Bytedance"
+      },
+      {
+        "kind": "person",
+        "text": "Fatima Al-Sayed"
+      },
+      {
+        "kind": "person",
+        "text": "J. Okonkwo"
+      },
+      {
+        "kind": "person",
+        "text": "Sven"
+      }
+    ]
+  },
+  {
+    "text": "<!DOCTYPE html>\n<html lang=\"en\"><head><title>Hi</title></head><body><p>Contact: hello@site.dev</p></body></html>",
+    "kind": "html",
+    "spans": [
+      {
+        "kind": "email",
+        "text": "hello@site.dev"
+      }
+    ]
+  },
+  {
+    "text": "[{\"id\":1,\"who\":\"Ana Souza\",\"paid\":\"R$ 120,00\"},{\"id\":2,\"who\":\"Bo Lindqvist\",\"paid\":\"250 kr\"}]",
+    "kind": "json",
+    "spans": [
+      {
+        "kind": "person",
+        "text": "Ana Souza"
+      },
+      {
+        "kind": "money",
+        "text": "R$ 120,00"
+      },
+      {
+        "kind": "person",
+        "text": "Bo Lindqvist"
+      },
+      {
+        "kind": "money",
+        "text": "250 kr"
+      }
+    ]
+  },
+  {
+    "text": "src/components/Button/index.tsx",
+    "kind": "path",
+    "spans": []
+  },
+  {
+    "text": "2024-02-29",
+    "kind": "datetime",
+    "spans": [
+      {
+        "kind": "date",
+        "text": "2024-02-29"
+      }
+    ]
+  },
+  {
+    "text": "rebeccapurple",
+    "kind": "color",
+    "spans": [
+      {
+        "kind": "color",
+        "text": "rebeccapurple"
+      }
+    ]
+  },
+  {
+    "text": "mailto:support@example.com?subject=Help",
+    "kind": "url",
+    "spans": [
+      {
+        "kind": "url",
+        "text": "mailto:support@example.com?subject=Help"
+      }
+    ]
+  },
+  {
+    "text": "0xDEADBEEF",
+    "kind": "number",
+    "spans": []
+  },
+  {
+    "text": "tel: 1-800-275-2273 (Apple support, 24/7)",
+    "kind": "contact",
+    "spans": [
+      {
+        "kind": "phone",
+        "text": "1-800-275-2273"
+      },
+      {
+        "kind": "company",
+        "text": "Apple"
+      }
+    ]
+  }
+]

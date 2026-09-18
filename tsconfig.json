@@ -2,6 +2,9 @@
   "files": [],
   "references": [
     {
+      "path": "packages/gpu-paste"
+    },
+    {
       "path": "packages/gpu-tailwind"
     },
     {

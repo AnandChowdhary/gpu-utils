@@ -47,3 +47,7 @@ epoch 6 done: loss 0.0605 heldout {'token_acc': 0.9784827915362995, 'seq_acc': 0
 epoch 7 step 7200/8128 loss 0.0551 lr 2.34e-04 212s
 epoch 7 step 7400/8128 loss 0.0564 lr 1.83e-04 218s
 epoch 7 step 7600/8128 loss 0.0562 lr 1.44e-04 224s
+epoch 7 step 7800/8128 loss 0.0569 lr 1.17e-04 230s
+epoch 7 step 8000/8128 loss 0.0566 lr 1.03e-04 235s
+epoch 7 done: loss 0.0569 heldout {'token_acc': 0.9786286259744392, 'seq_acc': 0.7156666666666667, 'boundary_acc': 0.9992708278093015} (239s)
+best: {'epoch': 7, 'step': 8128, 'seed': 0, 'token_acc': 0.9786286259744392, 'seq_acc': 0.7156666666666667, 'boundary_acc': 0.9992708278093015, 'params': 45218, 'minutes': 3.9830095450083416}
