@@ -69,6 +69,13 @@ describe("gpu-paste rules", () => {
       ],
     });
     expect(parseDelimited("| a | b |\n|---|---|\n| 1 | 2 |")).toBeUndefined();
+    expect(
+      parseDelimited("We met on Monday; it went well.\nShe called later; nothing new."),
+    ).toBeUndefined();
+    expect(parseDelimited("milk, eggs\nbread, butter")?.rows).toEqual([
+      ["milk", " eggs"],
+      ["bread", " butter"],
+    ]);
   });
 
   it("normalises money and numbers across locales", () => {

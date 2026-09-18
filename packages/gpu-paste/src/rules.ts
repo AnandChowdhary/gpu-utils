@@ -112,7 +112,8 @@ const CODES = new Set(
 );
 const SYM_RE =
   "US\\$|CA\\$|AU\\$|NZ\\$|HK\\$|MX\\$|CN¥|SFr\\.|Fr\\.|Rs\\.?|Rp|R\\$|[ACS]\\$|[$€£¥₹₽₩₪₺₫₱฿₦₴₡₲₵]|kr\\.?|zł|Kč|Ft|руб\\.?|円|원|TL";
-const NUM_RE = "\\d{1,2}(?:,\\d{2})+,\\d{3}(?:\\.\\d+)?|\\d{1,3}(?:[ ,.']\\d{3})+(?:[.,]\\d+)?|\\d+(?:[.,]\\d+)?";
+const NUM_RE =
+  "\\d{1,2}(?:,\\d{2})+,\\d{3}(?:\\.\\d+)?|\\d{1,3}(?:[ ,.']\\d{3})+(?:[.,]\\d+)?|\\d+(?:[.,]\\d+)?";
 const MULT_RE = "\\s?(?:[kK]|[mM](?:n|io\\.?)?|[bB]n|M|million|billion|thousand|Mio\\.?|Mrd\\.?)?";
 const MONEY_RE = new RegExp(
   `^(?:(-|−|\\+)?(${SYM_RE}|[A-Z]{3})\\s?(-|−|\\+)?(${NUM_RE})(${MULT_RE})|(-|−|\\+)?(${NUM_RE})(${MULT_RE})\\s?(${SYM_RE}|[A-Z]{3}|${Object.keys(WORDS).join("|")}))$`,
@@ -522,6 +523,12 @@ export function parseDelimited(
     }
     const width = rows[0]!.length;
     if (!ok || width < 2 || rows.some((r) => r.length !== width)) continue;
+    // Cells are values, not sentences: prose with one ";" per line is not a table.
+    const cells = rows.flat();
+    const shortCells = cells.filter(
+      (c) => c.trim().split(/\s+/).length <= 4 && !/[.!?]$/.test(c.trim()),
+    ).length;
+    if (delimiter !== "\t" && shortCells < cells.length * 0.6) continue;
     const out: { delimiter: string; rows: string[][]; header?: string[] } = { delimiter, rows };
     const first = rows[0]!;
     const numeric = (c: string) => parseNumber(c) !== undefined;

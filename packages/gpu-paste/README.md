@@ -87,10 +87,11 @@ contacts is still `csv`; its e-mails come from the regex and its names from the 
 
 | Measure | Value |
 |---|---|
-| Package (min + Brotli, incl. int6 weights and WGSL) | see `pnpm size`; budget 60,000 B (60 KB) |
+| Package (min + Brotli, incl. int6 weights and WGSL) | 51.0 KiB (52,224 B); budget 60,000 B |
 | Weights alone (66,339 int6 params, Brotli) | ~38 KB |
 | Parameters | 66,339 |
-| CPU path, 1 KB paste (≈ 250 tokens), Node 24 | ≈ 1 ms warm |
+| CPU path, short contact (12 tokens), Node 24 | 0.5 ms warm |
+| CPU path, 1 KB paste (425 tokens), Node 24 | 13–14 ms warm (≈ 30 µs / token) |
 | WebGPU cold start (device + 7 pipelines + weight upload) | ≈ 50–100 ms (estimate, no GPU on the build box) |
 | WebGPU warm call, 1 KB paste | ≈ 1–3 ms, dominated by readback (estimate) |
 
