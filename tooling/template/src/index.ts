@@ -7,12 +7,13 @@
  */
 import { type Backend, hasWebGPU } from "@gpu-utils/runtime";
 import { forwardCpu } from "./cpu.ts";
-import { type __PASCAL__Result, decode } from "./decode.ts";
+import type { __PASCAL__Result } from "./decode.ts";
+import { decode } from "./decode.ts";
 import { featurize } from "./features.ts";
 import { forwardGpu } from "./gpu.ts";
 import { MODEL } from "./model.ts";
 
-export type { __PASCAL__Result } from "./decode.ts";
+export type { __PASCAL__Result, __PASCAL__Span } from "./decode.ts";
 
 export interface __PASCAL__Options {
   /** "auto" uses WebGPU for large inputs when available and the CPU reference otherwise. */
@@ -32,5 +33,5 @@ export async function parse(
     backend === "webgpu" ||
     (backend === "auto" && hasWebGPU() && features.tokens.length >= GPU_MIN_TOKENS);
   const logits = useGpu ? await forwardGpu(MODEL, features) : forwardCpu(MODEL, features);
-  return decode(MODEL, features, logits);
+  return decode(MODEL, features, logits, text);
 }
