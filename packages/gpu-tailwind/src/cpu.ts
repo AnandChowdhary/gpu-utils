@@ -40,12 +40,18 @@ export function forwardCpu(model: Model, features: FeatureRows): Float32Array {
     const row = features.rows[t]!;
     for (const id of row) {
       const base = id * D;
-      for (let d = 0; d < D; d++) e[t * D + d] += emb[base + d]!;
+      for (let d = 0; d < D; d++) e[t * D + d] = e[t * D + d]! + emb[base + d]!;
     }
   }
 
   // gated scans; weights are [D_in, D_out] row-major as in torch (e @ W)
-  const scan = (wa: Float32Array, ba: Float32Array, wu: Float32Array, bu: Float32Array, reverse: boolean) => {
+  const scan = (
+    wa: Float32Array,
+    ba: Float32Array,
+    wu: Float32Array,
+    bu: Float32Array,
+    reverse: boolean,
+  ) => {
     const a = new Float32Array(n * D);
     const b = new Float32Array(n * D);
     for (let t = 0; t < n; t++) {
@@ -92,7 +98,7 @@ export function forwardCpu(model: Model, features: FeatureRows): Float32Array {
     let s = 0;
     for (let t = 0; t < n; t++) s += x[t * W + d]!;
     const mean = s / n;
-    for (let h = 0; h < H; h++) gctx[h] += mean * wg[d * H + h]!;
+    for (let h = 0; h < H; h++) gctx[h] = gctx[h]! + mean * wg[d * H + h]!;
   }
   // depthwise conv3 + head
   const c = new Float32Array(W);

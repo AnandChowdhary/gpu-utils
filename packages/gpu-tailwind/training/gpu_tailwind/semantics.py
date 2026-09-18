@@ -16,15 +16,21 @@ SHADES = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "
 SIZES = ["xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl", "9xl"]
 WEIGHTS = ["thin", "extralight", "light", "normal", "medium", "semibold", "bold", "extrabold", "black"]
 
-PROP_OF: dict[str, str] = {p: k for k, ps in PROPS.items() for p in ps}
+def norm_key(p: str) -> str:
+    return " ".join(words_of(p))
+
+
+PROP_OF: dict[str, str] = {norm_key(p): k for k, ps in PROPS.items() for p in ps}
 VAL_OF: dict[str, str] = {}
 MOD_OF: dict[str, str] = {}
 for _k, _ps in VALUES.items():
     for _p in _ps:
         if _k.startswith("mod:"):
-            MOD_OF.setdefault(_p, _k[4:])
+            MOD_OF.setdefault(norm_key(_p), _k[4:])
         else:
-            VAL_OF.setdefault(_p, _k)
+            VAL_OF.setdefault(norm_key(_p), _k)
+            if re.search(r"[^a-z0-9 ]", _p):
+                VAL_OF.setdefault(_p.replace(" ", ""), _k)
 
 SPACING = ["p", "px", "py", "pt", "pr", "pb", "pl", "m", "mx", "my", "mt", "mr", "mb", "ml", "gap", "gap-x", "gap-y", "space-x", "space-y"]
 INSETS = ["top", "bottom", "left", "right", "inset"]
@@ -52,6 +58,10 @@ def shift_size(sz: str, by: int, lo: str = "xs", hi: str = "3xl") -> str:
         return sz
     i = max(SIZES.index(lo), min(SIZES.index(hi), SIZES.index(sz) + by))
     return SIZES[i]
+
+
+def size_le(s: str, hi: str) -> bool:
+    return s in SIZES and SIZES.index(s) <= SIZES.index(hi)
 
 
 def shift_shade(shade: str, by: int) -> str:
@@ -205,6 +215,8 @@ def sizing_value(k: str, v: Value | None, neg: bool) -> list[str]:
         if v.value == "none":
             return ["max-w-none"] if k == "max-w" else [f"{k}-0"]
         s = shift_size(v.value, v.intensity, "xs", "7xl")
+        if not size_le(s, "7xl"):
+            return []
         if horizontal:
             return [f"{k}-{s}"]
         n = SZ_HEIGHT.get(s)
@@ -248,7 +260,7 @@ def text_value(v: Value | None, neg: bool) -> list[str]:
     if v.kind == "num":
         return [f"text-[{v.value}px]"] if is_int(v.value, 6, 200) else []
     if v.kind == "unit":
-        return [f"text-[{v.value}]"] if unit_ok(v, LENGTH_UNITS) else []
+        return [f"text-[{v.value}]"] if unit_ok(v, ("px", "rem", "em")) else []
     if v.kind == "spec":
         return {"center": ["text-center"], "hcenter": ["text-center"], "vcenter": ["align-middle"], "sr-only": ["sr-only"]}.get(v.value, [])
     if v.kind == "kw":
@@ -373,11 +385,12 @@ def rounded_value(k: str, v: Value | None, neg: bool) -> list[str]:
             return [f"{k}-full"]
         if v.value == "none":
             return [f"{k}-none"]
-        return [f"{k}-{shift_size(v.value, v.intensity, 'xs', '4xl')}"]
+        s = shift_size(v.value, v.intensity, "xs", "4xl")
+        return [f"{k}-{s}"] if size_le(s, "4xl") else []
     if v.kind == "num":
         return [f"{k}-[{v.value}px]"] if is_int(v.value, 0, 64) else []
     if v.kind == "unit":
-        return [f"{k}-[{v.value}]"] if unit_ok(v, LENGTH_UNITS) else []
+        return [f"{k}-[{v.value}]"] if unit_ok(v, ("px", "rem", "em")) else []
     if v.kind == "kw" and v.value == "square":
         return [f"{k}-none"]
     return []
@@ -414,7 +427,7 @@ def shadow_value(v: Value | None, neg: bool) -> list[str]:
         if v.value == "full":
             return ["shadow-2xl"]
         s = shift_size(v.value, v.intensity, "xs", "2xl")
-        return [f"shadow-{s}"]
+        return [f"shadow-{s}"] if size_le(s, "2xl") else []
     if v.kind == "col":
         return ["shadow-md", f"shadow-{v.value}"]
     if v.kind == "mod":
@@ -597,7 +610,9 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     if k.startswith("border") and k != "border-style":
         return border_value(k, v, neg)
     if k == "border-style":
-        return [f"border-{v.value}"] if v is not None and v.kind == "kw" and v.value in ("dashed", "dotted", "solid", "double") else ["border-solid"]
+        if v is None:
+            return ["border-solid"]
+        return [f"border-{v.value}"] if v.kind == "kw" and v.value in ("dashed", "dotted", "solid", "double") else []
     if k.startswith("rounded"):
         return rounded_value(k, v, neg)
     if k in ("ring", "outline"):
@@ -833,7 +848,8 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if v.kind == "sz":
             if v.value == "none":
                 return ["blur-none"]
-            return [f"blur-{shift_size(v.value, v.intensity, 'xs', '3xl')}"]
+            s = shift_size(v.value, v.intensity, "xs", "3xl")
+            return [f"blur-{s}"] if size_le(s, "3xl") else []
         return []
     if k == "list":
         if neg:

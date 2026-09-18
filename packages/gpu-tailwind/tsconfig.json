@@ -7,6 +7,6 @@
     "declarationMap": false,
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo"
   },
-  "include": ["src"],
+  "include": ["src", "src/**/*.json"],
   "references": [{ "path": "../runtime" }]
 }

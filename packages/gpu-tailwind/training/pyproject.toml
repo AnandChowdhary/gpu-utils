@@ -26,7 +26,10 @@ build-backend = "hatchling.build"
 packages = ["gpu_tailwind"]
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = [
+    "pytest>=8",
+    "wgpu>=0.19",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

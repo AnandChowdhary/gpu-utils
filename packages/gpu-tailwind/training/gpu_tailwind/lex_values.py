@@ -121,7 +121,7 @@ VALUES: dict[str, list[str]] = {
     "num:32": ["thirty two", "thirty-two"],
     "num:40": ["forty"],
     "num:48": ["forty eight", "forty-eight"],
-    "num:50": ["fifty", "half"],
+    "num:50": ["fifty"],
     "num:60": ["sixty"],
     "num:64": ["sixty four", "sixty-four"],
     "num:75": ["seventy five", "three quarters", "seventy-five"],

@@ -2,7 +2,7 @@
 
     uv run python -m gpu_tailwind.build_table
 
-The theme is read from training/data/tailwind-theme.css (vendored from the
+The theme is read from training/data/tailwind-theme.txt (vendored from the
 `tailwindcss` npm package, MIT); pass --fetch to re-download it from unpkg.
 """
 
@@ -14,10 +14,10 @@ import sys
 import urllib.request
 from pathlib import Path
 
-from .lexicon import NEG_WORDS, PRESETS, PROPS, SEP_WORDS, SPELLING, VALUES, VAR_RULES
+from .lexicon import NEG_WORDS, PRESETS, PROPS, SEP_WORDS, SPELLING, VALUES, VAR_RULES, words_of
 
 ROOT = Path(__file__).resolve().parents[2]
-THEME = ROOT / "training" / "data" / "tailwind-theme.css"
+THEME = ROOT / "training" / "data" / "tailwind-theme.txt"
 OUT = ROOT / "src" / "table.json"
 URL = "https://unpkg.com/tailwindcss@4/theme.css"
 
@@ -62,15 +62,18 @@ def main() -> None:
         THEME.parent.mkdir(parents=True, exist_ok=True)
         THEME.write_bytes(urllib.request.urlopen(URL, timeout=30).read())  # noqa: S310
     theme = parse_theme(THEME.read_text())
-    props = {p: k for k, ps in PROPS.items() for p in ps}
+    norm = lambda p: " ".join(words_of(p))  # noqa: E731
+    props = {norm(p): k for k, ps in PROPS.items() for p in ps}
     vals: dict[str, str] = {}
     mods: dict[str, str] = {}
     for k, ps in VALUES.items():
         for p in ps:
             if k.startswith("mod:"):
-                mods.setdefault(p, k[4:])
+                mods.setdefault(norm(p), k[4:])
             else:
-                vals.setdefault(p, k)
+                vals.setdefault(norm(p), k)
+                if re.search(r"[^a-z0-9 ]", p):
+                    vals.setdefault(p.replace(" ", ""), k)
     table = {
         "theme": theme,
         "props": props,

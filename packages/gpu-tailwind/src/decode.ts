@@ -1,5 +1,17 @@
 import { type FeatureRows, type Token, viterbi } from "@gpu-utils/runtime";
-import { applyVariants, correctWords, emit, isValidClass, literalClass, parseValue, resolveVariant, standalone, T, type Value, wordsOf } from "./compile.ts";
+import {
+  applyVariants,
+  correctWords,
+  emit,
+  isValidClass,
+  literalClass,
+  parseValue,
+  resolveVariant,
+  standalone,
+  T,
+  type Value,
+  wordsOf,
+} from "./compile.ts";
 import type { Model } from "./model.ts";
 
 export interface Diagnostic {
@@ -57,7 +69,10 @@ function toSpans(tokens: Token[], labels: string[], boundary: boolean[]): Span[]
     if (!cur) return;
     // trim trailing whitespace tokens
     while (cur.last > cur.first && /^\s+$/.test(tokens[cur.last]!.text)) cur.last--;
-    cur.text = tokens.slice(cur.first, cur.last + 1).map((t) => t.text).join("");
+    cur.text = tokens
+      .slice(cur.first, cur.last + 1)
+      .map((t) => t.text)
+      .join("");
     spans.push(cur);
     cur = null;
   };
@@ -117,24 +132,24 @@ function lookupProp(text: string): string | null {
 }
 
 function lookupValue(text: string): Value | null {
-  const lit = literalClass(text);
-  if (lit) return { kind: "lit", value: lit, intensity: 0 };
   const v = parseValue(text);
   if (v) return v;
+  const lit = literalClass(text);
+  if (lit) return { kind: "lit", value: lit, intensity: 0 };
   const fixed = correctWords(wordsOf(text));
   return fixed ? parseValue(fixed.join(" ")) : null;
 }
 
 function lookupVariant(text: string): string | null {
   const words = wordsOf(text);
-  const v = resolveVariant(words);
-  if (v) return v;
-  const fixed = correctWords(words);
-  return fixed ? resolveVariant(fixed) : null;
+  // correct typos first: a misspelt keyword would otherwise silently change the variant
+  return resolveVariant(correctWords(words) ?? words);
 }
 
 interface Unit {
   span: Span;
+  /** position among the segment's non-O spans */
+  index: number;
   key?: string;
   value?: Value | null;
   neg: boolean;
@@ -144,13 +159,18 @@ function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[])
   const first = tokens[seg[0]!.first]!;
   const last = tokens[seg[seg.length - 1]!.last]!;
   const span = { start: first.start, end: last.end };
-  const text = tokens.slice(seg[0]!.first, seg[seg.length - 1]!.last + 1).map((t) => t.text).join("");
-  const diag = (message: string, s: Span) => diagnostics.push({ message, start: tokens[s.first]!.start, end: tokens[s.last]!.end });
+  const text = tokens
+    .slice(seg[0]!.first, seg[seg.length - 1]!.last + 1)
+    .map((t) => t.text)
+    .join("");
+  const diag = (message: string, s: Span) =>
+    diagnostics.push({ message, start: tokens[s.first]!.start, end: tokens[s.last]!.end });
 
   const variants: string[] = [];
   const props: Unit[] = [];
   const vals: Unit[] = [];
   let pendingNeg = false;
+  let index = 0;
   for (const s of seg) {
     if (s.role === "NEG") {
       pendingNeg = true;
@@ -160,34 +180,41 @@ function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[])
       const v = lookupVariant(s.text);
       if (v) variants.push(v);
       else diag(`unknown variant "${s.text}"`, s);
+      index++;
       continue;
     }
     if (s.role === "PROP") {
       const key = lookupProp(s.text);
-      if (key) props.push({ span: s, key, neg: pendingNeg });
+      if (key) props.push({ span: s, index, key, neg: pendingNeg });
       else diag(`unknown property "${s.text}"`, s);
     } else {
       const value = lookupValue(s.text);
-      if (value) vals.push({ span: s, value, neg: pendingNeg });
+      if (value) vals.push({ span: s, index, value, neg: pendingNeg });
       else diag(`unknown value "${s.text}"`, s);
     }
     pendingNeg = false;
+    index++;
   }
 
-  // pair every value with the nearest compatible property (ties prefer the preceding one)
+  // pair every value with the nearest compatible property, measured in spans; ties go to
+  // the preceding property for numbers ("gap 4") and the following one for adjectives
+  // ("blue background")
+  const NUMERIC = new Set(["num", "unit", "pct", "frac"]);
   const assigned = new Map<Unit, Unit[]>();
   const loose: Unit[] = [];
   for (const v of vals) {
     let best: Unit | null = null;
     let bestDist = Number.POSITIVE_INFINITY;
-    for (const p of props) {
-      if (!emit(p.key!, v.value!, false).length && !(v.value!.kind === "lit")) continue;
-      if (v.value!.kind === "lit") continue;
-      const before = p.span.last < v.span.first;
-      const dist = before ? v.span.first - p.span.last : p.span.first - v.span.last;
-      if (dist < bestDist || (dist === bestDist && before)) {
-        best = p;
-        bestDist = dist;
+    if (v.value!.kind !== "lit") {
+      for (const p of props) {
+        if (emit(p.key!, v.value!, false).length === 0) continue;
+        const before = p.index < v.index;
+        const dist = Math.abs(p.index - v.index);
+        const prefer = NUMERIC.has(v.value!.kind) ? before : !before;
+        if (dist < bestDist || (dist === bestDist && prefer)) {
+          best = p;
+          bestDist = dist;
+        }
       }
     }
     if (best) {
@@ -208,13 +235,14 @@ function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[])
     }
   };
   // emit in phrase order
-  const units = [...props, ...loose].sort((a, b) => a.span.first - b.span.first);
+  const units = [...props, ...loose].sort((a, b) => a.index - b.index);
   for (const u of units) {
     if (u.key !== undefined) {
       const values = assigned.get(u) ?? [];
       if (values.length === 0) {
         const cs = emit(u.key, null, u.neg);
-        if (cs.length === 0 && !u.key.startsWith("preset:")) diag(`"${u.span.text}" needs a value`, u.span);
+        if (cs.length === 0 && !u.key.startsWith("preset:"))
+          diag(`"${u.span.text}" needs a value`, u.span);
         push(cs, u.span);
       } else {
         for (const v of values) push(emit(u.key, v.value!, u.neg || v.neg), v.span);
@@ -230,7 +258,8 @@ function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[])
     return null;
   }
   if (classes.length === 0) {
-    if (props.length || vals.length) diagnostics.push({ message: `no classes for "${text}"`, ...span });
+    if (props.length || vals.length)
+      diagnostics.push({ message: `no classes for "${text}"`, ...span });
     return null;
   }
   const final = applyVariants(classes, variants);
@@ -272,7 +301,11 @@ export function decode(model: Model, features: FeatureRows, logits: Float32Array
 }
 
 /** Compile from gold labels (used by the oracle test to check compiler/generator parity). */
-export function decodeLabels(features: FeatureRows, labels: string[], boundary: boolean[]): TailwindResult {
+export function decodeLabels(
+  features: FeatureRows,
+  labels: string[],
+  boundary: boolean[],
+): TailwindResult {
   const spans = toSpans(features.tokens, labels, boundary);
   const diagnostics: Diagnostic[] = [];
   const groups: Group[] = [];
@@ -282,5 +315,11 @@ export function decodeLabels(features: FeatureRows, labels: string[], boundary: 
   }
   const classes: string[] = [];
   for (const g of groups) for (const c of g.classes) if (!classes.includes(c)) classes.push(c);
-  return { classes, groups, diagnostics, labels, tokens: features.tokens.map(({ text, start, end }) => ({ text, start, end })) };
+  return {
+    classes,
+    groups,
+    diagnostics,
+    labels,
+    tokens: features.tokens.map(({ text, start, end }) => ({ text, start, end })),
+  };
 }

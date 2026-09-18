@@ -16,8 +16,8 @@ import { featurize } from "./features.ts";
 import { forwardGpu } from "./gpu.ts";
 import { MODEL } from "./model.ts";
 
-export type { Diagnostic, Group, TailwindResult } from "./decode.ts";
 export { isValidClass } from "./compile.ts";
+export type { Diagnostic, Group, TailwindResult } from "./decode.ts";
 
 export interface TailwindOptions {
   /** "auto" uses WebGPU for large inputs when available and the CPU reference otherwise. */
@@ -38,7 +38,10 @@ export async function parse(text: string, options: TailwindOptions = {}): Promis
 }
 
 /** Batch helper: one call per phrase, sharing the loaded model. */
-export async function parseMany(texts: string[], options: TailwindOptions = {}): Promise<TailwindResult[]> {
+export async function parseMany(
+  texts: string[],
+  options: TailwindOptions = {},
+): Promise<TailwindResult[]> {
   const out: TailwindResult[] = [];
   for (const t of texts) out.push(await parse(t, options));
   return out;

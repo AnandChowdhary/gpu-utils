@@ -18,6 +18,7 @@ from pathlib import Path
 from gpu_utils_training.features import tokenize
 
 from .lexicon import GLUE_WORDS, NEG_WORDS, PROPS, SEP_WORDS, SPELLING, VALUES, VARIANT_PHRASES, resolve_variant, words_of
+from .pairing import compile_pieces
 from .semantics import HUES, MOD_OF, SHADES, Value, accepts, emit, parse_value, standalone
 
 LABELS = ["O", "B-PROP", "I-PROP", "B-VAL", "I-VAL", "B-VAR", "I-VAR", "SEP", "NEG"]
@@ -49,11 +50,15 @@ OUTROS = ["please", "thanks", "if possible", "ok", "for now", "basically", "and 
 LITERALS = ["p-4", "px-6", "py-2", "m-2", "mx-auto", "mt-8", "gap-4", "gap-2", "w-full", "w-1/2", "h-screen", "h-10", "max-w-md", "max-w-prose", "text-sm", "text-lg", "text-2xl", "text-center", "font-bold", "font-medium", "uppercase", "tracking-wide", "leading-relaxed", "truncate", "italic", "underline", "bg-white", "bg-gray-100", "bg-blue-500", "bg-black/50", "text-white", "text-gray-500", "text-red-600", "border", "border-2", "border-gray-200", "rounded", "rounded-lg", "rounded-full", "ring-2", "ring-blue-500", "shadow", "shadow-md", "shadow-lg", "opacity-50", "z-10", "z-50", "relative", "absolute", "fixed", "sticky", "top-0", "inset-0", "overflow-hidden", "overflow-auto", "flex", "inline-flex", "flex-col", "flex-wrap", "items-center", "justify-between", "justify-center", "grid", "grid-cols-3", "col-span-2", "transition", "duration-300", "ease-in-out", "cursor-pointer", "select-none", "hidden", "block", "sr-only", "hover:bg-blue-600", "hover:underline", "focus:ring-2", "focus:outline-hidden", "dark:bg-gray-900", "dark:text-white", "md:flex", "lg:w-1/3", "sm:hidden", "md:grid-cols-2", "lg:text-xl", "group-hover:opacity-100", "disabled:opacity-50", "first:mt-0", "last:border-0", "max-md:hidden", "xl:px-12", "2xl:max-w-7xl", "active:scale-95", "hover:shadow-lg", "focus-visible:ring-2", "motion-reduce:transition-none", "print:hidden"]
 
 
+LITERALS = [c for c in LITERALS if "-" in c or ":" in c]
+
+
 @dataclass
 class Piece:
     text: str
     role: str  # PROP VAL VAR SEP NEG O
     boundary: bool = False
+    key: str | None = None  # prop family for PROP, literal class for literal VAL
 
 
 @dataclass
@@ -167,7 +172,7 @@ def unit(rng: random.Random) -> tuple[list[Piece], list[str]]:
     r = rng.random()
     if r < 0.04:
         lit = rng.choice(LITERALS)
-        return [Piece(lit, "VAL")], [lit]
+        return [Piece(lit, "VAL", key=lit)], [lit]
     if r < 0.30:
         s = sample_standalone(rng)
         if s is None:
@@ -182,16 +187,16 @@ def unit(rng: random.Random) -> tuple[list[Piece], list[str]]:
     k = wchoice(rng, FAMILY_WEIGHTS)
     prop_phrase = rng.choice(PROPS[k])
     if k.startswith("preset:"):
-        return [Piece(prop_phrase, "PROP")], emit(k, None, False)
+        return [Piece(prop_phrase, "PROP", key=k)], emit(k, None, False)
     r = rng.random()
     neg = r < 0.07 and emit(k, None, True) != emit(k, None, False)
     if neg:
-        return [Piece(rng.choice(NEG_WORDS), "NEG"), Piece(prop_phrase, "PROP")], emit(k, None, True)
+        return [Piece(rng.choice(NEG_WORDS), "NEG"), Piece(prop_phrase, "PROP", key=k)], emit(k, None, True)
     if r < 0.25 and emit(k, None, False):
-        return [Piece(prop_phrase, "PROP")], emit(k, None, False)
+        return [Piece(prop_phrase, "PROP", key=k)], emit(k, None, False)
     s = sample_value_for(rng, k)
     if s is None:
-        return ([Piece(prop_phrase, "PROP")], emit(k, None, False)) if emit(k, None, False) else ([], [])
+        return ([Piece(prop_phrase, "PROP", key=k)], emit(k, None, False)) if emit(k, None, False) else ([], [])
     phrase, v = s
     cls = emit(k, v, False)
     order = rng.random()
@@ -202,12 +207,12 @@ def unit(rng: random.Random) -> tuple[list[Piece], list[str]]:
     else:
         prop_first = order < 0.5
     if prop_first:
-        pieces = [Piece(prop_phrase, "PROP")]
+        pieces = [Piece(prop_phrase, "PROP", key=k)]
         if rng.random() < 0.35:
             pieces.append(Piece(rng.choice(GLUE_BETWEEN), "O"))
         pieces.append(Piece(phrase, "VAL"))
     else:
-        pieces = [Piece(phrase, "VAL"), Piece(prop_phrase, "PROP")]
+        pieces = [Piece(phrase, "VAL"), Piece(prop_phrase, "PROP", key=k)]
     return pieces, cls
 
 
@@ -255,7 +260,9 @@ def segment(rng: random.Random) -> Segment:
             else:
                 seg.pieces.insert(0, vp)
                 seg.pieces.insert(1, Piece(rng.choice(["make it", "it becomes", "turn", "switch to", "go", "become", "it should be", "it is", "it gets"]), "O"))
-    seg.classes = apply_variant(classes, seg.variant)
+    # gold classes come from the compiler mirror on the clean pieces, so ambiguous
+    # pairings resolve identically on both sides
+    seg.classes = compile_pieces([(p.role, p.text, p.key) for p in seg.pieces])
     if seg.pieces:
         seg.pieces[0].boundary = True
     return seg
@@ -338,13 +345,13 @@ def build(rng: random.Random) -> dict | None:
             continue
         if text and not text.endswith(" "):
             text += " "
+        if text and rng.random() < 0.03:
+            text += " "  # occasional double space
         start = len(text)
         text += t
         spans.append((start, start + len(t), p.role, p.boundary))
         text += " "
     text = text.strip()
-    if rng.random() < 0.1:
-        text = re.sub(r" {1}", "  ", text, count=1) if rng.random() < 0.5 else text
     tokens = tokenize(text)
     labels: list[str] = []
     boundary: list[int] = []
@@ -393,6 +400,10 @@ def main() -> None:
             for r in rows:
                 f.write(json.dumps(r) + "\n")
         print(f"{name}: {len(rows)} examples -> {CACHE / f'{name}.jsonl'}")
+    # committed oracle sample for test/oracle.test.ts (generator/compiler parity)
+    with (CACHE.parent / "oracle.jsonl").open("w") as f:
+        for r in generate(400, 3):
+            f.write(json.dumps(r) + "\n")
     for r in generate(12, 7):
         print(r["text"], "=>", " ".join(r["classes"]))
 

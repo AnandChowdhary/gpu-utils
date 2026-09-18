@@ -3,7 +3,24 @@ import type { Model } from "./model.ts";
 import shader from "./shader.wgsl";
 
 export const ENTRIES = ["embed", "gates", "scan_local", "scan_fixup", "pool", "head"];
-export const TENSOR_ORDER = ["emb", "wa_f", "ba_f", "wu_f", "bu_f", "wa_b", "ba_b", "wu_b", "bu_b", "conv", "bc", "w1", "wg", "b1", "w2", "b2"];
+export const TENSOR_ORDER = [
+  "emb",
+  "wa_f",
+  "ba_f",
+  "wu_f",
+  "bu_f",
+  "wa_b",
+  "ba_b",
+  "wu_b",
+  "bu_b",
+  "conv",
+  "bc",
+  "w1",
+  "wg",
+  "b1",
+  "w2",
+  "b2",
+];
 const CHUNK = 256;
 
 let programPromise: Promise<Program> | undefined;
@@ -24,7 +41,10 @@ export function packParams(model: Model, n: number): Uint32Array {
 }
 
 /** Workgroup counts per pass for n tokens (shared with the Python harness). */
-export function dispatch(model: Model, n: number): { entry: string; workgroups: [number, number?, number?] }[] {
+export function dispatch(
+  model: Model,
+  n: number,
+): { entry: string; workgroups: [number, number?, number?] }[] {
   const D = model.hidden;
   return [
     { entry: "embed", workgroups: [Math.ceil((n * D) / 64)] },
@@ -49,7 +69,11 @@ export async function forwardGpu(model: Model, features: FeatureRows): Promise<F
   const flat = new Uint32Array(n * model.width);
   for (const [i, row] of features.rows.entries()) flat.set(row, i * model.width);
 
-  const params = program.buffer("params", packParams(model, n), GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
+  const params = program.buffer(
+    "params",
+    packParams(model, n),
+    GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  );
   const featureBuf = program.buffer("features", flat);
   const weights = program.buffer("weights", model.weights);
   const state = program.buffer("state", new Float32Array(n * D + n * W + model.head));
@@ -59,6 +83,10 @@ export async function forwardGpu(model: Model, features: FeatureRows): Promise<F
     new Float32Array(n * O),
     GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
   );
-  const out = await program.run([params, featureBuf, weights, state, scan, logits], dispatch(model, n), logits);
+  const out = await program.run(
+    [params, featureBuf, weights, state, scan, logits],
+    dispatch(model, n),
+    logits,
+  );
   return out.subarray(0, n * O);
 }
