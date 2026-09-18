@@ -2,8 +2,8 @@
 
 Natural language to table view specs: filter, sort, group, aggregate, limit, chart.
 
-Tiny model (37,711 parameters, int6), trained from scratch, runs on WebGPU or the CPU in the
-browser. Zero dependencies, 29.6 KiB Brotli including the weights. Part of
+Tiny model (37,775 parameters, int6), trained from scratch, runs on WebGPU or the CPU in the
+browser. Zero dependencies, 35.5 KiB Brotli including the weights. Part of
 [gpu-utils](https://github.com/AnandChowdhary/gpu-utils).
 
 It is **schema-blind**: the model never sees your field names. You pass the schema at
@@ -42,7 +42,8 @@ const spec = await parse("total revenue by region this quarter, top 10, as a bar
 
 Other phrases it handles: `open issues assigned to me sorted by priority`,
 `customers in Germany or France with more than 5 orders`,
-`average order value per month last year, line chart`, `repos not updated since 2024`,
+`average order value per month last year, line chart`, `unarchived repos with no maintainer`,
+`repos not updated in the last 30 days`, `vintage 2019 or older`,
 `plants without a species, newest first, limit 25`.
 
 ### Options
@@ -77,7 +78,7 @@ features that make the model schema-blind: matched a field (its kind, begin/insi
 nearest preceding or following field?), and the kind of and distance to the nearest field
 match on either side. The field words themselves never reach the model.
 
-A 37,711-parameter tagger from the shared scan family (`@gpu-utils/runtime`
+A 37,775-parameter tagger from the shared scan family (`@gpu-utils/runtime`
 `scanTaggerForward`; summed embeddings → bidirectional gated affine scan
 `h[t] = a[t]·h[t−1] + (1−a[t])·tanh(u[t])` as a parallel prefix scan → residual 5-tap
 depthwise convolution → mean-pooled context → two-layer head) emits one of 14 roles per
@@ -91,38 +92,51 @@ numbers with `k`/`m` suffixes and currency symbols, resolves relative dates (`to
 maps operator phrases and negation onto the op set, pairs aggregate functions with their
 fields, and reports diagnostics for anything left over. Comparatives and superlatives
 resolve through aliases: list `cheap` or `tall` as an alias of a numeric field and
-`cheapest first` sorts ascending, `taller than 50 cm` becomes `gt 50`. Mark one date field
-`primary: true` so bare time phrases ("this quarter") attach to it when the schema has
+`cheapest first` sorts ascending, `taller than 50 cm` becomes `gt 50`. A boolean field word
+may carry its negation as a prefix (`unarchived`, `nonbillable`, `inactive`). Mark one date
+field `primary: true` so bare time phrases ("this quarter") attach to it when the schema has
 several.
+
+Clauses compile independently, so a last pass normalises the spec as a whole: two `eq`
+filters on the same enum field become one value list, a `not_empty` implied by another
+filter on the same field is dropped, a field sorted twice keeps the direction the user
+spelled out, and duplicate aggregates collapse.
 
 ## Size and speed
 
 | Measure | Value |
 |---|---|
-| Bundle (min + Brotli, weights included) | 29.6 KiB (budget 39.1 KiB) |
-| Parameters | 33,087 (int6) |
-| Import + weight decode | ~5 ms (Node 24, Xeon 2.9 GHz) |
-| First parse (JIT warm-up) | ~15 ms |
-| Warm CPU parse, 19-token phrase | ~0.85 ms |
-| CPU batch of 1000 phrases | ~640 ms |
+| Bundle (min + Brotli, weights included) | 35.5 KiB (budget 39.1 KiB) |
+| Parameters | 37,775 (int6) |
+| Import + weight decode | ~5.2 ms (Node 24, Xeon 2.9 GHz) |
+| First parse (JIT warm-up) | ~13.5 ms |
+| Warm CPU parse, 14-token phrase | ~0.63 ms |
+| CPU batch of 1000 phrases | ~590 ms |
 
-The WGSL kernel (one workgroup per phrase, one thread per hidden channel) matches the CPU
-path to 1e-5 in a batched dispatch on Mesa's software Vulkan; it is used by `parseMany` for
-batches, where readback cost is amortised. Real-GPU timings are not measured yet.
+The canonical scan-family WGSL kernel from `@gpu-utils/runtime` (one workgroup per phrase,
+one thread per hidden channel) matches the CPU path to 1.5e-5 in a batched dispatch on Mesa's
+software Vulkan; it is used by `parseMany` for batches, where readback cost is amortised.
+Real-GPU timings are not measured yet.
 
 ## Limitations
 
-- Trained entirely on synthetic phrases. Held-out generated schemas reach 91% exact spec
-  match; a hand-written set of 65 phrases over four unseen schemas reaches 55%. See
-  [MODEL_CARD.md](./MODEL_CARD.md) for the failure analysis.
-- Superlatives that are not in the lexicon (`cheapest`, `tallest`), inflections the matcher
-  cannot bridge (`unopened` vs `opened`, `rated` vs `rating`), units after numbers
-  (`50 cm`) and date formats outside the resolver (`september 10 2026`, `this spring`)
-  are reported as diagnostics or missed.
-- Filters are always ANDed; `or` only forms value lists. Negated `contains`/`between` and
-  negated date ranges are unsupported and reported.
+- Trained entirely on synthetic phrases. Held-out generated schemas reach 88% exact spec
+  match; three hand-written sets of ~65 phrases over unseen schemas reach 74% / 67% / 72%.
+  See [MODEL_CARD.md](./MODEL_CARD.md) for the failure analysis.
+- A comparative or superlative only resolves when the adjective is a field word: with no
+  `long` alias on `pages`, `longest books first` sorts nothing. Say so in the schema
+  (`aliases: ["long"]`) or the phrase is reported as unresolved.
+- A number whose only field cue is a unit noun that is not a field word (`under 30 minutes`
+  when no field is called `minutes`) is reported, not guessed onto a field.
+- Free-text values the model has never seen are often not recognised as values
+  (`titles containing catan`); quoting them (`titles containing "catan"`) is reliable.
+- Verb-phrase negation (`games i do not own`, `workouts that were not completed`) is missed.
+- `before`/`after` on a year-like numeric field (`published before 2010`) compiles to `eq`.
+- Filters are always ANDed; `or` only forms value lists. Negated `contains` and date ranges
+  that end in the future are unsupported and reported; a negated window that ends now
+  (`not updated in the last 30 days`) becomes `lt <window start>`.
 - `top N` without a `by` field only sets `limit`; it does not infer a sort from an aggregate.
-- "Per month" needs exactly one date field in the schema or `options.dateField`.
+- "Per month" needs one date field, a `primary: true` date field, or `options.dateField`.
 - English only.
 
 ## Training

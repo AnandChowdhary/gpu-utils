@@ -71,7 +71,7 @@ Start with one phrase a user would type into a search bar. Split it into the tok
 
 - Caption: "h[t] = a[t]·h[t−1] + (1−a[t])·u[t], forward and backward"
 - Accent-colored sweep left→right then right→left over the strips; strips brighten as context accumulates.
-- Footnote: "37,711 parameters, int6"
+- Footnote: "37,775 parameters, int6"
 
 ---
 
@@ -136,7 +136,7 @@ Start with one phrase a user would type into a search bar. Split it into the tok
 
 - The animation must not imply the model sees field names: the schema footnote is crossed out before features appear, and the tags shown are the kinds (`field:number`), never the names.
 - The animation must not imply the output is deterministic text generation: the model emits roles and boundaries; the spec is assembled by the compiler scene.
-- Every number shown (37,711 parameters, int6) matches MODEL_CARD.md.
+- Every number shown (37,775 parameters, int6) matches MODEL_CARD.md.
 - Roles shown are exactly the ones the shipped model predicts for this phrase (verified with `parse()`).
 
 ## Reference Material

@@ -37,7 +37,7 @@ ROLES = {
 BOUNDARIES = {0, 3, 4, 7, 12}
 SCHEMA_TAGS = {"revenue": "field:number", "region": "field:enum", "quarter": "time", "this": "time",
                "total": "lexicon", "top": "lexicon", "chart": "lexicon", "10": "digits"}
-PARAMS = "37,711 parameters, int6"
+PARAMS = "37,775 parameters, int6"
 
 
 class GpuViewPipeline(ExplainerScene):
