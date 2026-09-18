@@ -59,7 +59,62 @@ Metrics use the shipped decoder (rules + Viterbi + regexes), on int6 weights. Li
 accuracy is over non-blank lines; reply exact match compares the trimmed reply string;
 contact F1 is exact-match per field (set-based for phone/email/url).
 
-__EVAL_TABLES__
+### Held-out, generated (3,000 emails, seed 999; Python decoder)
+
+| Metric | Value |
+|---|---|
+| Line-kind accuracy (64,377 lines) | **0.9926** |
+| per kind: reply / attribution / quote / signature | 0.999 / 1.000 / 0.993 / 0.999 |
+| per kind: disclaimer / forward_header / greeting / closing | 0.832 / 0.995 / 0.998 / 0.987 |
+| Reply exact match | **0.9887** (2,966 / 3,000) |
+| Contact NAME F1 (n=1,535) | 0.995 |
+| Contact TITLE F1 (n=1,181) | 0.989 |
+| Contact COMPANY F1 (n=1,171) | 0.992 |
+| Contact PHONE F1 (n=1,584) | 0.997 |
+| Contact EMAIL F1 (n=984) | 0.964 |
+| Contact URL F1 (n=755) | 0.955 |
+| Contact ADDRESS F1 (n=531) | 0.983 |
+| Token-level (training script): line-kind accuracy / BIO F1 | 0.9955 / 0.993 |
+
+Most remaining EMAIL/URL misses are generator noise (a non-breaking space inserted inside
+the address, CJK characters in the domain) that the exact regexes reject on purpose. The
+TypeScript decoder on the first 500 of the same emails: line-kind 0.9910, reply exact match
+0.980, NAME/TITLE/COMPANY/PHONE F1 0.993/0.990/0.993/1.000.
+
+### Unfamiliar, hand-written (71 emails; identical numbers from both decoders)
+
+| Metric | Value |
+|---|---|
+| Line-kind accuracy (486 lines) | **0.8909** |
+| per kind: reply / attribution / quote / signature | 0.812 / 0.893 / 1.000 / 0.891 |
+| per kind: disclaimer / forward_header / greeting / closing | 0.538 / 1.000 / 1.000 / 0.833 |
+| Reply exact match | **0.7183** (51 / 71) |
+| Contact NAME F1 (n=49) | 0.659 (P 0.778, R 0.571) |
+| Contact TITLE F1 (n=26) | 0.739 |
+| Contact COMPANY F1 (n=25) | 0.717 |
+| Contact PHONE F1 (n=23) | 0.913 |
+| Contact EMAIL F1 (n=5) | 0.769 |
+| Contact URL F1 (n=2) | 0.800 |
+| Contact ADDRESS F1 (n=3) | 0.500 |
+
+Top confusions: reply → signature (11), signature → closing (10: one-word name lines such
+as "Robert", "Dana", "Tom" read as closings), attribution → signature (5: the Turkish
+`-----Özgün İleti-----` header block, no keywords), reply → quote (4: Markdown table rows).
+The Zendesk "please type your reply above this line" banner at the top is read as reply.
+
+### External, real emails (evaluation only; 40 emails)
+
+| Set | Metric | Value |
+|---|---|---|
+| github/email_reply_parser (22) + mailgun/talon standard replies (12) | reply exact match | **0.8235** (28 / 34) |
+| mailgun/talon stripped signatures (6) | signature block exact match | 0.333 (2 / 6) |
+
+Reply misses: two bottom-posted "Hello" one-liners directly under a quote with no blank
+line (talon apple_mail_2, thunderbird), a bulleted list after two blank lines cut short
+(email_bullets), and three long replies where one body line is read as signature. The talon
+signature files include the closing line ("Thank you,\nNoam") and separators inside the
+signature, which this model labels `closing`; under talon's convention 2 of 6 match, under
+this package's kinds 4 of 6 signature blocks are found.
 
 The Python (`gpu_email.evaluate`) and TypeScript (`test/eval.test.ts`) decoders are
 mirrors; the TypeScript numbers on the unfamiliar set are printed by `pnpm test`.
@@ -67,7 +122,7 @@ mirrors; the TypeScript numbers on the unfamiliar set are printed by `pnpm test`
 ## Size and latency
 | Measure | Value |
 |---|---|
-| Package (min + Brotli, incl. weights) | 93.1 KiB (budget 117.2 KiB) |
+| Package (min + Brotli, incl. weights) | 92.9 KiB (budget 117.2 KiB = 120,000 B) |
 | Cold start (device + pipelines + upload) | not measured here (no WebGPU in CI); estimate 100–300 ms |
 | Warm call, 1 KB input (≈530 tokens), CPU path, Node 24 | ≈ 38 ms (featurize 2 ms, forward 36 ms, decode < 1 ms) |
 | Warm call, 10 KB input (≈5,300 tokens), CPU path | ≈ 385 ms |
@@ -83,7 +138,7 @@ right-to-left and non-Latin coverage is thin (see the unfamiliar-set numbers). N
 substitute for validation; outputs are probabilistic.
 
 ## Checkpoint
-- Promoted: __CHECKPOINT__
+- Promoted: 2026-09-18, seed 0, 3 epochs (8,154 steps, QAT from step 3,261), 15.9 min on 2 threads; `training/runs/latest.pt` (not committed), exported by `gpu_email.export` to `model/`
 - Training command: `pnpm train` (`uv run python -m gpu_email.train --minutes 17 --epochs 3`,
   seed 0, 2 CPU threads, `torch.set_num_threads(2)`)
 - Data command: `uv run python -m gpu_email.data 60000`

@@ -89,7 +89,7 @@ thread per (token, channel) and is checked against the PyTorch fixtures on a rea
 | Measure | Value |
 |---|---|
 | Parameters | 155,207 (int6, per-tensor scales) |
-| Package (min + Brotli, incl. weights) | 93.1 KiB / budget 117.2 KiB |
+| Package (min + Brotli, incl. weights) | 92.9 KiB / budget 117.2 KiB (120,000 B) |
 | Featurize + CPU forward + decode, 1 KB email (≈530 tokens), Node 24 | ≈ 38 ms |
 | Same, 10 KB email (≈5,300 tokens) | ≈ 385 ms |
 | WebGPU, 10 KB email (estimate; not measured in CI) | ≈ 5–10 ms warm, 100–300 ms cold |
@@ -117,7 +117,10 @@ embedding table (109K of the 155K parameters).
   Polish, Japanese and Chinese; see MODEL_CARD.md for the unfamiliar-set numbers on Korean,
   Czech, Finnish, Danish, Turkish, Greek and Traditional Chinese.
 
-See [MODEL_CARD.md](./MODEL_CARD.md) for evaluation numbers.
+Held-out generated set: 99.3% line-kind accuracy, 98.9% reply exact match, contact F1
+0.96–0.997. Hand-written unfamiliar set (71 emails, styles the generator cannot produce):
+89.1% line-kind accuracy, 71.8% reply exact match, contact F1 0.5–0.9. Real fixtures from
+email_reply_parser and talon: 28/34 replies exact. See [MODEL_CARD.md](./MODEL_CARD.md).
 
 ## Training
 
