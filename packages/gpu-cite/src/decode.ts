@@ -145,7 +145,17 @@ function entities(path: Int32Array, model: Model): Entity[] {
 const LEAD = " \t\"'“”‘’«»‚„*_";
 const TRAIL = " \t.,;:\"'“”‘’«»‚„*_";
 
-/** Trim quotes, whitespace and trailing punctuation; drop unbalanced brackets. */
+/** True when the whole value is wrapped in exactly one pair of brackets, e.g. "(2019)". */
+function wrapped(inner: string, open: string, close: string): boolean {
+  return (
+    inner.startsWith(open) &&
+    inner.endsWith(close) &&
+    inner.indexOf(close) === inner.length - 1 &&
+    inner.lastIndexOf(open) === 0
+  );
+}
+
+/** Trim quotes, whitespace and trailing punctuation; drop unbalanced or wrapping brackets. */
 export function trimSpan(text: string, start: number, end: number): Span {
   let s = start;
   let e = end;
@@ -153,9 +163,20 @@ export function trimSpan(text: string, start: number, end: number): Span {
     while (s < e && LEAD.includes(text[s]!)) s++;
     while (e > s && TRAIL.includes(text[e - 1]!)) e--;
     const inner = text.slice(s, e);
-    if ((inner.startsWith("(") && !inner.includes(")")) || (inner.startsWith("[") && !inner.includes("]"))) s++;
-    else if ((inner.endsWith(")") && !inner.includes("(")) || (inner.endsWith("]") && !inner.includes("["))) e--;
-    else break;
+    if (
+      (inner.startsWith("(") && !inner.includes(")")) ||
+      (inner.startsWith("[") && !inner.includes("]"))
+    )
+      s++;
+    else if (
+      (inner.endsWith(")") && !inner.includes("(")) ||
+      (inner.endsWith("]") && !inner.includes("["))
+    )
+      e--;
+    else if (wrapped(inner, "(", ")") || wrapped(inner, "[", "]")) {
+      s++;
+      e--;
+    } else break;
   }
   return [s, e];
 }
@@ -234,10 +255,15 @@ export function decode(
     if (!list || list.length === 0) return undefined;
     if (!longest) return list[0];
     let best = list[0]!;
-    for (const e of list) if (tokens[e.last]!.end - tokens[e.first]!.start > tokens[best.last]!.end - tokens[best.first]!.start) best = e;
+    for (const e of list)
+      if (
+        tokens[e.last]!.end - tokens[e.first]!.start >
+        tokens[best.last]!.end - tokens[best.first]!.start
+      )
+        best = e;
     return best;
   };
-  const valueOf = (role: string, longest = false): string | undefined => {
+  const fieldValue = (role: string, longest = false): string | undefined => {
     const e = pick(role, longest);
     if (!e) return undefined;
     const sp = entSpan(e);
@@ -267,8 +293,12 @@ export function decode(
         if (part === 1) given += tokens[i]!.text;
         else if (part === 2) family += tokens[i]!.text;
       }
-      given = clean(given).replace(/[,;]+$/, "").trim();
-      family = clean(family).replace(/[,;]+$/, "").trim();
+      given = clean(given)
+        .replace(/[,;]+$/, "")
+        .trim();
+      family = clean(family)
+        .replace(/[,;]+$/, "")
+        .trim();
       const person: Person = { span: abs(sp) };
       if (!given && !family) person.literal = clean(text.slice(sp[0], sp[1]));
       else {
@@ -281,15 +311,18 @@ export function decode(
   };
   const authors = people("AUTHOR");
   const editors = people("EDITOR");
-  if (authors.length > 0) spans.authors = [authors[0]!.span[0], authors[authors.length - 1]!.span[1]];
-  if (editors.length > 0) spans.editors = [editors[0]!.span[0], editors[editors.length - 1]!.span[1]];
+  if (authors.length > 0)
+    spans.authors = [authors[0]!.span[0], authors[authors.length - 1]!.span[1]];
+  if (editors.length > 0)
+    spans.editors = [editors[0]!.span[0], editors[editors.length - 1]!.span[1]];
 
   // 4. Document type from the pooled head; "unknown" below 50% confidence.
   const T = m.types.length;
   let typeIndex = 0;
   for (let j = 1; j < T; j++) if (logits.type[j]! > logits.type[typeIndex]!) typeIndex = j;
   const typeConfidence = n > 0 ? softmaxAt(logits.type, 0, T, typeIndex) : 0;
-  const type: CiteType = n > 0 && typeConfidence >= 0.5 ? (m.types[typeIndex] as CiteType) : "unknown";
+  const type: CiteType =
+    n > 0 && typeConfidence >= 0.5 ? (m.types[typeIndex] as CiteType) : "unknown";
   if (n > 0 && typeConfidence < 0.6) warnings.push("uncertain document type");
 
   const record: CiteRecord = {
@@ -303,38 +336,42 @@ export function decode(
       etAl: ET_AL.test(text),
       warnings,
       tags: Array.from(path, (i) => m.labels[i] ?? "O"),
-      tokens: tokens.map(({ text: t, start, end }) => ({ text: t, start: start + base, end: end + base })),
+      tokens: tokens.map(({ text: t, start, end }) => ({
+        text: t,
+        start: start + base,
+        end: end + base,
+      })),
     },
   };
   if (editors.length > 0) record.editors = editors;
 
   // 5. Text fields.
-  const title = valueOf("TITLE", true);
+  const title = fieldValue("TITLE", true);
   if (title) record.title = title;
-  const container = valueOf("CONTAINER", true);
+  const container = fieldValue("CONTAINER", true);
   if (container) record.container = container;
-  const publisher = valueOf("PUBLISHER");
+  const publisher = fieldValue("PUBLISHER");
   if (publisher) record.publisher = publisher;
-  const location = valueOf("LOCATION");
+  const location = fieldValue("LOCATION");
   if (location) record.location = location;
-  const accessed = valueOf("ACCESSED");
+  const accessed = fieldValue("ACCESSED");
   if (accessed) record.accessed = accessed;
 
   // 6. Numeric-ish fields with cue words stripped.
-  const yearText = valueOf("YEAR");
+  const yearText = fieldValue("YEAR");
   if (yearText !== undefined) {
     const y = YEAR_RE.exec(yearText);
     if (y) record.year = Number(y[0]);
     else if (/n\.\s?d\b|no date|s\.\s?d\./i.test(yearText)) warnings.push("no date (n.d.)");
     else warnings.push(`date not numeric: "${yearText}"`);
   } else warnings.push("no year found");
-  const volume = valueOf("VOLUME");
+  const volume = fieldValue("VOLUME");
   if (volume) record.volume = volume.replace(VOL_CUE, "");
-  const issue = valueOf("ISSUE");
+  const issue = fieldValue("ISSUE");
   if (issue) record.issue = issue.replace(ISSUE_CUE, "");
-  const pages = valueOf("PAGES");
+  const pages = fieldValue("PAGES");
   if (pages) record.pages = parsePages(pages.replace(PAGE_CUE, ""));
-  const edition = valueOf("EDITION");
+  const edition = fieldValue("EDITION");
   if (edition) record.edition = edition.replace(EDITION_CUE, "");
 
   // 7. Identifiers: deterministic regexes first, the model's span as a validated fallback.
@@ -376,7 +413,8 @@ export function decode(
   }
 
   if (!record.title && !record.url) warnings.push("no title found");
-  if (authors.length === 0 && type !== "web" && type !== "unknown") warnings.push("no authors found");
+  if (authors.length === 0 && type !== "web" && type !== "unknown")
+    warnings.push("no authors found");
   if (record.diagnostics.etAl) warnings.push("author list truncated with et al.");
   if (n === 0) warnings.push("empty input");
   return record;

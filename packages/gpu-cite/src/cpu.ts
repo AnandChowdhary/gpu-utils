@@ -96,7 +96,7 @@ export function forwardCpu(model: Model, features: FeatureRows): Logits {
   for (let i = 0; i < n; i++) {
     for (const id of features.rows[i]!) {
       if (id === 0) continue;
-      for (let c = 0; c < E; c++) e[i * E + c] += emb[id * E + c]!;
+      for (let c = 0; c < E; c++) e[i * E + c] = e[i * E + c]! + emb[id * E + c]!;
     }
   }
 
@@ -129,11 +129,11 @@ export function forwardCpu(model: Model, features: FeatureRows): Logits {
   for (let i = 0; i < n; i++) {
     for (let c = 0; c < C; c++) {
       const v = h2[i * C + c]!;
-      mean[c] += v;
+      mean[c] = mean[c]! + v;
       if (v > max[c]!) max[c] = v;
     }
   }
-  for (let c = 0; c < C; c++) mean[c] /= n;
+  for (let c = 0; c < C; c++) mean[c] = mean[c]! / n;
 
   // 6. token head: g = relu([h2 | y | mean] W1 + b1) → tags, name parts
   const x = new Float32Array(3 * C);

@@ -76,7 +76,7 @@ export async function forwardGpuBatch(model: Model, batch: FeatureRows[]): Promi
   const N = lengths.reduce((a, b) => a + b, 0);
   if (S === 0) return [];
   if (N === 0) {
-    return batch.map((f) => ({
+    return batch.map(() => ({
       n: 0,
       tags: new Float32Array(0),
       parts: new Float32Array(0),

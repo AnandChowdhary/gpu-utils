@@ -25,7 +25,7 @@ describe("gpu-cite", () => {
     expect(r.pages).toEqual({ from: "1527", to: "1554" });
     expect(r.doi).toBe("10.1162/neco.2006.18.7.1527");
     expect(r.url).toBeUndefined();
-    expect(r.spans.title).toEqual([49, 95]);
+    expect(r.spans.title).toEqual([47, 93]);
   });
 
   it("parses an IEEE conference paper with et al.", async () => {

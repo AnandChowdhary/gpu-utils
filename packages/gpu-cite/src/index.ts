@@ -40,10 +40,7 @@ function flatten(text: string): string {
   return text.replace(/[\r\n]/g, " ");
 }
 
-async function forward(
-  features: FeatureRows[],
-  backend: Backend,
-): Promise<Logits[]> {
+async function forward(features: FeatureRows[], backend: Backend): Promise<Logits[]> {
   const total = features.reduce((s, f) => s + f.tokens.length, 0);
   const useGpu =
     backend === "webgpu" || (backend === "auto" && hasWebGPU() && total >= GPU_MIN_TOKENS);

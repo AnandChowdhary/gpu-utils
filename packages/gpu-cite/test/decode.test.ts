@@ -54,6 +54,9 @@ describe("deterministic identifiers", () => {
   });
   it("finds URLs", () => {
     const s = "Retrieved from www.example.org/x?y=1. See https://a.b/c).";
-    expect(findUrls(s).map(([a, b]) => s.slice(a, b))).toEqual(["www.example.org/x?y=1", "https://a.b/c"]);
+    expect(findUrls(s).map(([a, b]) => s.slice(a, b))).toEqual([
+      "www.example.org/x?y=1",
+      "https://a.b/c",
+    ]);
   });
 });

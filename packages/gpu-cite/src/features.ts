@@ -174,6 +174,11 @@ export function findArxiv(text: string): Span[] {
   return out;
 }
 
+function hasNonAscii(text: string): boolean {
+  for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) > 127) return true;
+  return false;
+}
+
 function skeleton(text: string): string {
   const low = text.toLowerCase();
   let s = "";
@@ -200,7 +205,7 @@ function tokenFlags(t: Token, inUrl: boolean, inDoi: boolean, inArxiv: boolean):
     const g = LEXICON.get(low);
     if (g !== undefined) flags.push(FLAG[g]);
     if (ROMAN_RE.test(low) && g !== "CUE_IN") flags.push(FLAG.ROMAN);
-    if (/[^\x00-\x7f]/.test(text)) flags.push(FLAG.NONASCII);
+    if (hasNonAscii(text)) flags.push(FLAG.NONASCII);
   } else if (t.cls === 4) {
     if (QUOTE_CHARS.has(text)) flags.push(FLAG.QUOTE);
     else if (BRACKET_CHARS.has(text)) flags.push(FLAG.BRACKET);
