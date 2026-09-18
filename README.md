@@ -14,6 +14,8 @@ turns tags into typed output.
 | Package | Task | Size | Status |
 |---|---|---|---|
 | [gpu-cite](./packages/gpu-cite) | Parse citation and reference strings into structured bibliographic fields | 54.1 KiB | beta |
+| [gpu-paste](./packages/gpu-paste) | Understand pasted text: detect what it is and extract structured fields | 51.0 KiB | experimental |
+| [gpu-view](./packages/gpu-view) | Natural language to table view specs: filter, sort, group, aggregate, limit, chart | 29.6 KiB | experimental |
 
 ## Development
 

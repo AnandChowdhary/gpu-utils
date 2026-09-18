@@ -20,7 +20,10 @@ if (pkg.dependencies && Object.keys(pkg.dependencies).length > 0) {
   process.exit(1);
 }
 
-const out = execFileSync("npm", ["pack", "--dry-run", "--json"], { cwd, encoding: "utf8" });
+const out = execFileSync("npm", ["pack", "--dry-run", "--json"], {
+  cwd,
+  encoding: "utf8",
+});
 const [info] = JSON.parse(out) as [{ files: { path: string; size: number }[]; size: number }];
 const allowed = /^(dist\/[^/]+\.(js|d\.ts)|README\.md|MODEL_CARD\.md|LICENSE|package\.json)$/;
 const bad = info!.files.filter((f) => !allowed.test(f.path));

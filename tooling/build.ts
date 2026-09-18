@@ -21,7 +21,10 @@ const pkg = JSON.parse(readFileSync(resolve(cwd, "package.json"), "utf8")) as {
   gpuUtils?: { entries?: Record<string, string> };
 };
 
-const entries: Record<string, string> = { index: "src/index.ts", ...pkg.gpuUtils?.entries };
+const entries: Record<string, string> = {
+  index: "src/index.ts",
+  ...pkg.gpuUtils?.entries,
+};
 
 let wgslenderReady: Promise<typeof import("wgslender") | null> | undefined;
 

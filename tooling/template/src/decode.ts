@@ -17,6 +17,10 @@ export function decode(
   const ids = argmax(logits, features.tokens.length, k);
   return {
     labels: Array.from(ids, (i) => model.manifest.labels[i] ?? "O"),
-    tokens: features.tokens.map(({ text, start, end }) => ({ text, start, end })),
+    tokens: features.tokens.map(({ text, start, end }) => ({
+      text,
+      start,
+      end,
+    })),
   };
 }

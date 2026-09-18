@@ -11,7 +11,11 @@ import { resolve } from "node:path";
 import { brotliCompressSync, constants } from "node:zlib";
 import { transformSync } from "esbuild";
 
-type Pkg = { name: string; private?: boolean; gpuUtils?: { sizeBudget?: number } };
+type Pkg = {
+  name: string;
+  private?: boolean;
+  gpuUtils?: { sizeBudget?: number };
+};
 
 export function measure(dir: string): { name: string; bytes: number; budget?: number } | null {
   const pkgPath = resolve(dir, "package.json");
@@ -20,11 +24,17 @@ export function measure(dir: string): { name: string; bytes: number; budget?: nu
   if (pkg.private) return null;
   const entry = resolve(dir, "dist/index.js");
   if (!existsSync(entry)) throw new Error(`${pkg.name}: dist/index.js missing, run build first`);
-  const minified = transformSync(readFileSync(entry, "utf8"), { minify: true, format: "esm" }).code;
+  const minified = transformSync(readFileSync(entry, "utf8"), {
+    minify: true,
+    format: "esm",
+  }).code;
   const bytes = brotliCompressSync(Buffer.from(minified), {
     params: { [constants.BROTLI_PARAM_QUALITY]: 11 },
   }).length;
-  const result: { name: string; bytes: number; budget?: number } = { name: pkg.name, bytes };
+  const result: { name: string; bytes: number; budget?: number } = {
+    name: pkg.name,
+    bytes,
+  };
   if (pkg.gpuUtils?.sizeBudget !== undefined) result.budget = pkg.gpuUtils.sizeBudget;
   return result;
 }

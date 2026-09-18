@@ -10,9 +10,10 @@
       "**",
       "!**/dist",
       "!**/model/*.json",
+      "!**/eval/*.json",
+      "!**/test/fixtures/*.json",
       "!**/training/runs",
-      "!video/media",
-      "!**/test/fixtures/*.json"
+      "!video/media"
     ]
   },
   "formatter": {
