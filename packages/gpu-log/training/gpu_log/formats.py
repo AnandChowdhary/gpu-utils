@@ -14,9 +14,13 @@ from .gen import (
 Builder = Callable[[random.Random], Line]
 
 
-def msg_tail(line: Line, rng: random.Random, kv_p: float = 0.25, sep: str | None = None) -> None:
-    """Message, optionally followed by a kv tail."""
-    m = message(rng)
+def msg_tail(line: Line, rng: random.Random, kv_p: float = 0.25, sep: str | None = None, prefix: str = "") -> None:
+    """Message, optionally followed by a kv tail.
+
+    `prefix` (the RFC 5424 "BOM" marker) is part of the MSG span: it is glued to the first
+    word of the message, so a span boundary inside that token would be unlearnable.
+    """
+    m = prefix + message(rng)
     line.add(m, "MSG")
     if rng.random() < kv_p:
         add_kv(line, rng, sep=sep)
@@ -73,9 +77,7 @@ def syslog_5424(rng: random.Random) -> Line:
         L.add("-")
     if rng.random() < 0.9:
         L.add(" ")
-        if rng.random() < 0.1:
-            L.add("BOM")
-        msg_tail(L, rng, 0.15)
+        msg_tail(L, rng, 0.15, prefix="BOM" if rng.random() < 0.1 else "")
     return L
 
 

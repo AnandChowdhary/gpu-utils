@@ -36,8 +36,28 @@ class Example:
     kind: str
 
 
+def trim_spans(text: str, spans: tuple[tuple[int, int, str], ...]) -> tuple[tuple[int, int, str], ...]:
+    """Drop whitespace from both ends of every span.
+
+    A span that starts or ends inside a whitespace run would put a label boundary inside a
+    single whitespace token (the tokenizer groups runs by character class), which no tagger
+    can express - and which showed up as O -> I-ROLE transitions in the gold tags.
+    """
+    out = []
+    for start, end, role in spans:
+        s, e = start, end
+        while s < e and text[s].isspace():
+            s += 1
+        while e > s and text[e - 1].isspace():
+            e -= 1
+        if s < e:
+            out.append((s, e, role))
+    return tuple(out)
+
+
 def from_line(line: Line) -> Example:
-    return Example(line.text(), tuple(line.spans()), line.kind)
+    text = line.text()
+    return Example(text, trim_spans(text, tuple(line.spans())), line.kind)
 
 
 MARKUP_RE = re.compile(r"⟦([A-Z]+)\|(.*?)⟧", re.S)
@@ -64,7 +84,8 @@ def parse_markup(s: str) -> Example:
         n += len(inner)
         pos = m.end()
     text.append(body[pos:])
-    return Example("".join(text), tuple(spans), kind)
+    joined = "".join(text)
+    return Example(joined, trim_spans(joined, tuple(spans)), kind)
 
 
 def to_markup(ex: Example) -> str:
@@ -83,7 +104,8 @@ def read_jsonl(path: Path) -> list[Example]:
     for raw in path.read_text(encoding="utf-8").splitlines():
         if raw.strip():
             d = json.loads(raw)
-            out.append(Example(d["text"], tuple(tuple(s) for s in d["spans"]), d["kind"]))
+            spans = tuple((int(a), int(b), str(r)) for a, b, r in d["spans"])
+            out.append(Example(d["text"], trim_spans(d["text"], spans), d["kind"]))
     return out
 
 
