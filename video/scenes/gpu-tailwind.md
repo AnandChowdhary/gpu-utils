@@ -2,7 +2,7 @@
 
 ## Overview
 
-- **Topic**: A 45K-parameter tagger plus a deterministic compiler that turns
+- **Topic**: A 45K-parameter shared-family (ScanTagger) tagger plus a deterministic compiler that turns
   "card with rounded corners, subtle shadow, blue on hover, hidden on mobile" into
   `rounded-lg bg-white p-4 shadow-sm hover:bg-blue-500 max-sm:hidden`, in the browser.
 - **Hook**: The model never writes a class name. It only decides which words are
@@ -64,7 +64,7 @@ sequence forward and backward, then a tiny head.
 
 ### Visual Elements
 
-- Caption: "Two gated affine scans, 45,218 parameters"
+- Caption: "Two gated affine scans, 45,394 parameters"
 - Accent highlight window sweeping left-to-right, then right-to-left over the strips.
 - Footnote: "int6 weights · runs as WGSL compute passes"
 
@@ -123,7 +123,7 @@ v4 table and prefixes variants.
 
 - Caption: "gpu-tailwind"
 - The class cells slide together into one line; sentence above, classes below.
-- Footnote: "52.3 KiB Brotli · runs in the browser on WebGPU"
+- Footnote: "54.9 KiB Brotli · runs in the browser on WebGPU"
 
 ---
 
@@ -149,7 +149,7 @@ v4 table and prefixes variants.
 - The animation must not imply the model emits class names: classes only appear in the
   compile scene, after the roles.
 - It must not imply output is deterministic given the phrase; the roles are predictions.
-- Every number shown (45,218 parameters, Brotli size) matches MODEL_CARD.md.
+- Every number shown (45,394 parameters, Brotli size) matches MODEL_CARD.md.
 
 ## Reference Material
 
