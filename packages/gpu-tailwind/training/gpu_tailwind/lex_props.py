@@ -395,3 +395,7 @@ PROPS: dict[str, list[str]] = {
         "for screen readers",
     ],
 }
+
+# v2 additions (appended so ruff's list formatting never breaks patches)
+PROPS["shadow"] += ["lift", "lifted", "raise", "raised", "elevate", "lift the shadow", "raise the shadow", "lift it", "floating look", "depth"]
+PROPS["gradient"] = ["gradient", "linear gradient", "gradient background", "background gradient", "colour gradient", "color gradient", "gradient from", "bg gradient", "gradient fill", "fade", "fading", "a gradient", "gradient going", "gradient that goes", "gradient running", "blend", "blending", "colour blend", "color blend"]

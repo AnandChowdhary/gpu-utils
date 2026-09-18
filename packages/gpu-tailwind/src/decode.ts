@@ -1,8 +1,15 @@
-import { type FeatureRows, type Token, viterbi } from "@gpu-utils/runtime";
+import {
+  bioStartMask,
+  bioTransitions,
+  type FeatureRows,
+  type Token,
+  viterbi,
+} from "@gpu-utils/runtime";
 import {
   applyVariants,
-  correctWords,
+  correctWordsAll,
   emit,
+  emitGradient,
   isValidClass,
   literalClass,
   parseValue,
@@ -44,22 +51,6 @@ interface Span {
   last: number;
   text: string;
   boundary: boolean;
-}
-
-function transitions(labels: string[]): Float32Array {
-  const k = labels.length;
-  const t = new Float32Array(k * k);
-  for (let a = 0; a < k; a++) {
-    for (let b = 0; b < k; b++) {
-      const to = labels[b]!;
-      if (to.startsWith("I-")) {
-        const from = labels[a]!;
-        const ok = from === to || from === `B-${to.slice(2)}`;
-        t[a * k + b] = ok ? 0 : Number.NEGATIVE_INFINITY;
-      }
-    }
-  }
-  return t;
 }
 
 function toSpans(tokens: Token[], labels: string[], boundary: boolean[]): Span[] {
@@ -126,8 +117,10 @@ function lookupProp(text: string): string | null {
   const words = wordsOf(text);
   const direct = T.props[words.join(" ")];
   if (direct) return direct;
-  const fixed = correctWords(words);
-  if (fixed) return T.props[fixed.join(" ")] ?? null;
+  for (const fixed of correctWordsAll(words)) {
+    const key = T.props[fixed.join(" ")];
+    if (key) return key;
+  }
   return null;
 }
 
@@ -136,14 +129,21 @@ function lookupValue(text: string): Value | null {
   if (v) return v;
   const lit = literalClass(text);
   if (lit) return { kind: "lit", value: lit, intensity: 0 };
-  const fixed = correctWords(wordsOf(text));
-  return fixed ? parseValue(fixed.join(" ")) : null;
+  for (const fixed of correctWordsAll(wordsOf(text))) {
+    const fv = parseValue(fixed.join(" "));
+    if (fv) return fv;
+  }
+  return null;
 }
 
 function lookupVariant(text: string): string | null {
   const words = wordsOf(text);
   // correct typos first: a misspelt keyword would otherwise silently change the variant
-  return resolveVariant(correctWords(words) ?? words);
+  for (const fixed of correctWordsAll(words)) {
+    const v = resolveVariant(fixed);
+    if (v) return v;
+  }
+  return resolveVariant(words);
 }
 
 interface Unit {
@@ -155,7 +155,23 @@ interface Unit {
   neg: boolean;
 }
 
-function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[]): Group | null {
+/** Variants of a leading variant phrase, scoping over the following segments. */
+interface Carry {
+  variants: string[];
+}
+
+/**
+ * Compiles one segment. A variant phrase that LEADS its segment ("on hover, blue and
+ * underlined") scopes over the following segments until the next variant phrase; a
+ * trailing variant ("blue on hover") applies to its own segment only and ends any carry.
+ * Mirror of compile_pieces in training/gpu_tailwind/pairing.py.
+ */
+function compileSegment(
+  seg: Span[],
+  tokens: Token[],
+  diagnostics: Diagnostic[],
+  carry: Carry,
+): Group | null {
   const first = tokens[seg[0]!.first]!;
   const last = tokens[seg[seg.length - 1]!.last]!;
   const span = { start: first.start, end: last.end };
@@ -171,6 +187,7 @@ function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[])
   const vals: Unit[] = [];
   let pendingNeg = false;
   let index = 0;
+  const leading = seg[0]!.role === "VAR";
   for (const s of seg) {
     if (s.role === "NEG") {
       pendingNeg = true;
@@ -195,6 +212,10 @@ function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[])
     pendingNeg = false;
     index++;
   }
+  const own = variants.length > 0;
+  if (own && leading) carry.variants = [...variants];
+  else if (own) carry.variants = [];
+  const effective = own ? variants : [...carry.variants];
 
   // pair every value with the nearest compatible property, measured in spans; ties go to
   // the preceding property for numbers ("gap 4") and the following one for adjectives
@@ -234,10 +255,18 @@ function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[])
       if (!classes.includes(c)) classes.push(c);
     }
   };
+  // "black on yellow": two bare colours in one segment are foreground then background
+  const looseColours = loose.filter((u) => u.value!.kind === "col");
+  const twoColours =
+    looseColours.length === 2 &&
+    !props.some((p) => emit(p.key!, looseColours[0]!.value!, false).length > 0);
   // emit in phrase order
   const units = [...props, ...loose].sort((a, b) => a.index - b.index);
   for (const u of units) {
-    if (u.key !== undefined) {
+    if (u.key === "gradient") {
+      const values = (assigned.get(u) ?? []).sort((a, b) => a.index - b.index);
+      push(emitGradient(values.map((v) => v.value!)), u.span);
+    } else if (u.key !== undefined) {
       const values = assigned.get(u) ?? [];
       if (values.length === 0) {
         const cs = emit(u.key, null, u.neg);
@@ -247,14 +276,18 @@ function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[])
       } else {
         for (const v of values) push(emit(u.key, v.value!, u.neg || v.neg), v.span);
       }
+    } else if (twoColours && u === looseColours[0]) {
+      push([`text-${u.value!.value}`], u.span);
     } else {
       const cs = standalone(u.value!, u.neg);
       if (cs.length === 0) diag(`"${u.span.text}" needs a property`, u.span);
       push(cs, u.span);
     }
   }
-  if (classes.length === 0 && variants.length > 0) {
-    diagnostics.push({ message: `variant "${text}" has no classes to apply to`, ...span });
+  if (classes.length === 0 && own) {
+    // a variant-only segment ("on hover, ...") just sets the carry
+    if (!leading || props.length || vals.length)
+      diagnostics.push({ message: `variant "${text}" has no classes to apply to`, ...span });
     return null;
   }
   if (classes.length === 0) {
@@ -262,31 +295,19 @@ function compileSegment(seg: Span[], tokens: Token[], diagnostics: Diagnostic[])
       diagnostics.push({ message: `no classes for "${text}"`, ...span });
     return null;
   }
-  const final = applyVariants(classes, variants);
+  const final = applyVariants(classes, effective);
   const group: Group = { span, text, classes: final };
-  if (variants.length) group.variant = final[0]!.slice(0, final[0]!.lastIndexOf(":"));
+  if (effective.length) group.variant = final[0]!.slice(0, final[0]!.lastIndexOf(":"));
   return group;
 }
 
-/** Viterbi over role logits, then the deterministic compiler. */
-export function decode(model: Model, features: FeatureRows, logits: Float32Array): TailwindResult {
-  const labelsList = model.manifest.labels;
-  const k = labelsList.length;
-  const O = model.out;
-  const n = features.tokens.length;
-  const roles = new Float32Array(n * k);
-  const boundary: boolean[] = [];
-  for (let t = 0; t < n; t++) {
-    for (let j = 0; j < k; j++) roles[t * k + j] = logits[t * O + j]!;
-    boundary.push(logits[t * O + O - 1]! > 0);
-  }
-  const path = viterbi(roles, n, k, transitions(labelsList));
-  const labels = Array.from(path, (i) => labelsList[i] ?? "O");
+function compileAll(features: FeatureRows, labels: string[], boundary: boolean[]): TailwindResult {
   const spans = toSpans(features.tokens, labels, boundary);
   const diagnostics: Diagnostic[] = [];
   const groups: Group[] = [];
+  const carry: Carry = { variants: [] };
   for (const seg of segmentsOf(spans)) {
-    const g = compileSegment(seg, features.tokens, diagnostics);
+    const g = compileSegment(seg, features.tokens, diagnostics, carry);
     if (g) groups.push(g);
   }
   const classes: string[] = [];
@@ -298,6 +319,28 @@ export function decode(model: Model, features: FeatureRows, logits: Float32Array
     labels,
     tokens: features.tokens.map(({ text, start, end }) => ({ text, start, end })),
   };
+}
+
+/**
+ * Constrained Viterbi over the role columns of the tag head (BIO transitions and start
+ * mask from the runtime), the last column as the segment-boundary score, then the
+ * deterministic compiler.
+ */
+export function decode(model: Model, features: FeatureRows, logits: Float32Array): TailwindResult {
+  const labelsList = model.manifest.labels;
+  const k = labelsList.length;
+  const O = model.manifest.tags;
+  const n = features.tokens.length;
+  const roles = new Float32Array(n * k);
+  const boundary: boolean[] = [];
+  const start = bioStartMask(labelsList);
+  for (let t = 0; t < n; t++) {
+    for (let j = 0; j < k; j++) roles[t * k + j] = logits[t * O + j]! + (t === 0 ? start[j]! : 0);
+    boundary.push(logits[t * O + O - 1]! > 0);
+  }
+  const path = viterbi(roles, n, k, bioTransitions(labelsList));
+  const labels = Array.from(path, (i) => labelsList[i] ?? "O");
+  return compileAll(features, labels, boundary);
 }
 
 /** Compile from gold labels (used by the oracle test to check compiler/generator parity). */
@@ -306,20 +349,5 @@ export function decodeLabels(
   labels: string[],
   boundary: boolean[],
 ): TailwindResult {
-  const spans = toSpans(features.tokens, labels, boundary);
-  const diagnostics: Diagnostic[] = [];
-  const groups: Group[] = [];
-  for (const seg of segmentsOf(spans)) {
-    const g = compileSegment(seg, features.tokens, diagnostics);
-    if (g) groups.push(g);
-  }
-  const classes: string[] = [];
-  for (const g of groups) for (const c of g.classes) if (!classes.includes(c)) classes.push(c);
-  return {
-    classes,
-    groups,
-    diagnostics,
-    labels,
-    tokens: features.tokens.map(({ text, start, end }) => ({ text, start, end })),
-  };
+  return compileAll(features, labels, boundary);
 }

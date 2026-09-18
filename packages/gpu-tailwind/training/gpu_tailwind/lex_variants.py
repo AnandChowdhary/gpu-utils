@@ -3801,3 +3801,6 @@ GLUE: list[str] = [
     "quickly",
     "fast",
 ]
+
+# Clauses that must map to nothing (tagged O); the v1 model over-tagged these.
+NOISE_CLAUSES: list[str] = ["so it sits above everything", "so it sits on top", "for the loading icon", "for the icon", "for the card body", "in the header", "in the footer", "in the sidebar", "on the page", "normally", "by default", "as usual", "at rest", "when idle", "in general", "all round", "all around", "on every side", "for accessibility", "for the modal", "for the hero", "in the nav", "for readability", "to match the brand", "like the mockup", "as in the design", "per the design", "for the list", "on each card", "across the board", "for consistency", "as designed", "to look nice", "for a clean look", "it reveals it", "reveals the tooltip", "for the tooltip", "on the button", "for the input", "in the form", "to feel snappy", "when loaded", "once loaded", "after loading", "for the avatar", "for the badge", "on the image", "around the image", "for the heading", "for body copy", "for links", "for the whole page", "for the section", "site wide", "everywhere", "throughout"]

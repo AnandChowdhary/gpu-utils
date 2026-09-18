@@ -164,6 +164,7 @@ const parseKV = (s: string): Value => {
 
 export function normalizeWord(w: string): string {
   const l = w.toLowerCase();
+  if (l === "percent" || l === "pct") return "%";
   return T.spelling[l] ?? l;
 }
 
@@ -221,21 +222,40 @@ function within1(a: string, b: string): boolean {
   return s.slice(i) === l.slice(i + 1);
 }
 
-/** Replace unknown words of >= 5 chars by a vocabulary word at edit distance 1, if any. */
-export function correctWords(words: string[]): string[] | null {
+/** Vocabulary words at Damerau-Levenshtein distance 1 from an unknown word (>= 4 chars). */
+function candidates(w: string): string[] {
   const voc = vocabulary();
+  if (w.length < 4 || voc.has(w) || /\d/.test(w)) return [];
+  const out: string[] = [];
+  for (const c of voc)
+    if (c.length >= 5 && Math.abs(c.length - w.length) <= 1 && within1(w, c)) out.push(c);
+  return out;
+}
+
+/**
+ * Alternative spellings of a phrase with each unknown word replaced by a vocabulary word at
+ * edit distance 1 (all combinations, capped). Empty when nothing needs correcting.
+ */
+export function correctWordsAll(words: string[], cap = 16): string[][] {
+  let variants: string[][] = [[]];
   let changed = false;
-  const out = words.map((w) => {
-    if (w.length < 4 || voc.has(w) || /\d/.test(w)) return w;
-    for (const c of voc) {
-      if (c.length >= 5 && Math.abs(c.length - w.length) <= 1 && within1(w, c)) {
-        changed = true;
-        return c;
-      }
+  for (const w of words) {
+    const cs = candidates(w);
+    if (cs.length === 0) {
+      variants = variants.map((v) => [...v, w]);
+      continue;
     }
-    return w;
-  });
-  return changed ? out : null;
+    changed = true;
+    const next: string[][] = [];
+    for (const v of variants) for (const c of cs) if (next.length < cap) next.push([...v, c]);
+    variants = next;
+  }
+  return changed ? variants : [];
+}
+
+/** First correction candidate (kept for callers that only need one). */
+export function correctWords(words: string[]): string[] | null {
+  return correctWordsAll(words)[0] ?? null;
 }
 
 // ---------------------------------------------------------------- values
@@ -256,25 +276,98 @@ function shiftWeight(w: string, by: number): string {
   return WEIGHTS[Math.max(0, Math.min(WEIGHTS.length - 1, WEIGHTS.indexOf(w) + by))]!;
 }
 
+const COLOR_FILLER = new Set([
+  "a",
+  "an",
+  "the",
+  "shade",
+  "shades",
+  "of",
+  "in",
+  "at",
+  "but",
+  "tone",
+  "tint",
+  "version",
+  "variant",
+  "color",
+  "colour",
+  "coloured",
+  "colored",
+  "with",
+  "opacity",
+  "alpha",
+  "transparency",
+]);
+const ALPHA_WORDS: Record<string, string> = {
+  translucent: "50",
+  "semi transparent": "50",
+  "semi-transparent": "50",
+  "see through": "50",
+  "half transparent": "50",
+  "mostly transparent": "25",
+  "slightly transparent": "75",
+  "barely transparent": "90",
+  "very transparent": "25",
+  faintly: "25",
+};
+
+/** [alpha words] [modifiers] hue [shade] | hue-shade | shade hue, with "at N%" style alpha. */
 function parseColor(words: string[]): Value | null {
   if (words.length === 0) return null;
-  const joined = words.join("");
+  let ws = [...words];
+  let alpha: string | undefined;
+  // alpha: "N %" anywhere, or "/ N" at the end
+  for (let i = 0; i + 1 < ws.length; i++) {
+    if (/^\d+$/.test(ws[i]!) && ws[i + 1] === "%") {
+      alpha = ws[i];
+      ws.splice(i, 2);
+      break;
+    }
+  }
+  if (
+    alpha === undefined &&
+    ws.length >= 3 &&
+    ws[ws.length - 2] === "/" &&
+    /^\d+$/.test(ws[ws.length - 1]!)
+  ) {
+    alpha = ws[ws.length - 1];
+    ws = ws.slice(0, -2);
+  }
+  for (const [phrase, a] of Object.entries(ALPHA_WORDS)) {
+    const pw = phrase.split(" ");
+    if (ws.length > pw.length && pw.every((w, i) => ws[i] === w)) {
+      alpha = alpha ?? a;
+      ws = ws.slice(pw.length);
+      break;
+    }
+  }
+  ws = ws.filter((w) => !COLOR_FILLER.has(w));
+  if (ws.length === 0) return null;
+  const joined = ws.join("");
   const m = /^([a-z]+)-?(\d{2,3})$/.exec(joined);
-  if (m && HUES.includes(m[1]!) && SHADES.includes(m[2]!)) return V("col", `${m[1]}-${m[2]}`);
-  const ws = [...words];
+  const withAlpha = (v: string) => V("col", alpha !== undefined ? `${v}/${alpha}` : v);
+  if (m && HUES.includes(m[1]!) && SHADES.includes(m[2]!)) return withAlpha(`${m[1]}-${m[2]}`);
   let shade: string | undefined;
   if (ws.length && SHADES.includes(ws[ws.length - 1]!)) shade = ws.pop();
   else if (ws.length && SHADES.includes(ws[0]!)) shade = ws.shift();
   if (ws.length === 0) return null;
-  const hue = ws[ws.length - 1]!;
-  if (!HUES.includes(hue)) return null;
-  const mods = ws.slice(0, -1);
+  // "blue but darker": a modifier after the hue
+  let hueIndex = ws.findIndex((w) => HUES.includes(w));
+  if (hueIndex < 0) {
+    if (ws.length === 1 && (ws[0] === "white" || ws[0] === "black" || ws[0] === "transparent"))
+      return withAlpha(ws[0]!);
+    return null;
+  }
+  const hue = ws[hueIndex]!;
+  const mods = [...ws.slice(0, hueIndex), ...ws.slice(hueIndex + 1)];
+  hueIndex = 0;
   if (mods.length) {
     const mod = T.mods[mods.join(" ")];
     if (mod === undefined) return null;
     shade = shade ?? mod;
   }
-  return V("col", `${hue}-${shade ?? "500"}`);
+  return withAlpha(`${hue}-${shade ?? "500"}`);
 }
 
 /** Mirror of parse_value in semantics.py. */
@@ -848,6 +941,13 @@ function simpleKw(
 export function emit(k: string, v: Value | null, neg: boolean): string[] {
   if (k.startsWith("preset:")) return split(T.presets[k.slice(7)] ?? "");
   if (v && v.kind === "lit") return [v.value];
+  if (k === "gradient") {
+    if (!v) return ["bg-linear-to-r"];
+    if (v.kind === "col" || v.kind === "mod")
+      return [`from-${v.kind === "col" ? v.value : `gray-${shiftShade(v.value, v.intensity)}`}`];
+    const d = gradientDirection(v);
+    return d ? [`bg-linear-to-${d}`] : [];
+  }
   if (SPACING.has(k) || INSETS.has(k)) return spacingValue(k, v, neg);
   if (SIZING.has(k)) return sizingValue(k, v, neg);
   switch (k) {
@@ -1267,6 +1367,44 @@ export function emit(k: string, v: Value | null, neg: boolean): string[] {
 
 export const accepts = (k: string, v: Value): boolean => emit(k, v, false).length > 0;
 
+const GRADIENT_DIR: Record<string, string> = {
+  row: "r",
+  col: "b",
+  "row-reverse": "l",
+  "col-reverse": "t",
+  right: "r",
+  left: "l",
+  top: "t",
+  bottom: "b",
+  diagonal: "br",
+  reverse: "l",
+};
+const GRADIENT_SPEC: Record<string, string> = {
+  "top-right": "tr",
+  "bottom-right": "br",
+  "bottom-left": "bl",
+  "top-left": "tl",
+};
+
+export function gradientDirection(v: Value): string | null {
+  if (v.kind === "kw") return GRADIENT_DIR[v.value] ?? null;
+  if (v.kind === "spec") return GRADIENT_SPEC[v.value] ?? null;
+  return null;
+}
+
+/** Joint emission for the gradient property: direction + from/via/to colour stops. */
+export function emitGradient(values: Value[]): string[] {
+  const colours = values
+    .filter((v) => v.kind === "col" || v.kind === "mod")
+    .map((v) => (v.kind === "col" ? v.value : `gray-${shiftShade(v.value, v.intensity)}`));
+  const dir = values.map(gradientDirection).find((d) => d !== null) ?? "r";
+  const out = [`bg-linear-to-${dir}`];
+  if (colours.length >= 1) out.push(`from-${colours[0]}`);
+  if (colours.length >= 3) out.push(`via-${colours[1]}`);
+  if (colours.length >= 2) out.push(`to-${colours[colours.length - 1]}`);
+  return out;
+}
+
 // ---------------------------------------------------------------- variants
 
 function match(ws: Set<string>, rules: [string, string[], string[]][]): string | null {
@@ -1399,6 +1537,7 @@ const PATTERNS: [RegExp, string][] = [
   [/^font-/, `^font-(?:${WEIGHTS.join("|")}|sans|serif|mono)$`],
   [/^tracking-/, "^tracking-(?:tighter|tight|normal|wide|wider|widest)$"],
   [/^leading-/, "^leading-(?:none|tight|snug|normal|relaxed|loose|\\d+)$"],
+  [/^bg-linear-to-/, "^bg-linear-to-(?:t|tr|r|br|b|bl|l|tl)$"],
   [/^bg-/, `^bg-(?:${COLOR})(?:/\\d{1,3})?$`],
   [
     /^border-/,
@@ -1408,9 +1547,9 @@ const PATTERNS: [RegExp, string][] = [
     /^rounded/,
     "^rounded(?:-(?:t|b|l|r|tl|tr|bl|br))?(?:-(?:xs|sm|md|lg|xl|2xl|3xl|4xl|full|none|\\[\\d+(?:\\.\\d+)?(?:px|rem|em)\\]))?$",
   ],
-  [/^ring-/, `^ring-(?:0|1|2|4|8|${COLOR})$`],
-  [/^outline-/, `^outline-(?:0|1|2|4|8|${COLOR})$`],
-  [/^shadow-/, `^shadow-(?:2xs|xs|sm|md|lg|xl|2xl|none|${COLOR})$`],
+  [/^ring-/, `^ring-(?:0|1|2|4|8|(?:${COLOR})(?:/\\d{1,3})?)$`],
+  [/^outline-/, `^outline-(?:0|1|2|4|8|(?:${COLOR})(?:/\\d{1,3})?)$`],
+  [/^shadow-/, `^shadow-(?:2xs|xs|sm|md|lg|xl|2xl|none|(?:${COLOR})(?:/\\d{1,3})?)$`],
   [/^opacity-/, "^opacity-(?:\\d{1,2}|100)$"],
   [/^-?z-/, "^-?z-(?:\\d{1,3}|auto)$"],
   [/^overflow(-x|-y)?-/, "^overflow(?:-x|-y)?-(?:auto|hidden|visible|scroll|clip)$"],
@@ -1428,6 +1567,7 @@ const PATTERNS: [RegExp, string][] = [
   [/^rotate-/, "^rotate-(?:\\d{1,3})$"],
   [/^blur-/, "^blur-(?:xs|sm|md|lg|xl|2xl|3xl)$"],
   [/^aspect-/, "^aspect-\\d+/\\d+$"],
+  [/^(from|via|to)-/, `^(?:from|via|to)-(?:${COLOR})(?:/\\d{1,3})?$`],
   [/^columns-/, "^columns-(?:[1-9]|1[0-2])$"],
   [/^line-clamp-/, "^line-clamp-[1-6]$"],
 ];

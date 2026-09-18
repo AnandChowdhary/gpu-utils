@@ -10,7 +10,7 @@ import re
 
 from .lex_props import PROPS
 from .lex_values import VALUES
-from .lex_variants import GLUE, PRESETS, SEPARATORS, VARIANTS
+from .lex_variants import GLUE, NOISE_CLAUSES, PRESETS, SEPARATORS, VARIANTS
 
 MAX_VARIANT_PHRASES = 40
 VARIANT_PHRASES: dict[str, list[str]] = {
@@ -57,6 +57,8 @@ SPELLING: dict[str, str] = {
     "greyscale": "grayscale",
     "behaviour": "behavior",
     "shadowed": "shadow",
+    "percent": "%",
+    "pct": "%",
 }
 
 # Variant keyword rules. Evaluated by resolve_variant on the normalised word list of
@@ -369,6 +371,7 @@ def all_phrases() -> dict[str, tuple[str, str]]:
 
 __all__ = [
     "GLUE_WORDS",
+    "NOISE_CLAUSES",
     "NEG_WORDS",
     "PRESETS",
     "PROPS",
