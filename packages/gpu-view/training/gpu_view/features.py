@@ -32,10 +32,10 @@ BLOCKS: list[tuple[str, int]] = [
     ("word", WORD_BUCKETS),
     ("skeleton", SKEL_BUCKETS),
     ("keyword", KEYWORD_COUNT + 1),
-    ("flags", 10),
+    ("flags", 12),
     ("field_kind", 6),
     ("field_pos", 3),
-    ("quality", 5),
+    ("quality", 6),
     ("alias", 2),
     ("enum_any", 2),
     ("enum_pos", 3),
@@ -58,7 +58,7 @@ PADDING_ROW = FEATURE_ROWS
 SLOTS = 28
 
 FLAG_HAS_DIGIT, FLAG_ALL_DIGIT, FLAG_PUNCT, FLAG_UPPER, FLAG_FIRST, FLAG_LAST = 0, 1, 2, 3, 4, 5
-FLAG_PREV_DIGIT, FLAG_NEXT_DIGIT, FLAG_YEAR, FLAG_SUFFIX = 6, 7, 8, 9
+FLAG_PREV_DIGIT, FLAG_NEXT_DIGIT, FLAG_YEAR, FLAG_SUFFIX, FLAG_ER, FLAG_EST = 6, 7, 8, 9, 10, 11
 
 
 def length_bucket(n: int) -> int:
@@ -147,6 +147,11 @@ def featurize(text: str, schema: dict) -> tuple[list[Token], list[list[int]]]:
             add("flags", FLAG_YEAR)
         if i > 0 and tokens[i - 1].cls == CLASS_DIGIT and low in ("k", "m", "b", "bn", "mm", "%"):
             add("flags", FLAG_SUFFIX)
+
+        if tok.cls == 0 and len(low) >= 5 and (low.endswith("er") or low.endswith("ier")):
+            add("flags", FLAG_ER)
+        if tok.cls == 0 and len(low) >= 6 and (low.endswith("est") or low.endswith("iest")):
+            add("flags", FLAG_EST)
 
         f = field_at[i]
         add("field_kind", KIND_ID[f.kind] if f else 0)

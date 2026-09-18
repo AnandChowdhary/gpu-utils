@@ -19,7 +19,7 @@ from dataclasses import dataclass
 
 from gpu_utils_training.features import CLASS_DIGIT, CLASS_LETTER, Token, tokenize
 
-EXACT, STEM, PREFIX, TYPO = 0, 1, 2, 3
+EXACT, STEM, INFLECT, PREFIX, TYPO = 0, 1, 2, 3, 4
 MIN_PREFIX = 4
 MIN_TYPO = 5
 MAX_WORDS = 3
@@ -47,6 +47,41 @@ def stem(word: str) -> str:
     if n >= 4 and word.endswith("s") and not word.endswith("ss"):
         return word[:-1]
     return word
+
+
+def forms(word: str) -> set[str]:
+    """Stemmed base forms reachable by stripping comparative/superlative/participle endings.
+
+    "rated" and "rating" share "rat"/"rate"; "cheapest" reaches "cheap"; "downloaded" reaches
+    "download". Used by the INFLECT tier so an app can list "cheap" as an alias of price and
+    have "cheapest" resolve to it.
+    """
+    out = {stem(word)}
+    n = len(word)
+    cands: list[str] = []
+    if n >= 6 and word.endswith("iest"):
+        cands.append(word[:-4] + "y")
+    if n >= 6 and word.endswith("est"):
+        cands.append(word[:-3])
+    if n >= 5 and word.endswith("ier"):
+        cands.append(word[:-3] + "y")
+    if n >= 5 and word.endswith("er"):
+        cands.append(word[:-2])
+    if n >= 5 and word.endswith("ied"):
+        cands.append(word[:-3] + "y")
+    if n >= 5 and word.endswith("ed"):
+        cands.append(word[:-2])
+        cands.append(word[:-1])
+    if n >= 6 and word.endswith("ing"):
+        cands.append(word[:-3])
+        cands.append(word[:-3] + "e")
+    for c in list(cands):
+        if len(c) >= 3 and c[-1] == c[-2] and c[-1] not in "aeiou":
+            cands.append(c[:-1])  # bigg → big
+    for c in cands:
+        if len(c) >= 3:
+            out.add(stem(c))
+    return out
 
 
 def within_one_edit(a: str, b: str) -> bool:
@@ -147,6 +182,13 @@ def _match_at(
                 return Span(start, end, first.field, first.kind, quality, first.alias, first.value, owners)
         if n == 1:
             w = span_words[0]
+            if len(w) >= 5:
+                qforms = forms(w)
+                hits = [e for e in entries if len(e.words) == 1 and qforms & forms(e.words[0])]
+                if hits:
+                    e = hits[0]
+                    owners = tuple(sorted({h.field for h in hits}))
+                    return Span(start, end, e.field, e.kind, INFLECT, e.alias, e.value, owners)
             if len(w) >= MIN_PREFIX:
                 hits = [e for e in entries if len(e.words) == 1 and len(e.words[0]) >= MIN_PREFIX and e.words[0].startswith(w)]
                 keys = {(e.field, e.value) for e in hits}

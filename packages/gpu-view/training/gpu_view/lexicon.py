@@ -58,6 +58,51 @@ KEYWORDS: list[str] = [
     # symbols
     ">", "<", "=", ":", ",", "-", "!", "%", "$", "€", "£", "\"", "'", "(", ")", ".", "?", "/",
     "#", "+", "&", "*", ";", "~", "_", "@", "|", "[", "]", "≥", "≤",
+    # units after numbers
+    "cm", "mm", "km", "kg", "g", "lb", "lbs", "ft", "in", "mi", "miles", "meters", "metres",
+    "kilos", "grams", "pounds", "inches", "feet", "min", "mins", "minutes", "sec", "secs",
+    "seconds", "hrs", "hours", "stars", "pts", "points", "dollars", "euros", "bucks", "usd",
+    "eur", "gbp", "mb", "gb", "ms", "kb", "x", "times", "people", "units", "pcs", "pieces",
+    # seasons and date words
+    "spring", "summer", "autumn", "fall", "winter", "of", "st", "nd", "rd", "th",
+    # polarity adjectives with comparative and superlative forms
+    "cheap", "cheaper", "cheapest", "expensive", "pricey", "pricier", "priciest", "costly",
+    "tall", "taller", "tallest", "short", "shorter", "shortest", "long", "longer", "longest",
+    "heavy", "heavier", "heaviest", "light", "lighter", "lightest", "big", "bigger", "biggest",
+    "small", "smaller", "smallest", "large", "larger", "old", "older", "oldest", "young",
+    "younger", "youngest", "new", "newer", "fast", "faster", "fastest", "slow", "slower",
+    "slowest", "popular", "good", "better", "best", "bad", "worse", "worst", "strong",
+    "stronger", "strongest", "weak", "weaker", "weakest", "hot", "hotter", "hottest", "cold",
+    "colder", "coldest", "rich", "richer", "richest", "poor", "poorer", "poorest", "wide",
+    "wider", "widest", "narrow", "narrower", "narrowest", "deep", "deeper", "deepest",
+    "shallow", "late", "early", "far", "farther", "farthest", "near", "nearer", "nearest",
+    "loud", "louder", "loudest", "quiet", "quieter", "quietest", "busy", "busier", "busiest",
+    "full", "fuller", "fullest", "rated", "rating", "priced", "sized", "aged", "fewest",
+    "greatest", "least", "most",
+]
+
+# Adjective polarity: "high" means the superlative picks the largest value ("tallest" → desc,
+# "taller than" → gt); "low" the opposite ("cheapest" → asc, "cheaper than" → lt).
+POLARITY: dict[str, str] = {
+    "expensive": "high", "pricey": "high", "pricy": "high", "costly": "high", "dear": "high",
+    "tall": "high", "high": "high", "heavy": "high", "long": "high", "big": "high",
+    "large": "high", "old": "high", "fast": "high", "popular": "high", "good": "high",
+    "strong": "high", "hot": "high", "rich": "high", "wide": "high", "deep": "high",
+    "late": "high", "far": "high", "loud": "high", "busy": "high", "full": "high",
+    "great": "high", "many": "high", "much": "high", "recent": "high", "new": "high",
+    "cheap": "low", "short": "low", "low": "low", "light": "low", "small": "low",
+    "little": "low", "young": "low", "slow": "low", "bad": "low", "weak": "low",
+    "cold": "low", "poor": "low", "narrow": "low", "shallow": "low", "early": "low",
+    "near": "low", "quiet": "low", "empty": "low", "few": "low",
+}
+SEASONS: dict[str, tuple[int, int]] = {"spring": (3, 5), "summer": (6, 8), "autumn": (9, 11),
+                                       "fall": (9, 11), "winter": (12, 2)}
+UNITS: list[str] = [
+    "cm", "mm", "km", "kg", "g", "lb", "lbs", "ft", "mi", "miles", "meters", "metres", "kilos",
+    "grams", "pounds", "inches", "feet", "min", "mins", "minutes", "sec", "secs", "seconds",
+    "hrs", "hours", "stars", "pts", "points", "dollars", "euros", "bucks", "usd", "eur", "gbp",
+    "mb", "gb", "ms", "kb", "x", "times", "people", "units", "pcs", "pieces", "days", "weeks",
+    "months", "years", "%", "percent", "pct",
 ]
 # Deduplicate while keeping first occurrence; a few words appear in two groups above.
 _seen: set[str] = set()

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { forwardCpu } from "../src/cpu.ts";
-import { featurize } from "../src/features.ts";
+import { FEATURE_ROWS, featurize } from "../src/features.ts";
 import type { Schema } from "../src/match.ts";
 import { MODEL } from "../src/model.ts";
 import { read } from "./helpers.ts";
@@ -23,7 +23,7 @@ describe("gpu-view parity", () => {
   const cases = read<Fixture[]>("model/fixtures.json");
   it("ships at least 20 fixtures", () => expect(cases.length).toBeGreaterThanOrEqual(20));
   it("declares the feature layout the featurizer produces", () => {
-    expect(MODEL.manifest.featureRows).toBe(639);
+    expect(MODEL.manifest.featureRows).toBe(FEATURE_ROWS);
     expect(MODEL.manifest.labels).toHaveLength(14);
   });
   it.each(cases.map((c, i) => [i, c.text] as const))("case %i matches PyTorch: %s", (i) => {

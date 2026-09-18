@@ -40,10 +40,10 @@ export const BLOCKS: [string, number][] = [
   ["word", WORD_BUCKETS],
   ["skeleton", SKEL_BUCKETS],
   ["keyword", KEYWORD_COUNT + 1],
-  ["flags", 10],
+  ["flags", 12],
   ["field_kind", 6],
   ["field_pos", 3],
-  ["quality", 5],
+  ["quality", 6],
   ["alias", 2],
   ["enum_any", 2],
   ["enum_pos", 3],
@@ -142,6 +142,18 @@ export function featurize(text: string, schema: Schema): ViewFeatures {
     )
       add("flags", 8);
     if (prevDigit && SUFFIXES.has(low)) add("flags", 9);
+    if (
+      tok.cls === CharClass.Letter &&
+      low.length >= 5 &&
+      (low.endsWith("er") || low.endsWith("ier"))
+    )
+      add("flags", 10);
+    if (
+      tok.cls === CharClass.Letter &&
+      low.length >= 6 &&
+      (low.endsWith("est") || low.endsWith("iest"))
+    )
+      add("flags", 11);
 
     const f = fieldAt[i]!;
     add("field_kind", f ? KIND_ID[f.kind] : 0);

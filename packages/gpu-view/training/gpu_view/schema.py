@@ -23,13 +23,20 @@ class Field:
     aliases: tuple[str, ...] = ()
     values: tuple[str, ...] = ()
     person: bool = False  # text field that can take "me" as a value
+    adjectives: tuple[str, ...] = ()  # polarity adjectives usable as aliases ("cheap", "tall")
+    year_like: bool = False  # number field whose values look like years (vintage, founded)
+    unit: str = ""  # unit word that may follow a value ("cm", "kg")
+    primary: bool = False  # date field used for bare time phrases
 
     def to_json(self) -> dict:
         out: dict = {"name": self.name, "kind": self.kind}
-        if self.aliases:
-            out["aliases"] = list(self.aliases)
+        aliases = list(self.aliases) + list(self.adjectives)
+        if aliases:
+            out["aliases"] = aliases
         if self.values:
             out["values"] = list(self.values)
+        if self.primary:
+            out["primary"] = True
         return out
 
 
@@ -52,13 +59,17 @@ class Schema:
         return [f for f in self.fields if f.kind == kind]
 
 
-def F(name: str, kind: str, aliases: str = "", values: str = "", person: bool = False) -> Field:
+def F(name: str, kind: str, aliases: str = "", values: str = "", person: bool = False,
+      adj: str = "", year_like: bool = False, unit: str = "") -> Field:
     return Field(
         name,
         kind,
         tuple(a.strip() for a in aliases.split("|") if a.strip()),
         tuple(v.strip() for v in values.split("|") if v.strip()),
         person,
+        tuple(a.strip() for a in adj.split("|") if a.strip()),
+        year_like,
+        unit,
     )
 
 
@@ -68,17 +79,18 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
         ["orders", "purchases", "carts"],
         [
             F("customer", TEXT, "buyer|shopper|client", person=True),
-            F("total", NUMBER, "amount|order value|order total|spend"),
+            F("total", NUMBER, "amount|order value|order total|spend", adj="expensive|cheap|pricey|big", unit="dollars"),
             F("status", ENUM, "state", "pending|paid|shipped|delivered|cancelled|refunded"),
             F("country", ENUM, "nation|ship to", "Germany|France|Spain|Italy|Japan|Brazil|Canada|Mexico"),
             F("created_at", DATE, "created|order date|placed|ordered"),
-            F("items", NUMBER, "item count|quantity|qty|units"),
+            F("items", NUMBER, "item count|quantity|qty", unit="units"),
             F("discount", NUMBER, "coupon|promo|markdown"),
             F("gift", BOOL, "is gift|gift wrapped"),
             F("payment_method", ENUM, "payment|paid with", "card|paypal|bank transfer|cash on delivery|crypto"),
             F("category", ENUM, "department|product type", "electronics|clothing|books|toys|home|garden|sports"),
             F("shipping_cost", NUMBER, "shipping|postage|delivery fee"),
-            F("rating", NUMBER, "review score|review"),
+            F("rating", NUMBER, "review score|review|rated", adj="good|popular", unit="stars"),
+            F("weight_kg", NUMBER, "package weight|heaviness", adj="heavy|light", unit="kg"),
             F("sku", TEXT, "product code|part number"),
             F("returned", BOOL, "return|sent back"),
         ],
@@ -89,7 +101,8 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
             F("company", TEXT, "organisation|organization|firm"),
             F("owner", TEXT, "rep|account manager|sales rep|salesperson", person=True),
             F("stage", ENUM, "pipeline stage|phase", "lead|qualified|proposal|negotiation|won|lost"),
-            F("value", NUMBER, "deal size|deal value|arr|revenue"),
+            F("value", NUMBER, "deal size|deal value|arr|revenue", adj="big|large|small|rich", unit="dollars"),
+            F("founded", NUMBER, "founded in|established|est", year_like=True),
             F("industry", ENUM, "sector|vertical", "software|healthcare|retail|banking|manufacturing|media|insurance"),
             F("region", ENUM, "territory|geo", "emea|apac|americas|latam|nordics|dach|benelux"),
             F("last_contacted", DATE, "last contact|contacted|last touch"),
@@ -99,7 +112,7 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
             F("closed_at", DATE, "close date|closed|closing"),
             F("newsletter", BOOL, "subscribed|opted in"),
             F("source", ENUM, "channel|lead source", "referral|webinar|ads|organic|conference|partner|cold call"),
-            F("employees", NUMBER, "headcount|staff count"),
+            F("employees", NUMBER, "headcount|staff count", unit="people"),
             F("website", TEXT, "url|domain"),
         ],
     ),
@@ -115,7 +128,7 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
             F("created", DATE, "opened|created at|filed"),
             F("updated", DATE, "updated at|modified|last updated|last activity"),
             F("due", DATE, "due date|deadline|target date"),
-            F("estimate", NUMBER, "points|story points|effort|size"),
+            F("estimate", NUMBER, "points|story points|effort|size", adj="big|small", unit="pts"),
             F("comments", NUMBER, "comment count|replies|discussion"),
             F("project", ENUM, "board|repo|repository", "web|mobile|api|infra|design|billing"),
             F("resolved", BOOL, "fixed|is resolved"),
@@ -129,12 +142,13 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
             F("artist", TEXT, "performer|band|musician|singer"),
             F("album", TEXT, "record|release title"),
             F("genre", ENUM, "style", "rock|jazz|pop|hip hop|classical|electronic|metal|folk|reggae|blues"),
-            F("duration", NUMBER, "length|runtime|minutes|seconds"),
-            F("plays", NUMBER, "play count|streams|listens|spins"),
+            F("duration", NUMBER, "length|runtime", adj="long|short", unit="minutes"),
+            F("recorded_in", NUMBER, "recorded|recording", year_like=True),
+            F("plays", NUMBER, "play count|streams|listens|spins|played|streamed", adj="popular"),
             F("released", DATE, "release date|release|dropped|published"),
             F("explicit", BOOL, "parental advisory|is explicit"),
             F("label", TEXT, "record label|imprint"),
-            F("bpm", NUMBER, "tempo|beats per minute"),
+            F("bpm", NUMBER, "tempo|beats per minute", adj="fast|slow"),
             F("mood", ENUM, "vibe|feel", "happy|sad|energetic|chill|dark|romantic|angry"),
             F("format", ENUM, "medium", "vinyl|cd|digital|cassette|streaming"),
             F("favorite", BOOL, "liked|starred|favourite|loved"),
@@ -147,13 +161,14 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
         [
             F("department", ENUM, "dept|org|function", "engineering|marketing|sales|finance|support|legal|operations|people ops"),
             F("manager", TEXT, "reports to|boss|supervisor|lead", person=True),
-            F("salary", NUMBER, "pay|compensation|comp|base"),
+            F("salary", NUMBER, "pay|compensation|comp|base|paid", adj="rich|poor|expensive|cheap", unit="dollars"),
             F("hired", DATE, "hire date|start date|joined|joining date"),
             F("location", ENUM, "office|site|based in", "london|berlin|new york|remote|austin|toronto|singapore|dublin"),
             F("level", ENUM, "grade|band|seniority", "junior|mid|senior|staff|principal|director|vp"),
             F("remote", BOOL, "works remotely|wfh|remote worker"),
             F("team", TEXT, "squad|pod|group name"),
-            F("age", NUMBER, "years old"),
+            F("age", NUMBER, "years old", adj="old|young", unit="years"),
+            F("yob", NUMBER, "birthyear|birth yr", year_like=True),
             F("performance", NUMBER, "perf|review rating|performance score"),
             F("contract", ENUM, "employment type|worker type", "full time|part time|contractor|intern|temp"),
             F("active", BOOL, "employed|current|still here"),
@@ -165,7 +180,7 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
         ["shipments", "packages", "parcels", "deliveries"],
         [
             F("carrier", ENUM, "courier|shipper", "ups|fedex|dhl|usps|maersk|tnt|royal mail"),
-            F("weight", NUMBER, "kg|mass|kilos|pounds|lbs"),
+            F("weight", NUMBER, "mass|weighs", adj="heavy|light", unit="kg"),
             F("origin", ENUM, "from warehouse|depot|hub", "hamburg|rotterdam|shanghai|chicago|memphis|leipzig|dubai"),
             F("destination", TEXT, "dest|going to|address"),
             F("shipped", DATE, "ship date|dispatched|sent|dispatch date"),
@@ -177,7 +192,8 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
             F("route", TEXT, "lane|leg"),
             F("driver", TEXT, "trucker|courier name|delivered by", person=True),
             F("eta", DATE, "expected|arrival|expected delivery|arriving"),
-            F("distance", NUMBER, "km|miles|mileage"),
+            F("distance", NUMBER, "mileage|how far", adj="far|near|long|short", unit="km"),
+            F("height_cm", NUMBER, "parcel height|how tall", adj="tall|short", unit="cm"),
             F("insured", BOOL, "insurance|covered"),
         ],
     ),
@@ -187,10 +203,10 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
             F("page", TEXT, "path|url|screen"),
             F("browser", ENUM, "user agent", "chrome|firefox|safari|edge|opera|brave"),
             F("device", ENUM, "device type|form factor", "desktop|mobile|tablet|tv|watch"),
-            F("visitors", NUMBER, "users|uniques|unique visitors|people count"),
+            F("visitors", NUMBER, "users|uniques|unique visitors|people count", adj="busy|popular", unit="people"),
             F("views", NUMBER, "hits|impressions|page views"),
             F("bounce_rate", NUMBER, "bounce|bounces|bounce percentage"),
-            F("session_length", NUMBER, "time on site|dwell time|engagement time"),
+            F("session_length", NUMBER, "time on site|dwell time|engagement time", adj="long|short", unit="seconds"),
             F("referrer", TEXT, "referring site|came from|traffic source"),
             F("campaign", TEXT, "utm campaign|utm|promotion"),
             F("timestamp", DATE, "time|when|seen at|visited"),
@@ -205,7 +221,8 @@ POOLS: dict[str, tuple[list[str], list[Field]]] = {
         ["transactions", "invoices", "expenses", "payments"],
         [
             F("account", TEXT, "account name|ledger|wallet"),
-            F("amount", NUMBER, "sum paid|net|gross|charge"),
+            F("amount", NUMBER, "sum paid|net|gross|charge", adj="big|small|large|expensive", unit="dollars"),
+            F("fy", NUMBER, "fiscal|financial period", year_like=True),
             F("currency", ENUM, "ccy|denomination", "usd|eur|gbp|jpy|chf|aud|inr"),
             F("type", ENUM, "transaction type|kind|entry type", "debit|credit|transfer|fee|dividend|interest|chargeback"),
             F("merchant", TEXT, "vendor|payee|supplier|counterparty"),
@@ -231,8 +248,8 @@ EVAL_POOLS: dict[str, tuple[list[str], list[Field]]] = {
         [
             F("cuisine", ENUM, "kitchen|cooking tradition", "italian|mexican|thai|indian|greek|korean|ethiopian|peruvian"),
             F("difficulty", ENUM, "skill needed|complexity", "easy|moderate|hard|expert"),
-            F("prep", NUMBER, "preparation|kitchen wait|cooking mins"),
-            F("calories", NUMBER, "kcal|energy content"),
+            F("prep", NUMBER, "preparation|kitchen wait|cooking mins", adj="long|short|quick", unit="minutes"),
+            F("calories", NUMBER, "kcal|energy content", adj="heavy|light", unit="kcal"),
             F("servings", NUMBER, "portions|serves|yield"),
             F("chef", TEXT, "cook|contributor", person=True),
             F("course", ENUM, "meal slot", "starter|main|dessert|snack|breakfast|brunch|appetizer"),
@@ -249,15 +266,15 @@ EVAL_POOLS: dict[str, tuple[list[str], list[Field]]] = {
         [
             F("bedrooms", NUMBER, "beds|br"),
             F("bathrooms", NUMBER, "baths|ba"),
-            F("asking", NUMBER, "asking figure|sticker|listed for"),
-            F("sqft", NUMBER, "square feet|square footage|floor area|footage"),
+            F("asking", NUMBER, "asking figure|sticker|listed for|priced", adj="expensive|cheap|pricey", unit="dollars"),
+            F("sqft", NUMBER, "square feet|square footage|floor area|footage", adj="big|small|large", unit="sqft"),
             F("neighborhood", ENUM, "neighbourhood|district|area", "downtown|suburbs|waterfront|uptown|midtown|hills|old town"),
             F("listed_on", DATE, "listed|went live|hit the market|listing day"),
             F("dwelling", ENUM, "housing shape|structure", "condo|house|townhouse|apartment|loft|duplex|bungalow"),
             F("garage", BOOL, "parking|carport"),
             F("furnished", BOOL, "comes furnished|with furniture"),
             F("realtor", TEXT, "broker|listing person", person=True),
-            F("year_built", NUMBER, "built|construction year|vintage"),
+            F("year_built", NUMBER, "built|constructed|vintage", adj="old|new", year_like=True),
             F("pool", BOOL, "swimming pool|has pool"),
             F("sold", BOOL, "no longer available|already sold"),
             F("hoa", NUMBER, "association dues|community dues"),
@@ -268,7 +285,7 @@ EVAL_POOLS: dict[str, tuple[list[str], list[Field]]] = {
         ["students", "courses", "enrollments", "pupils"],
         [
             F("student", TEXT, "learner|pupil|enrollee", person=True),
-            F("gpa", NUMBER, "mark|marks|scholastic result"),
+            F("gpa", NUMBER, "mark|marks|scholastic result|graded", adj="good|bad|strong|weak"),
             F("subject", ENUM, "discipline|topic", "math|physics|chemistry|biology|history|literature|art|geography"),
             F("semester", ENUM, "term", "fall|spring|summer|winter"),
             F("enrolled", DATE, "enrollment|enrolled on|registered|matriculated"),
@@ -290,13 +307,13 @@ EVAL_POOLS: dict[str, tuple[list[str], list[Field]]] = {
             F("airline", ENUM, "flown with|operator", "lufthansa|delta|emirates|ryanair|qantas|klm|ana"),
             F("departure", DATE, "departs|leaving|depart|outbound"),
             F("inbound_flight", DATE, "returning|inbound|homebound"),
-            F("nights", NUMBER, "overnights|nights away"),
-            F("fare", NUMBER, "airfare|ticket outlay"),
+            F("nights", NUMBER, "overnights|nights away", adj="long|short", unit="nights"),
+            F("fare", NUMBER, "airfare|ticket outlay", adj="expensive|cheap|pricey", unit="euros"),
             F("traveler", TEXT, "passenger|guest|traveller|flyer", person=True),
             F("cabin", ENUM, "seat class|travel class", "economy|business|first class|premium economy"),
             F("refundable", BOOL, "flexible|cancellable|free cancellation"),
             F("hotel", TEXT, "accommodation|lodging|inn"),
-            F("stops", NUMBER, "layovers|connections|stopovers"),
+            F("stops", NUMBER, "layovers|connections|stopovers", adj="long|short|few"),
             F("reserved_on", DATE, "reserved|reservation day|bought on"),
             F("reviews", NUMBER, "guest feedback|feedback tally"),
             F("checked_bag", BOOL, "luggage included|bag included|baggage"),
@@ -327,7 +344,7 @@ def vocabulary(pools: dict[str, tuple[list[str], list[Field]]]) -> set[str]:
                 out |= _words(a)
             for v in f.values:
                 out |= _words(v)
-    return out
+    return out  # polarity adjectives are shared lexicon words and are excluded on purpose
 
 
 def assert_disjoint() -> None:
@@ -335,6 +352,17 @@ def assert_disjoint() -> None:
     shared = vocabulary(POOLS) & vocabulary(EVAL_POOLS)
     if shared:
         raise AssertionError(f"held-out vocabulary overlaps training: {sorted(shared)}")
+
+
+def date_target(schema: Schema) -> Field | None:
+    """The date field a bare time phrase refers to: the only one, or the primary one."""
+    dates = schema.of_kind(DATE)
+    if len(dates) == 1:
+        return dates[0]
+    for f in dates:
+        if f.primary:
+            return f
+    return None
 
 
 def sample(split: str, rng: random.Random, domain: str | None = None) -> Schema:
@@ -352,7 +380,12 @@ def sample(split: str, rng: random.Random, domain: str | None = None) -> Schema:
         values = f.values
         if values and rng.random() < 0.3 and len(values) > 3:
             values = tuple(rng.sample(values, rng.randint(3, len(values))))
-        fields.append(Field(f.name, f.kind, aliases, values, f.person))
+        adjectives = tuple(a for a in f.adjectives if rng.random() < 0.8)
+        fields.append(Field(f.name, f.kind, aliases, values, f.person, adjectives, f.year_like, f.unit))
+    dates = [i for i, f in enumerate(fields) if f.kind == DATE]
+    if len(dates) > 1 and rng.random() < 0.5:
+        i = rng.choice(dates)
+        fields[i] = Field(**{**fields[i].__dict__, "primary": True})
     return Schema(domain, rng.choice(entities), fields)
 
 

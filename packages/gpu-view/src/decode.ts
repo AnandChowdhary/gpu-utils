@@ -8,10 +8,12 @@
  */
 import { argmax } from "@gpu-utils/runtime";
 import type { ViewFeatures } from "./features.ts";
+import { POLARITY } from "./lexicon.ts";
 import {
   type Entry,
   enumEntries,
   fieldEntries,
+  forms,
   resolveWords,
   type Schema,
   wordsOf,
@@ -172,6 +174,8 @@ interface Ctx {
   now: Date;
   dateField: string | undefined;
   spec: ViewSpec;
+  /** A "top N" / "bottom N" seen before its sort field ("top 5 comedy episodes by listens"). */
+  pendingDir: SortDir | undefined;
 }
 
 const FLIP: Record<FilterOp, FilterOp> = {
@@ -213,25 +217,30 @@ const UNIT_WORDS: Record<string, Granularity> = {
   annual: "year",
 };
 const DATE_DIR_RE = /\b(newest|oldest|latest|earliest|recent)\b/;
-const NUMBER_RE = /^([0-9]+(?:\.[0-9]+)?)(k|m|b|bn|mm)?$/;
+const NUMBER_RE = /^([0-9]+(?:\.[0-9]+)?)([a-z%]*)$/;
+const MULTIPLIERS: Record<string, number> = { k: 1e3, m: 1e6, b: 1e9, bn: 1e9, mm: 1e6 };
 
-/** "5k" → 5000, "$1,200" → 1200, "2.5m" → 2500000, "30%" → 30. */
+/** "5k" → 5000, "$1,200" → 1200, "2.5m" → 2500000, "30%" → 30, "50 cm" → 50 (unit words ignored). */
 export function parseNumber(text: string): number | null {
   const t = text
     .toLowerCase()
     .replace(/[,$€£ ]/g, "")
-    .replace(/%+$/, "");
+    .replace(/^(usd|eur|gbp)/, "");
   const m = NUMBER_RE.exec(t);
   if (!m) return null;
-  const mult: Record<string, number> = {
-    k: 1e3,
-    m: 1e6,
-    b: 1e9,
-    bn: 1e9,
-    mm: 1e6,
-  };
-  return Number(m[1]) * (mult[m[2] ?? ""] ?? 1);
+  return Number(m[1]) * (MULTIPLIERS[m[2] ?? ""] ?? 1);
 }
+
+/** Polarity of a comparative/superlative field word ("cheaper" → low, "tallest" → high), if any. */
+function polarityOf(word: string): "high" | "low" | undefined {
+  for (const f of forms(word)) {
+    const p = POLARITY[f];
+    if (p) return p;
+  }
+  return undefined;
+}
+const isComparative = (w: string) => w.length >= 5 && (w.endsWith("er") || w.endsWith("ier"));
+const isSuperlative = (w: string) => w.length >= 6 && (w.endsWith("est") || w.endsWith("iest"));
 
 /** Compiles gold or predicted roles into a spec. Exported so tests can round-trip gold labels. */
 export function compile(
@@ -267,6 +276,7 @@ export function compile(
     now,
     dateField: options.dateField,
     spec,
+    pendingDir: undefined,
   };
   // Clause segmentation: a non-O token with the boundary bit (or with no open clause) opens a clause.
   const clauses: number[][] = [];
@@ -326,6 +336,8 @@ function defaultDateField(ctx: Ctx, span: Span): number {
     if (i >= 0) return i;
   }
   if (dates.length === 1) return dates[0]!;
+  const primary = dates.find((i) => ctx.schema.fields[i]!.primary);
+  if (primary !== undefined) return primary;
   if (dates.length === 0)
     diag(ctx, "no_date_field", "a time phrase was used but the schema has no date field", span);
   else
@@ -350,9 +362,11 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
     .join(" ");
 
   let fi = -1;
+  let fieldWord = "";
   if (fieldRuns.length > 0) {
     const run = fieldRuns[0]!;
-    const m = resolveWords(wordsOf(runText(ctx, run)), ctx.fieldEntries);
+    const words = wordsOf(runText(ctx, run));
+    const m = resolveWords(words, ctx.fieldEntries);
     if (!m) {
       diag(
         ctx,
@@ -363,6 +377,22 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
       return;
     }
     fi = m.field;
+    if (words.length === 1) fieldWord = words[0]!;
+    // "business or tech episodes": a weak text-field mention next to values that all belong to
+    // one enum field is a carrier noun, not the field being filtered.
+    if (ctx.schema.fields[fi]!.kind === "text" && valueRuns.length > 0) {
+      let owners: Set<number> | null = null;
+      for (const v of valueRuns) {
+        const e = resolveWords(wordsOf(runText(ctx, v)), ctx.enumEntries);
+        if (!e) {
+          owners = null;
+          break;
+        }
+        owners =
+          owners === null ? new Set(e.owners) : new Set(e.owners.filter((o) => owners!.has(o)));
+      }
+      if (owners?.size === 1) fi = [...owners][0]!;
+    }
   } else if (valueRuns.length > 0) {
     let owners: Set<number> | null = null;
     for (const run of valueRuns) {
@@ -416,7 +446,12 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
   };
 
   if (field.kind === "date" && timeRuns.length === 0 && valueRuns.length > 0) timeRuns = valueRuns;
-  const hasValues = field.kind === "date" ? timeRuns.length > 0 : valueRuns.length > 0;
+  // "vintage between 2015 and 2020": years on a numeric field are numbers.
+  const numberRuns =
+    field.kind === "number"
+      ? [...valueRuns, ...timeRuns].sort((a, b) => a.start - b.start)
+      : valueRuns;
+  const hasValues = field.kind === "date" ? timeRuns.length > 0 : numberRuns.length > 0;
   if (!hasValues) {
     if (field.kind === "boolean") return push(flip(EMPTY_RE.test(opText) ? "is_false" : "is_true"));
     return push(flip(EMPTY_RE.test(opText) ? "is_empty" : "not_empty"));
@@ -431,7 +466,7 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
 
   if (field.kind === "number") {
     const nums: number[] = [];
-    for (const run of valueRuns) {
+    for (const run of numberRuns) {
       const v = parseNumber(runText(ctx, run));
       if (v === null)
         return diag(
@@ -447,7 +482,7 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
       if (negatedUnsupported("between")) return;
       return push("between", [nums[0]!, nums[1]!]);
     }
-    return push(flip(numberOp(opText)), nums[0]!);
+    return push(flip(numberOp(opText, fieldWord)), nums[0]!);
   }
 
   if (field.kind === "date") {
@@ -521,8 +556,17 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
   push("contains", v);
 }
 
-function numberOp(op: string): FilterOp {
+function numberOp(op: string, fieldWord = ""): FilterOp {
   const has = (re: RegExp) => re.test(op);
+  // "cheaper than 100" / "taller than 50": the comparative field word carries the direction.
+  if (
+    isComparative(fieldWord) &&
+    !has(/\b(more|less|greater|fewer|at least|at most|up to|minimum|maximum|min|max)\b|[<>≥≤=]/)
+  ) {
+    const p = polarityOf(fieldWord);
+    if (p === "high") return has(/\bor equal\b/) ? "gte" : "gt";
+    if (p === "low") return has(/\bor equal\b/) ? "lte" : "lt";
+  }
   if (
     has(
       /\bat least\b|\bminimum\b|\bmin\b|>=|≥|\bor more\b|\bor higher\b|\band up\b|\band above\b|\band over\b|\bstarting at\b|\+/,
@@ -566,15 +610,23 @@ function compileSort(ctx: Ctx, clause: number[]): void {
   if (fieldRuns.length === 0 && dirRuns.length === 0) return;
   const span = clauseSpan(ctx, clause);
   const dirText = dirRuns.map((r) => runText(ctx, r).toLowerCase()).join(" ");
-  const dir = sortDir(dirText);
   if (fieldRuns.length === 0) {
-    if (!DATE_DIR_RE.test(dirText)) return; // "top"/"bottom" without a field only carry a limit
-    const fi = defaultDateField(ctx, span);
-    if (fi >= 0) ctx.spec.sort.push({ field: ctx.schema.fields[fi]!.name, dir, span });
+    if (DATE_DIR_RE.test(dirText)) {
+      const fi = defaultDateField(ctx, span);
+      if (fi >= 0)
+        ctx.spec.sort.push({
+          field: ctx.schema.fields[fi]!.name,
+          dir: sortDir(dirText) ?? "asc",
+          span,
+        });
+    } else if (/\b(top|bottom)\b/.test(dirText)) {
+      ctx.pendingDir = /\bbottom\b/.test(dirText) ? "asc" : "desc"; // attaches to the next "by field"
+    }
     return;
   }
   for (const run of fieldRuns) {
-    const m = resolveWords(wordsOf(runText(ctx, run)), ctx.fieldEntries);
+    const words = wordsOf(runText(ctx, run));
+    const m = resolveWords(words, ctx.fieldEntries);
     if (!m) {
       diag(
         ctx,
@@ -584,11 +636,21 @@ function compileSort(ctx: Ctx, clause: number[]): void {
       );
       continue;
     }
-    ctx.spec.sort.push({ field: ctx.schema.fields[m.field]!.name, dir, span });
+    let dir = sortDir(dirText);
+    if (dir === undefined && words.length === 1 && isSuperlative(words[0]!)) {
+      const p = polarityOf(words[0]!); // "cheapest" → asc, "tallest" → desc
+      if (p) dir = p === "high" ? "desc" : "asc";
+    }
+    if (dir === undefined && dirRuns.length === 0 && ctx.pendingDir !== undefined) {
+      dir = ctx.pendingDir;
+      ctx.pendingDir = undefined;
+    }
+    ctx.spec.sort.push({ field: ctx.schema.fields[m.field]!.name, dir: dir ?? "asc", span });
   }
 }
 
-function sortDir(t: string): SortDir {
+/** Explicit direction words; undefined when the text carries none ("first", ""). */
+function sortDir(t: string): SortDir | undefined {
   if (/low to high|lowest to highest|a to z|increasing/.test(t)) return "asc";
   if (/high to low|highest to lowest|z to a|decreasing/.test(t)) return "desc";
   if (
@@ -597,7 +659,13 @@ function sortDir(t: string): SortDir {
     )
   )
     return "desc";
-  return "asc";
+  if (
+    /\b(asc|ascending|lowest|bottom|oldest|earliest|alphabetical|alphabetically|smallest|least|worst|fewest|cheapest|shortest|lightest)\b/.test(
+      t,
+    )
+  )
+    return "asc";
+  return undefined;
 }
 
 function compileGroup(ctx: Ctx, clause: number[]): void {

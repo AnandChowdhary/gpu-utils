@@ -57,6 +57,10 @@ def test_matcher_tiers() -> None:
     assert match.resolve_words(["totals"], entries).quality == match.STEM
     assert match.resolve_words(["tota"], entries).quality == match.PREFIX
     assert match.resolve_words(["statis"], entries).quality == match.TYPO
+    priced = match.field_entries({"fields": [{"name": "price", "kind": "number", "aliases": ["cheap", "rated"]}]})
+    assert match.resolve_words(["cheapest"], priced).quality == match.INFLECT
+    assert match.resolve_words(["rating"], priced).quality == match.INFLECT
+    assert match.resolve_words(["cheaper"], priced).field == 0
     assert match.resolve_words(["nothing"], entries) is None
     toks = match.model_tokens("in-progress items")
     spans = match.match_spans(toks, match.enum_entries(schema), enum=True)

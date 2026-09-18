@@ -15,7 +15,8 @@ from dataclasses import dataclass, field
 from datetime import date
 
 from . import match, schema as schema_module
-from .schema import BOOL, DATE, ENUM, NUMBER, TEXT, Field, Schema
+from .lexicon import POLARITY, UNITS
+from .schema import BOOL, DATE, ENUM, NUMBER, TEXT, Field, Schema, date_target
 from .timeres import resolve as resolve_time
 
 ROLES = ["O", "FIELD", "OP", "VALUE", "TIME_VALUE", "CONJ", "NEG", "SORT_FIELD", "SORT_DIR",
@@ -232,19 +233,67 @@ def format_number(rng: random.Random, kind_hint: str = "") -> str:
     return f"{rng.randint(1, 99)}%"
 
 
-NUMBER_RE = re.compile(r"^([0-9]+(?:\.[0-9]+)?)(k|m|b|bn|mm)?$")
+NUMBER_RE = re.compile(r"^([0-9]+(?:\.[0-9]+)?)([a-z%]*)$")
+MULTIPLIERS = {"k": 1e3, "m": 1e6, "b": 1e9, "bn": 1e9, "mm": 1e6}
 
 
 def parse_number(text: str) -> float | None:
+    """Mirrors parseNumber in src/decode.ts: currency, commas, k/m suffixes; unit words ignored."""
     t = text.lower().replace(",", "").replace("$", "").replace("€", "").replace("£", "").replace(" ", "")
-    t = t.rstrip("%")
+    t = re.sub(r"^(usd|eur|gbp)", "", t)
     m = NUMBER_RE.match(t)
     if not m:
         return None
-    v = float(m[1])
-    mult = {"k": 1e3, "m": 1e6, "b": 1e9, "bn": 1e9, "mm": 1e6}.get(m[2] or "", 1)
-    v = v * mult
+    v = float(m[1]) * MULTIPLIERS.get(m[2], 1)
     return int(v) if v == int(v) else v
+
+
+IRREGULAR = {"good", "bad", "far", "many", "much", "little", "great", "recent", "empty", "late", "early"}
+
+
+def comparative(adj: str) -> str:
+    if adj in ("expensive", "popular", "costly"):
+        return "more " + adj
+    if adj.endswith("y"):
+        return adj[:-1] + "ier"
+    if adj.endswith("e"):
+        return adj + "r"
+    if len(adj) >= 3 and adj[-1] not in "aeiouwy" and adj[-2] in "aeiou" and adj[-3] not in "aeiou":
+        return adj + adj[-1] + "er"
+    return adj + "er"
+
+
+def superlative(adj: str) -> str:
+    if adj in ("expensive", "popular", "costly"):
+        return "most " + adj
+    if adj.endswith("y"):
+        return adj[:-1] + "iest"
+    if adj.endswith("e"):
+        return adj + "st"
+    if len(adj) >= 3 and adj[-1] not in "aeiouwy" and adj[-2] in "aeiou" and adj[-3] not in "aeiou":
+        return adj + adj[-1] + "est"
+    return adj + "est"
+
+
+def usable_adjectives(f: Field, schema: Schema | None = None) -> list[str]:
+    """Polarity adjectives of a field that no other field in the schema also claims."""
+    taken: set[str] = set()
+    if schema is not None:
+        for g in schema.fields:
+            if g is not f:
+                taken |= set(g.adjectives) | {a for a in g.aliases if " " not in a}
+    return [a for a in f.adjectives if a in POLARITY and a not in IRREGULAR and a not in taken]
+
+
+def number_value(f: Field, rng: random.Random) -> str:
+    if f.year_like:
+        return str(rng.randint(1985, 2026))
+    v = format_number(rng)
+    if rng.random() < 0.2 and not any(c in v for c in "$€£%"):
+        unit = f.unit if (f.unit and rng.random() < 0.7) else rng.choice(UNITS)
+        if unit not in ("%", "percent", "pct") or rng.random() < 0.5:
+            return f"{v} {unit}" if rng.random() < 0.8 else f"{v}{unit}"
+    return v
 
 
 def time_phrase(rng: random.Random) -> str:
@@ -407,8 +456,23 @@ def render_number(schema: Schema, f: Field, fi: int, rng: random.Random, fentrie
     surface = field_surface(f, rng, schema, fentries, fi)
     style = rng.random()
     pieces: list[Piece] = []
+    adjectives = usable_adjectives(f, schema)
+    if adjectives and rng.random() < 0.15:
+        # Comparative adjective as the field word: "cheaper than 100", "more expensive than 5k".
+        adj = rng.choice(adjectives)
+        comp = comparative(adj)
+        value = number_value(f, rng)
+        polarity = POLARITY[adj]
+        if comp.startswith("more "):
+            more = rng.random() < 0.6
+            pieces = [P("more" if more else "less", "OP"), P(adj, "FIELD"), P("than", "OP"), P(value, "VALUE")]
+            op = "gt" if more else "lt"
+        else:
+            pieces = [P(comp, "FIELD"), P("than", "OP"), P(value, "VALUE")]
+            op = "gt" if polarity == "high" else "lt"
+        return Clause("filter", pieces, {"field": f.name, "op": op, "_values": 1})
     if style < 0.12:
-        a, b = format_number(rng), format_number(rng)
+        a, b = number_value(f, rng), number_value(f, rng)
         if (parse_number(a) or 0) > (parse_number(b) or 0):
             a, b = b, a
         layout = rng.random()
@@ -441,7 +505,7 @@ def render_number(schema: Schema, f: Field, fi: int, rng: random.Random, fentrie
     negated = rng.random() < 0.1
     fam = rng.choices(["gt", "gte", "lt", "lte", "eq"], weights=[30, 15, 25, 12, 10])[0]
     op = rng.choice({"gt": GT_OPS, "gte": GTE_OPS, "lt": LT_OPS, "lte": LTE_OPS, "eq": EQ_NUM_OPS}[fam])
-    value = format_number(rng)
+    value = number_value(f, rng)
     op_pieces: list[Piece] = []
     for w in op.split(" "):
         op_pieces.append(P(w, "NEG" if w in ("no", "not") else "OP"))
@@ -503,7 +567,7 @@ def render_date(schema: Schema, f: Field, fi: int, rng: random.Random, fentries)
     if value.endswith("ago") and fam == "in":
         op = ""
     bare = (fam == "in" and rng.random() < 0.3 and op in ("", "in", "during", "for")
-            and len(schema.of_kind(DATE)) == 1)
+            and date_target(schema) is f)
     op_pieces = [P(w, "NEG" if w in ("no", "not") else "OP") for w in op.split(" ")] if op else []
     if op == "no later than":
         fam = "after"  # NEG + after → until (lte)
@@ -649,8 +713,7 @@ def render_sort(schema: Schema, rng: random.Random, ctx: dict, with_limit: bool 
     if f.kind == DATE and style < 0.3:
         dir_ = "desc" if rng.random() < 0.7 else "asc"
         word = rng.choice(DATE_DESC if dir_ == "desc" else DATE_ASC)
-        date_fields = schema.of_kind(DATE)
-        if len(date_fields) == 1 and rng.random() < 0.6:
+        if date_target(schema) is f and rng.random() < 0.6:
             pieces = [P(word, "SORT_DIR")]
             return Clause("sort", pieces, {"field": f.name, "dir": dir_})
         layout = rng.random()
@@ -667,6 +730,36 @@ def render_sort(schema: Schema, rng: random.Random, ctx: dict, with_limit: bool 
         if rng.random() < 0.3:
             pieces.insert(2, P(schema.entity, "O"))
         return Clause("sort", pieces, {"field": f.name, "dir": "desc" if top else "asc", "_limit": n})
+    adjectives = usable_adjectives(f, schema) if f.kind == NUMBER else []
+    participles = [a for a in f.aliases if a.endswith("ed") and " " not in a]
+    if (adjectives or participles) and style < 0.6:
+        r = rng.random()
+        if adjectives and (r < 0.6 or not participles):
+            adj = rng.choice(adjectives)
+            sup = superlative(adj)
+            polarity = POLARITY[adj]
+            layout = rng.random()
+            if sup.startswith("most ") or (layout < 0.3 and polarity == "high"):
+                word = rng.choice(["most", "least"]) if polarity == "high" else "most"
+                dir_ = "desc" if word == "most" else "asc"
+                pieces = [P(word, "SORT_DIR"), P(adj, "SORT_FIELD")]
+            else:
+                dir_ = "desc" if polarity == "high" else "asc"
+                pieces = [P(sup, "SORT_FIELD")]
+                if rng.random() < 0.3:
+                    pieces.insert(0, P("the", "O"))
+            if rng.random() < 0.6:
+                pieces.append(P("first", "SORT_DIR"))
+            if rng.random() < 0.2:
+                pieces.insert(0, P(rng.choice(["sorted", "sort", "order", "show"]), "O"))
+            return Clause("sort", pieces, {"field": f.name, "dir": dir_})
+        part = rng.choice(participles)
+        word = rng.choice(["highest", "lowest", "most", "least", "best", "worst", "top"])
+        dir_ = "desc" if word in ("highest", "most", "best", "top") else "asc"
+        pieces = [P(word, "SORT_DIR"), P(part, "SORT_FIELD")]
+        if rng.random() < 0.5:
+            pieces.append(P("first", "SORT_DIR"))
+        return Clause("sort", pieces, {"field": f.name, "dir": dir_})
     dir_word = ""
     dir_ = "asc"
     r = rng.random()
@@ -703,7 +796,7 @@ def render_group(schema: Schema, rng: random.Random, ctx: dict, intro_ok: bool =
     if date_fields and rng.random() < 0.3:
         f = rng.choice(date_fields)
         unit = rng.choice(list(UNIT_WORDS))
-        if len(date_fields) == 1 and rng.random() < 0.7:
+        if date_target(schema) is f and rng.random() < 0.7:
             if rng.random() < 0.3:
                 adverb = rng.choice([a for a, u in ADVERB_UNITS.items() if u == unit] or ["monthly"])
                 unit = ADVERB_UNITS[adverb]
@@ -796,11 +889,14 @@ def render_chart(rng: random.Random) -> Clause:
 
 # ---------------------------------------------------------------- assembly
 def entity_noun(schema: Schema, rng: random.Random) -> str:
-    if rng.random() < 0.15:
+    """Sometimes the carrier noun collides with a text field ("episodes" vs alias "episode")."""
+    if rng.random() < 0.3:
         texts = [f for f in schema.fields if f.kind == TEXT]
         if texts:
             f = rng.choice(texts)
-            return f.name.replace("_", " ") + "s"
+            forms = [f.name.replace("_", " ")] + [a for a in f.aliases if " " not in a]
+            word = rng.choice(forms)
+            return word + ("es" if word.endswith(("s", "x", "ch")) else "s")
     return schema.entity
 
 
@@ -831,9 +927,9 @@ def build(schema: Schema, rng: random.Random) -> Example | None:
             agg2 = render_agg(schema, rng, ctx)
             if agg2 and agg2.spec != (head[0].spec if head else None):
                 head.insert(1 if head else 0, agg2)
-    if mode in ("metric", "chart") and head and rng.random() < 0.5 and len(schema.of_kind(DATE)) == 1:
+    if mode in ("metric", "chart") and head and rng.random() < 0.5 and date_target(schema) is not None:
         # "total revenue by region this quarter": a bare time filter right after the head.
-        f = schema.of_kind(DATE)[0]
+        f = date_target(schema)
         bare = Clause("filter", [P(time_phrase(rng), "TIME_VALUE")], {"field": f.name, "op": "in", "_dates": 1, "_bare": True})
         if rng.random() < 0.4:
             bare.pieces.insert(0, P(rng.choice(["in", "for", "during"]), "OP"))
@@ -843,17 +939,26 @@ def build(schema: Schema, rng: random.Random) -> Example | None:
         c = Clause("agg", [P(rng.choice(["how many", "count of", "number of", "count", "total number of"]), "AGG_FN")], {"fn": "count"})
         c.pieces = [P(w, "AGG_FN") for w in c.pieces[0].text.split(" ")]
         head.append(c)
-        if rng.random() < 0.4:
+        if rng.random() < 0.7:
             g = render_group(schema, rng, ctx)
             if g:
                 tail.append(g)
+    dangling: list[Clause] = []
     if mode == "list":
         r = rng.random()
         if r < 0.15:
             s = render_sort(schema, rng, ctx, with_limit=True)
             if s:
-                tail.append(s)
-                limit_done = True
+                if "_limit" in s.spec and rng.random() < 0.5:
+                    # "top 5 comedy episodes by listens": the direction is stranded before the noun.
+                    n = s.spec["_limit"]
+                    head_clause = Clause("limit", [P(s.pieces[0].text, "SORT_DIR"), P(str(n), "LIMIT")], {"limit": n})
+                    field_clause = Clause("sort", [P(rng.choice(["by", "ranked by", "sorted by", "on"]), "O"),
+                                                   P(s.pieces[-1].text, "SORT_FIELD")], {"field": s.spec["field"], "dir": s.spec["dir"]})
+                    dangling = [head_clause, field_clause]
+                else:
+                    tail.append(s)
+                limit_done = "_limit" in s.spec
         elif r < 0.5:
             s = render_sort(schema, rng, ctx)
             if s:
@@ -893,12 +998,20 @@ def build(schema: Schema, rng: random.Random) -> Example | None:
             if all(p.role in ("VALUE", "FIELD", "NEG") for p in c.pieces) and len(c.pieces) <= 2:
                 adjective = c
                 break
+    if dangling:
+        parts.append((" ", dangling[0], ""))
+        show_entity = True
     if adjective:
         filters.remove(adjective)
         parts.append((" ", adjective, ""))
         parts.append((" ", None, entity))
     elif show_entity:
         parts.append((" ", None, entity))
+    if dangling and not adjective and filters:
+        first = filters.pop(0)
+        parts.append((rng.choice([" ", " with ", " that are "]), first, ""))
+    if dangling:
+        parts.append((" ", dangling[1], ""))
     for j, c in enumerate(filters):
         joiner = rng.choice(FIRST_JOINERS if j == 0 else FILTER_JOINERS)
         if j == 0 and glue_first_filter:
