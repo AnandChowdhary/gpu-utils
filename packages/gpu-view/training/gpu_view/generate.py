@@ -715,7 +715,14 @@ def render_group(schema: Schema, rng: random.Random, ctx: dict, intro_ok: bool =
             return Clause("group", pieces, spec)
         fi = schema.fields.index(f)
         surface = field_surface(f, rng, schema, fentries, fi)
-        pieces = [P(rng.choice(GROUP_INTRO), "O"), P(surface, "GROUP_FIELD"), P(rng.choice(UNIT_WORDS[unit]), "GROUP_FIELD")]
+        unit_word = rng.choice(UNIT_WORDS[unit])
+        # "viewing day" may itself be a field surface; then the unit word is not separable.
+        combined = match.resolve_words(entry_words(surface + " " + unit_word), fentries)
+        if combined is not None and combined.end - combined.start > len(entry_words(surface)):
+            pieces = [P(rng.choice(GROUP_INTRO), "O"), P(surface, "GROUP_FIELD")]
+            spec["fields"] = [f.name]
+            return Clause("group", pieces, spec)
+        pieces = [P(rng.choice(GROUP_INTRO), "O"), P(surface, "GROUP_FIELD"), P(unit_word, "GROUP_FIELD")]
         spec["fields"] = [f.name]
         spec["granularity"] = unit
         return Clause("group", pieces, spec)

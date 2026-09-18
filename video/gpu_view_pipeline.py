@@ -36,8 +36,7 @@ ROLES = {
 }
 BOUNDARIES = {0, 3, 4, 7, 12}
 SCHEMA_TAGS = {"revenue": "field:number", "region": "field:enum", "quarter": "time", "this": "time",
-               "total": "lexicon", "top": "lexicon", "bar": "lexicon", "chart": "lexicon", "by": "lexicon",
-               "as": "lexicon", "a": "lexicon", "10": "digits"}
+               "total": "lexicon", "top": "lexicon", "chart": "lexicon", "10": "digits"}
 PARAMS = "33,087 parameters, int6"
 
 
@@ -72,7 +71,7 @@ class GpuViewPipeline(ExplainerScene):
         for cell in cells:
             tag = SCHEMA_TAGS.get(cell.source)
             if tag:
-                tags.add(mono(tag, 11, MUTED).next_to(cell, DOWN, buff=0.12))
+                tags.add(mono(tag, 9, MUTED).next_to(cell, DOWN, buff=0.12))
         strike = Line(schema.get_left(), schema.get_right(), color=MUTED, stroke_width=2)
         self.play(LaggedStart(*[FadeIn(t, shift=UP * 0.05) for t in tags], lag_ratio=0.08), Create(strike))
         strips = VGroup(*[activation_strip(c.source, c.get_center() + DOWN * 1.35, height=0.6) for c in cells])

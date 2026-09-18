@@ -45,20 +45,30 @@ without offsets). Numbers are from the promoted checkpoint on the CPU path (`pnp
 
 | Set | Size | Metric | Score |
 |---|---|---|---|
-| in-domain (training domains, fresh seed) | 200 | spec exact match, with spans | __INDOMAIN__ |
-| held-out (four unseen domains, disjoint vocabulary) | 400 | spec exact match, with spans | __TRANSFER__ |
-| held-out | 2,000 | token role accuracy / boundary accuracy | __TOKACC__ / __BNDACC__ |
-| unfamiliar (65 hand-written phrases, 4 schemas the generator never saw) | 65 | spec exact match | __UNFAMILIAR__ |
+| in-domain (training domains, fresh seed) | 200 | spec exact match, with spans | 96.5% |
+| held-out (four unseen domains, disjoint vocabulary) | 400 | spec exact match, with spans | 91.0% |
+| held-out | 2,000 | token role accuracy / boundary accuracy | 99.27% / 99.45% |
+| unfamiliar (65 hand-written phrases, 4 schemas the generator never saw) | 65 | spec exact match | 55.4% (36/65) |
 
 The unfamiliar set (`eval/unfamiliar.json`: podcasts, wine cellar, repositories, greenhouse)
 was written before evaluation and was not used for tuning. Failure analysis:
 
-__UNFAMILIAR_ANALYSIS__
+29 of 65 phrases miss. Grouped by cause (a phrase can have several):
+
+- **Sort direction lost across a clause** (4): `top 5 true crime episodes by listens`, `top 20 python repos by stars`. The model opens a new clause at the filter between `top N` and `by field`, so the sort clause has no direction and defaults to `asc`; the dangling `top` is not carried over.
+- **Bare value assigned to the wrong text field** (5): `business or tech episodes`, `java repos pushed`, `wilting plants on the south bench` (the stray `on`). Enum values the model tags as text values land on a `contains`/`in` filter for a text field instead of the enum field.
+- **Words outside the lexicon or the matcher's reach** (9): `cheapest first`, `rated 95+`, `unopened`, `tallest plant`, `longer than 60 minutes` (the comparative is in the compiler, but the model tagged `longer 60` as values), `bottles to drink by next year` (`bottles` is also a field), `50 cm` (unit after the number), `september 10 2026`, `this spring`.
+- **Genuinely ambiguous numbers vs. years** (2): `between 2015 and 2020` and `not from 2018` resolve to the date field `drink_by` / are dropped instead of the numeric `vintage`.
+- **Group-by tagged as sort or dropped** (4): `number of bottles by vintage`, `sum of forks by language`, `count of plants per health status`, `wines with no drink by date` (the trailing `date` became a `day` group).
+- **Bare boolean/field mentions** (3): `opened bottles`, `unarchived repos`, `episodes without a host`: an entity noun that is also a field (`bottles`) becomes a spurious `not_empty` filter; `unarchived` does not resolve.
+- **Other segmentation errors** (2): `season 3 episodes sorted by publish date, oldest first` duplicates the sort and drops the `season = 3` filter.
+
+Token-level behaviour on these phrases is mostly right (the schema-membership features carry over), and every miss is reported through a diagnostic or a visibly wrong clause rather than a silently invented field.
 
 ## Size and latency
 | Measure | Value |
 |---|---|
-| Package (min + Brotli, incl. weights) | 30.1 KiB (budget 39.1 KiB) |
+| Package (min + Brotli, incl. weights) | 29.6 KiB (budget 39.1 KiB) |
 | Weights (int6 text) | 33,087 chars |
 | Import + weight decode (Node 24, Xeon 2.9 GHz) | ~5 ms |
 | First parse (JIT warm-up) | ~15 ms |
@@ -77,5 +87,5 @@ whose time filter follows a group unit are occasionally mis-segmented, English o
 
 ## Checkpoint
 - Promoted: `runs/default` — 2026-09-18, seed 0, 160,000 samples, 14 epochs, batch 128,
-  AdamW lr 3e-3 one-cycle, QAT from epoch 2, 2 CPU threads, __TRAIN_TIME__
+  AdamW lr 3e-3 one-cycle, QAT from epoch 2, 2 CPU threads, 694 s wall clock
 - Training command: `pnpm train` (`uv run python -m gpu_view.train`), export with `pnpm export`

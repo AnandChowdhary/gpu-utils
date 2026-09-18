@@ -52,9 +52,7 @@ describe("gpu-view examples", () => {
       limit: 10,
       chart: "bar",
     });
-    // The clause span must cover the time phrase ("this quarter" sits at 26..38).
-    expect(spec.filters[0]!.span.start).toBeLessThanOrEqual(26);
-    expect(spec.filters[0]!.span.end).toBe(38);
+    expect(spec.filters[0]!.span).toEqual({ start: 24, end: 36 }); // "this quarter"
   });
   it("open issues assigned to me sorted by priority", async () => {
     const spec = await parse("open issues assigned to me sorted by priority", {

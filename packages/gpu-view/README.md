@@ -3,7 +3,7 @@
 Natural language to table view specs: filter, sort, group, aggregate, limit, chart.
 
 Tiny model (33K parameters, int6), trained from scratch, runs on WebGPU or the CPU in the
-browser. Zero dependencies, 30 KiB Brotli including the weights. Part of
+browser. Zero dependencies, 29.6 KiB Brotli including the weights. Part of
 [gpu-utils](https://github.com/AnandChowdhary/gpu-utils).
 
 It is **schema-blind**: the model never sees your field names. You pass the schema at
@@ -94,7 +94,7 @@ fields, and reports diagnostics for anything left over.
 
 | Measure | Value |
 |---|---|
-| Bundle (min + Brotli, weights included) | 30.1 KiB (budget 39.1 KiB) |
+| Bundle (min + Brotli, weights included) | 29.6 KiB (budget 39.1 KiB) |
 | Parameters | 33,087 (int6) |
 | Import + weight decode | ~5 ms (Node 24, Xeon 2.9 GHz) |
 | First parse (JIT warm-up) | ~15 ms |
@@ -107,8 +107,8 @@ batches, where readback cost is amortised. Real-GPU timings are not measured yet
 
 ## Limitations
 
-- Trained entirely on synthetic phrases. Held-out generated schemas reach ~90% exact spec
-  match; a hand-written set of 65 phrases over four unseen schemas reaches ~57%. See
+- Trained entirely on synthetic phrases. Held-out generated schemas reach 91% exact spec
+  match; a hand-written set of 65 phrases over four unseen schemas reaches 55%. See
   [MODEL_CARD.md](./MODEL_CARD.md) for the failure analysis.
 - Superlatives that are not in the lexicon (`cheapest`, `tallest`), inflections the matcher
   cannot bridge (`unopened` vs `opened`, `rated` vs `rating`), units after numbers
