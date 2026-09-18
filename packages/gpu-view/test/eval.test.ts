@@ -16,7 +16,6 @@ async function exact(
 ): Promise<{ rate: number; failures: string[] }> {
   let ok = 0;
   const failures: string[] = [];
-  // Group by schema so parseMany batches, then compare.
   for (const c of cases) {
     const [spec] = await parseMany([c.text], { schema: c.schema, now: c.now, backend: "cpu" });
     if (canon(strip(spec!, withSpans)) === canon(c.spec)) ok++;
@@ -28,22 +27,23 @@ async function exact(
   return { rate: ok / cases.length, failures };
 }
 
+const report = (name: string, rate: number, n: number, failures: string[], show: number) =>
+  process.stdout.write(
+    `${name} exact match: ${(rate * 100).toFixed(1)}% (${n})\n${failures.slice(0, show).join("\n")}\n`,
+  );
+
 /** Floors are regression guards well below the numbers in MODEL_CARD.md, not targets. */
 describe("gpu-view evaluation", () => {
   it("held-out schemas (transfer): spec exact match", async () => {
     const cases = read<Gold[]>("eval/heldout.json");
     const { rate, failures } = await exact(cases, true);
-    console.log(
-      `transfer exact match: ${(rate * 100).toFixed(1)}% (${cases.length})\n${failures.slice(0, 8).join("\n")}`,
-    );
+    report("transfer", rate, cases.length, failures, 8);
     expect(rate).toBeGreaterThan(0.6);
   });
   it("in-domain schemas: spec exact match", async () => {
     const cases = read<Gold[]>("eval/indomain.json");
     const { rate, failures } = await exact(cases, true);
-    console.log(
-      `in-domain exact match: ${(rate * 100).toFixed(1)}% (${cases.length})\n${failures.slice(0, 5).join("\n")}`,
-    );
+    report("in-domain", rate, cases.length, failures, 5);
     expect(rate).toBeGreaterThan(0.6);
   });
   it("unfamiliar hand-written phrases: spec exact match (spans ignored)", async () => {
@@ -56,9 +56,7 @@ describe("gpu-view evaluation", () => {
       spec: c.spec,
     }));
     const { rate, failures } = await exact(cases, false);
-    console.log(
-      `unfamiliar exact match: ${(rate * 100).toFixed(1)}% (${cases.length})\n${failures.join("\n")}`,
-    );
+    report("unfamiliar", rate, cases.length, failures, failures.length);
     expect(rate).toBeGreaterThan(0.4);
   });
 });

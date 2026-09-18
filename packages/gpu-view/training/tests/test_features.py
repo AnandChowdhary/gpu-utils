@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from gpu_view import features, match, timeres
@@ -21,7 +22,13 @@ def test_one_row_per_model_token() -> None:
 def test_lexicon_is_unique_and_mirrored() -> None:
     assert len(set(KEYWORDS)) == len(KEYWORDS)
     ts = (PACKAGE / "src" / "lexicon.ts").read_text()
-    assert json.dumps(KEYWORDS, ensure_ascii=False) in ts
+    start = ts.index("KEYWORDS: readonly string[] = ") + len("KEYWORDS: readonly string[] = ")
+    literal = ts[start : ts.index("];", start) + 1]
+    # Biome may emit '"' with single quotes; read every string literal either way.
+    found = [a if a is not None else b for a, b in
+             ((m.group(1), m.group(2)) for m in re.finditer(r'"((?:[^"\\]|\\.)*)"|\'((?:[^\'\\]|\\.)*)\'', literal))]
+    found = [f.replace('\\"', '"').replace("\\\\", "\\") for f in found]
+    assert found == KEYWORDS
 
 
 def test_fixtures_match_committed_files() -> None:

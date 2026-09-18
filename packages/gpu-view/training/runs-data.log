@@ -1,5 +1,0 @@
-fixtures: 70 feature cases, 192 time cases, 40 match cases
-eval sets: 400 transfer, 200 in-domain → /home/vercel-sandbox/gpu-utils-wt/gpu-view/packages/gpu-view/eval
-train: 160000 examples → train-160000-0.npz
-dev: 2000 examples → dev-2000-1000.npz
-transfer: 2000 examples → transfer-2000-2000.npz

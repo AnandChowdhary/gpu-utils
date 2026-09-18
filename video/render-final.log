@@ -1,0 +1,211 @@
+Manim Community v0.19.2
+
+[09/18/26 07:54:55] INFO     Caching disabled.              cairo_renderer.py:83
+Animation 0: FadeIn(Text('A phrase in a search bar')):   0%|          | 0/42 [00:00<?, ?it/s]Animation 0: FadeIn(Text('A phrase in a search bar')):  19%|█▉        | 8/42 [00:00<00:00, 76.13it/s]Animation 0: FadeIn(Text('A phrase in a search bar')):  40%|████      | 17/42 [00:00<00:00, 82.41it/s]Animation 0: FadeIn(Text('A phrase in a search bar')):  62%|██████▏   | 26/42 [00:00<00:00, 79.22it/s]Animation 0: FadeIn(Text('A phrase in a search bar')):  86%|████████▌ | 36/42 [00:00<00:00, 82.00it/s]                                                                                                                          INFO     Animation 0 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00000.mp4'                                     
+[09/18/26 07:54:56] INFO     Caching disabled.              cairo_renderer.py:83
+Animation 1: LaggedStart(Group):   0%|          | 0/47 [00:00<?, ?it/s]Animation 1: LaggedStart(Group):  13%|█▎        | 6/47 [00:00<00:00, 58.17it/s]Animation 1: LaggedStart(Group):  28%|██▊       | 13/47 [00:00<00:00, 64.00it/s]Animation 1: LaggedStart(Group):  43%|████▎     | 20/47 [00:00<00:00, 64.38it/s]Animation 1: LaggedStart(Group):  57%|█████▋    | 27/47 [00:00<00:00, 58.50it/s]Animation 1: LaggedStart(Group):  70%|███████   | 33/47 [00:00<00:00, 56.80it/s]Animation 1: LaggedStart(Group):  83%|████████▎ | 39/47 [00:00<00:00, 57.16it/s]Animation 1: LaggedStart(Group):  98%|█████████▊| 46/47 [00:00<00:00, 58.92it/s]                                                                                [09/18/26 07:54:57] INFO     Animation 1 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00001.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 2: FadeIn(Text('schema: revenue:number  region:enum  closed_at:date')):   0%|          | 0/47 [00:00<?, ?it/s]Animation 2: FadeIn(Text('schema: revenue:number  region:enum  closed_at:date')):  19%|█▉        | 9/47 [00:00<00:00, 86.81it/s]Animation 2: FadeIn(Text('schema: revenue:number  region:enum  closed_at:date')):  38%|███▊      | 18/47 [00:00<00:00, 83.63it/s]Animation 2: FadeIn(Text('schema: revenue:number  region:enum  closed_at:date')):  60%|█████▉    | 28/47 [00:00<00:00, 86.84it/s]Animation 2: FadeIn(Text('schema: revenue:number  region:enum  closed_at:date')):  79%|███████▊  | 37/47 [00:00<00:00, 83.07it/s]Animation 2: FadeIn(Text('schema: revenue:number  region:enum  closed_at:date')):  98%|█████████▊| 46/47 [00:00<00:00, 81.30it/s]                                                                                                                                 [09/18/26 07:54:58] INFO     Animation 2 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00002.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+                    INFO     Animation 3 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00003.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 4: ReplacementTransform(Text('A phrase in a search bar')):   0%|          | 0/42 [00:00<?, ?it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  10%|▉         | 4/42 [00:00<00:01, 33.56it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  19%|█▉        | 8/42 [00:00<00:01, 33.83it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  29%|██▊       | 12/42 [00:00<00:00, 33.45it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  38%|███▊      | 16/42 [00:00<00:00, 33.92it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  48%|████▊     | 20/42 [00:00<00:00, 34.04it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  57%|█████▋    | 24/42 [00:00<00:00, 34.03it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  67%|██████▋   | 28/42 [00:00<00:00, 33.93it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  76%|███████▌  | 32/42 [00:00<00:00, 33.92it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  86%|████████▌ | 36/42 [00:01<00:00, 34.43it/s]Animation 4: ReplacementTransform(Text('A phrase in a search bar')):  95%|█████████▌| 40/42 [00:01<00:00, 34.61it/s]                                                                                                                    [09/18/26 07:55:00] INFO     Animation 4 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00004.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 5: FadeOut(VGroup of 11 submobjects), etc.:   0%|          | 0/47 [00:00<?, ?it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  11%|█         | 5/47 [00:00<00:01, 39.85it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  19%|█▉        | 9/47 [00:00<00:00, 39.77it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  28%|██▊       | 13/47 [00:00<00:00, 39.05it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  36%|███▌      | 17/47 [00:00<00:00, 38.80it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  45%|████▍     | 21/47 [00:00<00:00, 38.71it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  53%|█████▎    | 25/47 [00:00<00:00, 38.33it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  62%|██████▏   | 29/47 [00:00<00:00, 38.09it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  70%|███████   | 33/47 [00:00<00:00, 38.00it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  79%|███████▊  | 37/47 [00:00<00:00, 36.82it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  87%|████████▋ | 41/47 [00:01<00:00, 36.35it/s]Animation 5: FadeOut(VGroup of 11 submobjects), etc.:  96%|█████████▌| 45/47 [00:01<00:00, 36.62it/s]                                                                                                     [09/18/26 07:55:02] INFO     Animation 5 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00005.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+                    INFO     Animation 6 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00006.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):   0%|          | 0/42 [00:00<?, ?it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  10%|▉         | 4/42 [00:00<00:00, 38.94it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  19%|█▉        | 8/42 [00:00<00:00, 38.25it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  29%|██▊       | 12/42 [00:00<00:00, 37.23it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  38%|███▊      | 16/42 [00:00<00:00, 36.81it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  48%|████▊     | 20/42 [00:00<00:00, 36.55it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  57%|█████▋    | 24/42 [00:00<00:00, 36.00it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  67%|██████▋   | 28/42 [00:00<00:00, 36.10it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  76%|███████▌  | 32/42 [00:00<00:00, 35.63it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  86%|████████▌ | 36/42 [00:00<00:00, 36.16it/s]Animation 7: ReplacementTransform(Text('Character-class tokens, whitespace dropped')):  95%|█████████▌| 40/42 [00:01<00:00, 36.95it/s]                                                                                                                                      [09/18/26 07:55:04] INFO     Animation 7 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00007.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 8: LaggedStart(Group), etc.:   0%|          | 0/47 [00:00<?, ?it/s]Animation 8: LaggedStart(Group), etc.:  15%|█▍        | 7/47 [00:00<00:00, 62.45it/s]Animation 8: LaggedStart(Group), etc.:  30%|██▉       | 14/47 [00:00<00:00, 62.39it/s]Animation 8: LaggedStart(Group), etc.:  45%|████▍     | 21/47 [00:00<00:00, 60.19it/s]Animation 8: LaggedStart(Group), etc.:  60%|█████▉    | 28/47 [00:00<00:00, 54.28it/s]Animation 8: LaggedStart(Group), etc.:  72%|███████▏  | 34/47 [00:00<00:00, 55.81it/s]Animation 8: LaggedStart(Group), etc.:  87%|████████▋ | 41/47 [00:00<00:00, 58.11it/s]Animation 8: LaggedStart(Group), etc.: 100%|██████████| 47/47 [00:00<00:00, 58.05it/s]                                                                                      [09/18/26 07:55:05] INFO     Animation 8 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00008.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 9: LaggedStart(Group):   0%|          | 0/47 [00:00<?, ?it/s]Animation 9: LaggedStart(Group):  19%|█▉        | 9/47 [00:00<00:00, 83.15it/s]Animation 9: LaggedStart(Group):  38%|███▊      | 18/47 [00:00<00:00, 82.54it/s]Animation 9: LaggedStart(Group):  57%|█████▋    | 27/47 [00:00<00:00, 80.31it/s]Animation 9: LaggedStart(Group):  77%|███████▋  | 36/47 [00:00<00:00, 81.60it/s]Animation 9: LaggedStart(Group):  96%|█████████▌| 45/47 [00:00<00:00, 83.44it/s]                                                                                [09/18/26 07:55:06] INFO     Animation 9 : Partial      scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00009.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:   0%|          | 0/47 [00:00<?, ?it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:   9%|▊         | 4/47 [00:00<00:01, 33.03it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  17%|█▋        | 8/47 [00:00<00:01, 32.25it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  26%|██▌       | 12/47 [00:00<00:01, 31.84it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  34%|███▍      | 16/47 [00:00<00:00, 31.44it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  43%|████▎     | 20/47 [00:00<00:00, 29.66it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  49%|████▉     | 23/47 [00:00<00:00, 29.07it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  57%|█████▋    | 27/47 [00:00<00:00, 29.61it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  64%|██████▍   | 30/47 [00:00<00:00, 29.70it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  72%|███████▏  | 34/47 [00:01<00:00, 29.80it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  81%|████████  | 38/47 [00:01<00:00, 30.08it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  89%|████████▉ | 42/47 [00:01<00:00, 30.33it/s]Animation 10: FadeOut(Text('schema: revenue:number  region:enum  closed_at:date')), etc.:  98%|█████████▊| 46/47 [00:01<00:00, 29.71it/s]                                                                                                                                         [09/18/26 07:55:08] INFO     Animation 10 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00010.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+                    INFO     Animation 11 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00011.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:   0%|          | 0/42 [00:00<?, ?it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:   7%|▋         | 3/42 [00:00<00:01, 24.30it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  14%|█▍        | 6/42 [00:00<00:01, 23.97it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  21%|██▏       | 9/42 [00:00<00:01, 24.03it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  29%|██▊       | 12/42 [00:00<00:01, 24.07it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  36%|███▌      | 15/42 [00:00<00:01, 23.69it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  43%|████▎     | 18/42 [00:00<00:01, 23.58it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  50%|█████     | 21/42 [00:00<00:00, 23.40it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  57%|█████▋    | 24/42 [00:01<00:00, 23.45it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  64%|██████▍   | 27/42 [00:01<00:00, 23.54it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  71%|███████▏  | 30/42 [00:01<00:00, 23.45it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  79%|███████▊  | 33/42 [00:01<00:00, 23.51it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  86%|████████▌ | 36/42 [00:01<00:00, 23.67it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.:  93%|█████████▎| 39/42 [00:01<00:00, 24.00it/s]Animation 12: ReplacementTransform(Text('The schema enters as anonymous features')), etc.: 100%|██████████| 42/42 [00:01<00:00, 24.35it/s]                                                                                                                                          [09/18/26 07:55:11] INFO     Animation 12 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00012.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 13: FadeIn(Text('▮')):   0%|          | 0/47 [00:00<?, ?it/s]Animation 13: FadeIn(Text('▮')):  38%|███▊      | 18/47 [00:00<00:00, 165.25it/s]Animation 13: FadeIn(Text('▮')):  77%|███████▋  | 36/47 [00:00<00:00, 169.33it/s]                                                                                                     INFO     Animation 13 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00013.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 14: _MethodAnimation(Text('▮')):   0%|          | 0/103 [00:00<?, ?it/s]Animation 14: _MethodAnimation(Text('▮')):  17%|█▋        | 17/103 [00:00<00:00, 167.02it/s]Animation 14: _MethodAnimation(Text('▮')):  34%|███▍      | 35/103 [00:00<00:00, 174.32it/s]Animation 14: _MethodAnimation(Text('▮')):  51%|█████▏    | 53/103 [00:00<00:00, 175.16it/s]Animation 14: _MethodAnimation(Text('▮')):  69%|██████▉   | 71/103 [00:00<00:00, 161.78it/s]Animation 14: _MethodAnimation(Text('▮')):  85%|████████▌ | 88/103 [00:00<00:00, 150.50it/s]                                                                                            [09/18/26 07:55:12] INFO     Animation 14 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00014.mp4'                                     
+[09/18/26 07:55:13] INFO     Caching disabled.              cairo_renderer.py:83
+Animation 15: _MethodAnimation(Text('▮')), etc.:   0%|          | 0/103 [00:00<?, ?it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:   7%|▋         | 7/103 [00:00<00:01, 64.30it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  14%|█▎        | 14/103 [00:00<00:01, 63.76it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  20%|██        | 21/103 [00:00<00:01, 66.41it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  28%|██▊       | 29/103 [00:00<00:01, 68.45it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  36%|███▌      | 37/103 [00:00<00:00, 69.92it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  44%|████▎     | 45/103 [00:00<00:00, 71.11it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  51%|█████▏    | 53/103 [00:00<00:00, 65.86it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  58%|█████▊    | 60/103 [00:00<00:00, 64.29it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  65%|██████▌   | 67/103 [00:01<00:00, 64.23it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  72%|███████▏  | 74/103 [00:01<00:00, 65.14it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  79%|███████▊  | 81/103 [00:01<00:00, 65.51it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  85%|████████▌ | 88/103 [00:01<00:00, 66.29it/s]Animation 15: _MethodAnimation(Text('▮')), etc.:  93%|█████████▎| 96/103 [00:01<00:00, 67.53it/s]Animation 15: _MethodAnimation(Text('▮')), etc.: 100%|██████████| 103/103 [00:01<00:00, 67.60it/s]                                                                                                  [09/18/26 07:55:14] INFO     Animation 15 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00015.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 16: FadeOut(Text('▮')), etc.:   0%|          | 0/47 [00:00<?, ?it/s]Animation 16: FadeOut(Text('▮')), etc.:  15%|█▍        | 7/47 [00:00<00:00, 66.02it/s]Animation 16: FadeOut(Text('▮')), etc.:  30%|██▉       | 14/47 [00:00<00:00, 63.90it/s]Animation 16: FadeOut(Text('▮')), etc.:  45%|████▍     | 21/47 [00:00<00:00, 64.00it/s]Animation 16: FadeOut(Text('▮')), etc.:  60%|█████▉    | 28/47 [00:00<00:00, 64.09it/s]Animation 16: FadeOut(Text('▮')), etc.:  74%|███████▍  | 35/47 [00:00<00:00, 63.90it/s]Animation 16: FadeOut(Text('▮')), etc.:  89%|████████▉ | 42/47 [00:00<00:00, 64.86it/s]                                                                                       [09/18/26 07:55:15] INFO     Animation 16 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00016.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+[09/18/26 07:55:16] INFO     Animation 17 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00017.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:   0%|          | 0/42 [00:00<?, ?it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:   7%|▋         | 3/42 [00:00<00:01, 24.89it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  14%|█▍        | 6/42 [00:00<00:01, 24.82it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  21%|██▏       | 9/42 [00:00<00:01, 24.72it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  29%|██▊       | 12/42 [00:00<00:01, 24.68it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  36%|███▌      | 15/42 [00:00<00:01, 24.72it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  43%|████▎     | 18/42 [00:00<00:00, 24.80it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  50%|█████     | 21/42 [00:00<00:00, 24.76it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  57%|█████▋    | 24/42 [00:00<00:00, 24.76it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  64%|██████▍   | 27/42 [00:01<00:00, 24.69it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  71%|███████▏  | 30/42 [00:01<00:00, 24.71it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  79%|███████▊  | 33/42 [00:01<00:00, 24.64it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  86%|████████▌ | 36/42 [00:01<00:00, 24.55it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.:  93%|█████████▎| 39/42 [00:01<00:00, 24.46it/s]Animation 18: ReplacementTransform(Text('h[t] = a[t]·h[t−1] + b[t], forward and backward')), etc.: 100%|██████████| 42/42 [00:01<00:00, 24.79it/s]                                                                                                                                                  [09/18/26 07:55:18] INFO     Animation 18 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00018.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 19: ReplacementTransform(VGroup of 14 submobjects):   0%|          | 0/47 [00:00<?, ?it/s]Animation 19: ReplacementTransform(VGroup of 14 submobjects):  13%|█▎        | 6/47 [00:00<00:00, 55.94it/s]Animation 19: ReplacementTransform(VGroup of 14 submobjects):  26%|██▌       | 12/47 [00:00<00:00, 56.70it/s]Animation 19: ReplacementTransform(VGroup of 14 submobjects):  38%|███▊      | 18/47 [00:00<00:00, 55.75it/s]Animation 19: ReplacementTransform(VGroup of 14 submobjects):  51%|█████     | 24/47 [00:00<00:00, 54.99it/s]Animation 19: ReplacementTransform(VGroup of 14 submobjects):  64%|██████▍   | 30/47 [00:00<00:00, 54.00it/s]Animation 19: ReplacementTransform(VGroup of 14 submobjects):  77%|███████▋  | 36/47 [00:00<00:00, 54.23it/s]Animation 19: ReplacementTransform(VGroup of 14 submobjects):  89%|████████▉ | 42/47 [00:00<00:00, 54.38it/s]                                                                                                             [09/18/26 07:55:19] INFO     Animation 19 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00019.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 20: LaggedStart(Group):   0%|          | 0/47 [00:00<?, ?it/s]Animation 20: LaggedStart(Group):  43%|████▎     | 20/47 [00:00<00:00, 189.92it/s]Animation 20: LaggedStart(Group):  83%|████████▎ | 39/47 [00:00<00:00, 178.09it/s]                                                                                  [09/18/26 07:55:20] INFO     Animation 20 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00020.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+                    INFO     Animation 21 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00021.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:   0%|          | 0/42 [00:00<?, ?it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  10%|▉         | 4/42 [00:00<00:00, 38.76it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  19%|█▉        | 8/42 [00:00<00:00, 38.47it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  29%|██▊       | 12/42 [00:00<00:00, 38.80it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  38%|███▊      | 16/42 [00:00<00:00, 38.66it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  48%|████▊     | 20/42 [00:00<00:00, 38.29it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  57%|█████▋    | 24/42 [00:00<00:00, 37.77it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  67%|██████▋   | 28/42 [00:00<00:00, 37.43it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  76%|███████▌  | 32/42 [00:00<00:00, 37.34it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  86%|████████▌ | 36/42 [00:00<00:00, 36.88it/s]Animation 22: ReplacementTransform(Text('One role per token, plus clause boundaries')), etc.:  95%|█████████▌| 40/42 [00:01<00:00, 36.85it/s]                                                                                                                                             [09/18/26 07:55:22] INFO     Animation 22 : Partial     scene_file_writer.py:590
+                             movie file written in                              
+                             '/home/vercel-sandbox/gpu-                         
+                             utils-wt/gpu-view/video/me                         
+                             dia/videos/gpu_view_pipeli                         
+                             ne/1080p30/partial_movie_f                         
+                             iles/GpuViewPipeline/uncac                         
+                             hed_00022.mp4'                                     
+                    INFO     Caching disabled.              cairo_renderer.py:83
+Animation 23: LaggedStart(Group):   0%|          | 0/117 [00:00<?, ?it/s]Animation 23: LaggedStart(Group):   2%|▏         | 2/117 [00:00<00:11, 10.21it/s]Animation 23: LaggedStart(Group):   3%|▎         | 4/117 [00:00<00:11, 10.20it/s]Animation 23: LaggedStart(Group):   5%|▌         | 6/117 [00:00<00:10, 10.20it/s]Animation 23: LaggedStart(Group):   7%|▋         | 8/117 [00:00<00:10, 10.31it/s]Animation 23: LaggedStart(Group):   9%|▊         | 10/117 [00:00<00:10, 10.19it/s]Animation 23: LaggedStart(Group):  10%|█         | 12/117 [00:01<00:10,  9.71it/s]Animation 23: LaggedStart(Group):  11%|█         | 13/117 [00:01<00:10,  9.74it/s]Animation 23: LaggedStart(Group):  12%|█▏        | 14/117 [00:01<00:10,  9.75it/s]Animation 23: LaggedStart(Group):  13%|█▎        | 15/117 [00:01<00:10,  9.77it/s]Animation 23: LaggedStart(Group):  14%|█▎        | 16/117 [00:01<00:10,  9.81it/s]Animation 23: LaggedStart(Group):  15%|█▍        | 17/117 [00:01<00:10,  9.83it/s]Animation 23: LaggedStart(Group):  15%|█▌        | 18/117 [00:01<00:10,  9.84it/s]Animation 23: LaggedStart(Group):  16%|█▌        | 19/117 [00:01<00:09,  9.87it/s]Animation 23: LaggedStart(Group):  17%|█▋        | 20/117 [00:02<00:11,  8.42it/s]Animation 23: LaggedStart(Group):  19%|█▉        | 22/117 [00:02<00:10,  9.28it/s]Animation 23: LaggedStart(Group):  21%|██        | 24/117 [00:02<00:09,  9.72it/s]Animation 23: LaggedStart(Group):  22%|██▏       | 26/117 [00:02<00:09,  9.89it/s]Animation 23: LaggedStart(Group):  24%|██▍       | 28/117 [00:02<00:08, 10.05it/s]Animation 23: LaggedStart(Group):  26%|██▌       | 30/117 [00:03<00:08, 10.17it/s]Animation 23: LaggedStart(Group):  27%|██▋       | 32/117 [00:03<00:08, 10.23it/s]Animation 23: LaggedStart(Group):  29%|██▉       | 34/117 [00:03<00:08, 10.28it/s]Animation 23: LaggedStart(Group):  31%|███       | 36/117 [00:03<00:08,  9.90it/s]Animation 23: LaggedStart(Group):  32%|███▏      | 37/117 [00:03<00:08,  9.76it/s]Animation 23: LaggedStart(Group):  32%|███▏      | 38/117 [00:03<00:08,  9.68it/s]Animation 23: LaggedStart(Group):  33%|███▎      | 39/117 [00:03<00:08,  9.61it/s]Animation 23: LaggedStart(Group):  34%|███▍      | 40/117 [00:04<00:08,  9.54it/s]Animation 23: LaggedStart(Group):  35%|███▌      | 41/117 [00:04<00:08,  9.44it/s]Animation 23: LaggedStart(Group):  36%|███▌      | 42/117 [00:04<00:07,  9.44it/s]Animation 23: LaggedStart(Group):  37%|███▋      | 43/117 [00:04<00:07,  9.26it/s]Animation 23: LaggedStart(Group):  38%|███▊      | 44/117 [00:04<00:07,  9.34it/s]Animation 23: LaggedStart(Group):  38%|███▊      | 45/117 [00:04<00:07,  9.18it/s]Animation 23: LaggedStart(Group):  39%|███▉      | 46/117 [00:04<00:07,  9.00it/s]Animation 23: LaggedStart(Group):  40%|████      | 47/117 [00:04<00:07,  8.83it/s]Animation 23: LaggedStart(Group):  41%|████      | 48/117 [00:04<00:07,  8.65it/s]Animation 23: LaggedStart(Group):  42%|████▏     | 49/117 [00:05<00:07,  8.65it/s]Animation 23: LaggedStart(Group):  43%|████▎     | 50/117 [00:05<00:07,  8.62it/s]Animation 23: LaggedStart(Group):  44%|████▎     | 51/117 [00:05<00:07,  8.59it/s]Animation 23: LaggedStart(Group):  44%|████▍     | 52/117 [00:05<00:07,  8.48it/s]Animation 23: LaggedStart(Group):  45%|████▌     | 53/117 [00:05<00:07,  8.39it/s]Animation 23: LaggedStart(Group):  46%|████▌     | 54/117 [00:05<00:07,  8.37it/s]Animation 23: LaggedStart(Group):  47%|████▋     | 55/117 [00:05<00:07,  8.40it/s]Animation 23: LaggedStart(Group):  48%|████▊     | 56/117 [00:05<00:07,  8.40it/s]Animation 23: LaggedStart(Group):  49%|████▊     | 57/117 [00:06<00:07,  8.37it/s]Animation 23: LaggedStart(Group):  50%|████▉     | 58/117 [00:06<00:07,  8.27it/s]Animation 23: LaggedStart(Group):  50%|█████     | 59/117 [00:06<00:07,  8.24it/s]Animation 23: LaggedStart(Group):  51%|█████▏    | 60/117 [00:06<00:06,  8.17it/s]Animation 23: LaggedStart(Group):  52%|█████▏    | 61/117 [00:06<00:06,  8.11it/s]Animation 23: LaggedStart(Group):  53%|█████▎    | 62/117 [00:06<00:06,  7.98it/s]Animation 23: LaggedStart(Group):  54%|█████▍    | 63/117 [00:06<00:06,  8.12it/s]Animation 23: LaggedStart(Group):  55%|█████▍    | 64/117 [00:06<00:06,  8.16it/s]Animation 23: LaggedStart(Group):  56%|█████▌    | 65/117 [00:07<00:06,  8.28it/s]Animation 23: LaggedStart(Group):  56%|█████▋    | 66/117 [00:07<00:06,  8.38it/s]

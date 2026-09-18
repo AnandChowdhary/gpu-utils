@@ -445,7 +445,7 @@ def render_number(schema: Schema, f: Field, fi: int, rng: random.Random, fentrie
     op_pieces: list[Piece] = []
     for w in op.split(" "):
         op_pieces.append(P(w, "NEG" if w in ("no", "not") else "OP"))
-    if negated:
+    if negated and not any(p.role == "NEG" for p in op_pieces):  # never stack "not not over"
         op_pieces = [P(rng.choice(["not", "isn't"]), "NEG")] + op_pieces
     layout = rng.random()
     if layout < 0.55:
@@ -824,6 +824,14 @@ def build(schema: Schema, rng: random.Random) -> Example | None:
             agg2 = render_agg(schema, rng, ctx)
             if agg2 and agg2.spec != (head[0].spec if head else None):
                 head.insert(1 if head else 0, agg2)
+    if mode in ("metric", "chart") and head and rng.random() < 0.5 and len(schema.of_kind(DATE)) == 1:
+        # "total revenue by region this quarter": a bare time filter right after the head.
+        f = schema.of_kind(DATE)[0]
+        bare = Clause("filter", [P(time_phrase(rng), "TIME_VALUE")], {"field": f.name, "op": "in", "_dates": 1, "_bare": True})
+        if rng.random() < 0.4:
+            bare.pieces.insert(0, P(rng.choice(["in", "for", "during"]), "OP"))
+        filters.insert(0, bare)
+        head.append(None)  # marker: first filter attaches with a plain space
     if mode == "count":
         c = Clause("agg", [P(rng.choice(["how many", "count of", "number of", "count", "total number of"]), "AGG_FN")], {"fn": "count"})
         c.pieces = [P(w, "AGG_FN") for w in c.pieces[0].text.split(" ")]
@@ -862,13 +870,15 @@ def build(schema: Schema, rng: random.Random) -> Example | None:
     parts: list[tuple[str, Clause | None, str]] = []  # (joiner, clause, literal text)
     prefix = rng.choice(PREFIXES)
     entity = entity_noun(schema, rng)
-    show_entity = rng.random() < (0.75 if mode == "list" else 0.5)
+    show_entity = rng.random() < (0.75 if mode == "list" else 0.5) and None not in head
     if mode == "count":
         show_entity = rng.random() < 0.9
     if prefix:
         parts.append(("", None, prefix))
+    glue_first_filter = None in head
     for c in head:
-        parts.append((" ", c, ""))
+        if c is not None:
+            parts.append((" ", c, ""))
     # A bare enum / bare bool adjective before the noun: "open issues".
     adjective: Clause | None = None
     if show_entity and filters and rng.random() < 0.35:
@@ -884,6 +894,8 @@ def build(schema: Schema, rng: random.Random) -> Example | None:
         parts.append((" ", None, entity))
     for j, c in enumerate(filters):
         joiner = rng.choice(FIRST_JOINERS if j == 0 else FILTER_JOINERS)
+        if j == 0 and glue_first_filter:
+            joiner = rng.choice([" ", " ", ", ", " for "])
         if j == 0 and not parts:
             joiner = ""
         parts.append((joiner, c, ""))

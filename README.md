@@ -13,7 +13,7 @@ turns tags into typed output.
 
 | Package | Task | Size | Status |
 |---|---|---|---|
-| _coming soon_ | | | |
+| [gpu-view](./packages/gpu-view) | Natural language to table view specs: filter, sort, group, aggregate, limit, chart | 30.1 KiB | experimental |
 
 ## Development
 
