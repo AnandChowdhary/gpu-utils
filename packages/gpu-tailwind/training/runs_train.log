@@ -1,0 +1,53 @@
+/home/vercel-sandbox/gpu-utils-wt/gpu-tailwind/packages/gpu-tailwind/training/gpu_tailwind/train.py:148: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  running += float(loss)
+params: 45218  train: 130000  heldout: 3000
+epoch 0 step 200/8128 loss 1.7465 lr 2.68e-03 6s
+epoch 0 step 400/8128 loss 1.1072 lr 4.00e-03 12s
+epoch 0 step 600/8128 loss 0.8516 lr 3.99e-03 18s
+epoch 0 step 800/8128 loss 0.7125 lr 3.96e-03 23s
+epoch 0 step 1000/8128 loss 0.6229 lr 3.92e-03 29s
+epoch 0 done: loss 0.6168 heldout {'token_acc': 0.922628201728801, 'seq_acc': 0.468, 'boundary_acc': 0.9919658482261229} (30s)
+epoch 1 step 1200/8128 loss 0.2024 lr 3.87e-03 35s
+epoch 1 step 1400/8128 loss 0.1749 lr 3.81e-03 40s
+epoch 1 step 1600/8128 loss 0.1605 lr 3.74e-03 46s
+epoch 1 step 1800/8128 loss 0.1533 lr 3.66e-03 52s
+epoch 1 step 2000/8128 loss 0.1468 lr 3.56e-03 58s
+epoch 1 done: loss 0.1458 heldout {'token_acc': 0.9653444344275336, 'seq_acc': 0.612, 'boundary_acc': 0.998382563504269} (60s)
+epoch 2 step 2200/8128 loss 0.1100 lr 3.46e-03 66s
+epoch 2 step 2400/8128 loss 0.1072 lr 3.35e-03 72s
+epoch 2 step 2600/8128 loss 0.1053 lr 3.23e-03 78s
+epoch 2 step 2800/8128 loss 0.1043 lr 3.10e-03 84s
+epoch 2 step 3000/8128 loss 0.1029 lr 2.96e-03 89s
+epoch 2 done: loss 0.1027 heldout {'token_acc': 0.9689107493238586, 'seq_acc': 0.6383333333333333, 'boundary_acc': 0.9984753672376306} (91s)
+epoch 3 step 3200/8128 loss 0.0897 lr 2.82e-03 95s
+epoch 3 step 3400/8128 loss 0.0869 lr 2.68e-03 101s
+epoch 3 step 3600/8128 loss 0.0860 lr 2.53e-03 107s
+epoch 3 step 3800/8128 loss 0.0852 lr 2.37e-03 113s
+epoch 3 step 4000/8128 loss 0.0842 lr 2.22e-03 119s
+epoch 3 done: loss 0.0841 heldout {'token_acc': 0.9745717770589171, 'seq_acc': 0.687, 'boundary_acc': 0.9986212016757703} (121s)
+epoch 4 step 4200/8128 loss 0.0743 lr 2.06e-03 125s
+epoch 4 step 4400/8128 loss 0.0746 lr 1.90e-03 131s
+epoch 4 step 4600/8128 loss 0.0746 lr 1.75e-03 137s
+epoch 4 step 4800/8128 loss 0.0739 lr 1.60e-03 143s
+epoch 4 step 5000/8128 loss 0.0736 lr 1.45e-03 149s
+epoch 4 done: loss 0.0738 heldout {'token_acc': 0.9741210160683036, 'seq_acc': 0.6743333333333333, 'boundary_acc': 0.9989791589330222} (151s)
+epoch 5 step 5200/8128 loss 0.0657 lr 1.30e-03 155s
+epoch 5 step 5400/8128 loss 0.0672 lr 1.16e-03 160s
+epoch 5 step 5600/8128 loss 0.0666 lr 1.02e-03 166s
+epoch 5 step 5800/8128 loss 0.0659 lr 8.91e-04 171s
+epoch 5 step 6000/8128 loss 0.0661 lr 7.69e-04 176s
+epoch 5 done: loss 0.0658 heldout {'token_acc': 0.977674073288434, 'seq_acc': 0.7086666666666667, 'boundary_acc': 0.9992575701331071} (179s)
+epoch 6 step 6200/8128 loss 0.0585 lr 6.55e-04 182s
+epoch 6 step 6400/8128 loss 0.0605 lr 5.50e-04 188s
+epoch 6 step 6600/8128 loss 0.0606 lr 4.55e-04 194s
+epoch 6 step 6800/8128 loss 0.0605 lr 3.70e-04 200s
+epoch 6 step 7000/8128 loss 0.0605 lr 2.96e-04 206s
+epoch 6 done: loss 0.0605 heldout {'token_acc': 0.9784827915362995, 'seq_acc': 0.7213333333333334, 'boundary_acc': 0.999231054780718} (210s)
+epoch 7 step 7200/8128 loss 0.0551 lr 2.34e-04 212s
+epoch 7 step 7400/8128 loss 0.0564 lr 1.83e-04 218s
+epoch 7 step 7600/8128 loss 0.0562 lr 1.44e-04 224s
+epoch 7 step 7800/8128 loss 0.0569 lr 1.17e-04 230s
+epoch 7 step 8000/8128 loss 0.0566 lr 1.03e-04 235s
+epoch 7 done: loss 0.0569 heldout {'token_acc': 0.9786286259744392, 'seq_acc': 0.7156666666666667, 'boundary_acc': 0.9992708278093015} (239s)
+best: {'epoch': 7, 'step': 8128, 'seed': 0, 'token_acc': 0.9786286259744392, 'seq_acc': 0.7156666666666667, 'boundary_acc': 0.9992708278093015, 'params': 45218, 'minutes': 3.9830095450083416}
