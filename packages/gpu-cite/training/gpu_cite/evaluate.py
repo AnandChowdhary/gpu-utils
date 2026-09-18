@@ -1,7 +1,10 @@
 """Evaluate a checkpoint on the synthetic held-out set, the real anystyle and GROBID corpora,
 and the hand-written unfamiliar set. ``uv run python -m gpu_cite.evaluate [--run default]``.
 
-Writes ``runs/<run>/eval.json`` and prints the markdown tables used in MODEL_CARD.md.
+Decoding mirrors ``src/decode.ts``: Viterbi (``gpu_utils_training.decode``) over the
+learned CRF transitions plus the hard BIO constraints, argmax over the name-part columns
+and over the pooled type logits. Writes ``runs/<run>/eval.json`` and prints the markdown
+tables used in MODEL_CARD.md.
 """
 
 from __future__ import annotations
@@ -9,49 +12,112 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter
+from pathlib import Path
 from typing import Any
 
+import numpy as np
 import torch
-from gpu_utils_training.features import tokenize
+from gpu_utils_training.batch import collate
+from gpu_utils_training.decode import bio_start_mask, bio_transitions, viterbi
+from gpu_utils_training.features import Token, tokenize
+from gpu_utils_training.loop import load_checkpoint
+from torch import nn
 
 from .data import CACHE, read_jsonl
 from .evalsets import load_anystyle, load_grobid, load_unfamiliar
-from .export import RUNS, load_model
-from .features import featurize_tokens
-from .labels import ROLES, TYPES, spans_from_tags
-from .metrics import SpanScorer, _utf16, format_table, normalize_span
-from .model import CiteTagger, constrained_transitions
-from .train import evaluate_rows, viterbi_batch
+from .features import WIDTH, featurize_tokens
+from .labels import ROLES, TAGS, TYPES, spans_from_tags
+from .metrics import (
+    SpanScorer,
+    _utf16,
+    entity_spans,
+    field_spans,
+    format_table,
+    normalize_span,
+)
+from .model import build, split_tags
 
+RUNS = Path(__file__).resolve().parents[1] / "runs"
 ANYSTYLE_ROLES = ["AUTHOR", "TITLE", "CONTAINER", "YEAR", "VOLUME", "PAGES", "PUBLISHER", "LOCATION", "EDITOR", "URL", "DOI", "EDITION"]
 GROBID_ROLES = ["AUTHOR", "TITLE", "CONTAINER", "YEAR", "VOLUME", "ISSUE", "PAGES", "PUBLISHER", "LOCATION", "EDITOR", "DOI", "ARXIV", "URL"]
 
+BIO_TRANSITIONS = bio_transitions(TAGS).astype(np.float64)
+START = bio_start_mask(TAGS).astype(np.float64)
+
+
+def constrained_transitions(model: nn.Module) -> np.ndarray:
+    """Learned CRF transitions plus the hard BIO constraints, as ``src/decode.ts`` builds them."""
+    return model.transitions().detach().numpy().astype(np.float64) + BIO_TRANSITIONS  # type: ignore[operator]
+
 
 @torch.no_grad()
-def predict(model: CiteTagger, texts: list[str], batch_size: int = 128) -> list[dict[str, Any]]:
-    trans = constrained_transitions(model.transitions())
+def predict_rows(model: nn.Module, rows: list[list[list[int]]], batch_size: int = 256) -> list[dict[str, Any]]:
+    """Per sequence: ``{"tags": [int], "parts": [int], "type": int}`` from feature rows."""
+    trans = constrained_transitions(model)
+    padding_id: int = model.padding_id  # type: ignore[assignment]
     out: list[dict[str, Any]] = []
-    for i in range(0, len(texts), batch_size):
-        chunk = texts[i : i + batch_size]
-        toks = [tokenize(t) for t in chunk]
-        rows = [featurize_tokens(t, tk) for t, tk in zip(chunk, toks, strict=True)]
-        T = max(1, max(len(r) for r in rows))
-        r = torch.zeros(len(chunk), T, len(rows[0][0]) if rows[0] else 12, dtype=torch.long)
-        m = torch.zeros(len(chunk), T)
-        for j, rr in enumerate(rows):
-            if rr:
-                r[j, : len(rr)] = torch.as_tensor(rr)
-                m[j, : len(rr)] = 1.0
-        tags, parts, ty = model(r, m)
-        paths = viterbi_batch(tags, trans, m)
-        pt = parts.argmax(-1)
-        for j in range(len(chunk)):
-            n = len(rows[j])
-            out.append({"tags": paths[j][:n] if n else [], "parts": [int(pt[j, k]) for k in range(n)], "type": int(ty[j].argmax()), "tokens": toks[j]})
+    for i in range(0, len(rows), batch_size):
+        chunk = rows[i : i + batch_size]
+        r, mask = collate(chunk, WIDTH, padding_id)
+        res = model(r, mask)
+        emissions, part_logits = split_tags(res["tags"])
+        em = emissions.numpy().astype(np.float64)
+        parts = part_logits.argmax(-1).numpy()
+        types = res["pooled"].argmax(-1).tolist()
+        for j, seq in enumerate(chunk):
+            n = len(seq)
+            e = em[j, :n].copy()
+            if n:
+                e[0] += START
+            out.append({"tags": viterbi(e, trans) if n else [], "parts": parts[j, :n].tolist(), "type": types[j]})
     return out
 
 
-def score_cases(model: CiteTagger, cases: list[dict[str, Any]], roles: list[str], with_type: bool) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def predict(model: nn.Module, texts: list[str]) -> list[dict[str, Any]]:
+    """Featurize raw texts and predict; adds ``"tokens"`` to every result."""
+    toks: list[list[Token]] = [tokenize(t) for t in texts]
+    rows = [featurize_tokens(t, tk) for t, tk in zip(texts, toks, strict=True)]
+    preds = predict_rows(model, rows)
+    for p, tk in zip(preds, toks, strict=True):
+        p["tokens"] = tk
+    return preds
+
+
+@torch.no_grad()
+def evaluate_rows(model: nn.Module, rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Held-out metrics on featurized synthetic rows (needs ``rows``, ``tags``, ``parts``, ``type``)."""
+    model.eval()
+    preds = predict_rows(model, [r["rows"] for r in rows])
+    scorer = SpanScorer()
+    tok_correct = tok_total = 0
+    for ex, p in zip(rows, preds, strict=True):
+        toks = tokenize(ex["text"])
+        gold, pred = ex["tags"], p["tags"]
+        tok_correct += sum(int(a == b) for a, b in zip(gold, pred, strict=True))
+        tok_total += len(gold)
+        # full-record exact match also requires the given/family split on every name token
+        gp = [q for q, t in zip(ex["parts"], gold, strict=True) if t]
+        pp = [q for q, t in zip(p["parts"], pred, strict=True) if t]
+        scorer.add(
+            field_spans(ex["text"], gold, toks),
+            field_spans(ex["text"], pred, toks),
+            ex["type"],
+            p["type"],
+            entity_spans(ex["text"], gold, toks, "AUTHOR"),
+            entity_spans(ex["text"], pred, toks, "AUTHOR"),
+            extra_ok=gold == pred and gp == pp,
+        )
+    summary = scorer.summary()
+    summary["token_accuracy"] = round(tok_correct / max(1, tok_total), 4)
+    return summary
+
+
+def evaluate_flat(model: nn.Module, rows: list[dict[str, Any]]) -> dict[str, float]:
+    """The scalar subset of ``evaluate_rows`` for ``gpu_utils_training.loop.train``."""
+    return {k: float(v) for k, v in evaluate_rows(model, rows).items() if isinstance(v, (int, float))}
+
+
+def score_cases(model: nn.Module, cases: list[dict[str, Any]], roles: list[str], with_type: bool) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     preds = predict(model, [c["text"] for c in cases])
     scorer = SpanScorer()
     misses: list[dict[str, Any]] = []
@@ -84,22 +150,22 @@ def score_cases(model: CiteTagger, cases: list[dict[str, Any]], roles: list[str]
 
 
 def main() -> None:
+    from .train import featurize_set
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", default="default")
     ap.add_argument("--show-misses", type=int, default=15)
     args = ap.parse_args()
     torch.set_num_threads(2)
-    model, _ = load_model(args.run)
-    model.quant = True
+    model = build()
+    load_checkpoint(model, RUNS / args.run / "best.pt")
+    model.quant = True  # evaluate exactly what ships
+    model.eval()
     results: dict[str, Any] = {}
 
-    held = read_jsonl(CACHE / "heldout.jsonl.gz")
-    from .train import featurize_set
-
-    held = featurize_set(held, "feats_heldout")
+    held = featurize_set(read_jsonl(CACHE / "heldout.jsonl.gz"), "feats_heldout")
     results["heldout"] = evaluate_rows(model, held)
-    print("## Held-out synthetic\n", format_table(results["heldout"]), json.dumps({k: v for k, v in results["heldout"].items() if k != "fields"}), "\n")
-    # per-style / per-type exact match on the held-out set
+    print("## Held-out synthetic\n", format_table(results["heldout"]), json.dumps({k: v for k, v in results["heldout"].items() if k not in ("fields", "micro")}), "\n")
     by_style: dict[str, list[dict[str, Any]]] = {}
     for ex in held:
         by_style.setdefault(ex["style"], []).append(ex)
@@ -108,7 +174,7 @@ def main() -> None:
 
     unfam = load_unfamiliar()
     results["unfamiliar"], misses = score_cases(model, unfam, ROLES, with_type=True)
-    print(f"## Unfamiliar ({len(unfam)} cases)\n", format_table(results["unfamiliar"]), json.dumps({k: v for k, v in results["unfamiliar"].items() if k != "fields"}), "\n")
+    print(f"## Unfamiliar ({len(unfam)} cases)\n", format_table(results["unfamiliar"]), json.dumps({k: v for k, v in results["unfamiliar"].items() if k not in ("fields", "micro")}), "\n")
     results["unfamiliar_misses"] = misses
     for m in misses[: args.show_misses]:
         print("MISS", m["gold_type"], "->", m["pred_type"], "|", m["text"][:110])
@@ -117,11 +183,11 @@ def main() -> None:
 
     anystyle = load_anystyle()
     results["anystyle"], _ = score_cases(model, anystyle, ANYSTYLE_ROLES, with_type=False)
-    print(f"\n## anystyle core ({len(anystyle)} cases)\n", format_table(results["anystyle"]), json.dumps({k: v for k, v in results["anystyle"].items() if k != "fields"}), "\n")
+    print(f"\n## anystyle core ({len(anystyle)} cases)\n", format_table(results["anystyle"]), json.dumps({k: v for k, v in results["anystyle"].items() if k not in ("fields", "micro")}), "\n")
 
     grobid = load_grobid()
     results["grobid"], _ = score_cases(model, grobid, GROBID_ROLES, with_type=False)
-    print(f"## GROBID citation corpus ({len(grobid)} cases)\n", format_table(results["grobid"]), json.dumps({k: v for k, v in results["grobid"].items() if k != "fields"}), "\n")
+    print(f"## GROBID citation corpus ({len(grobid)} cases)\n", format_table(results["grobid"]), json.dumps({k: v for k, v in results["grobid"].items() if k not in ("fields", "micro")}), "\n")
 
     results["unfamiliar_types"] = dict(Counter(c["type"] for c in unfam))
     (RUNS / args.run / "eval.json").write_text(json.dumps(results, indent=1, ensure_ascii=False) + "\n")

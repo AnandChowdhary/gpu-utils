@@ -1,4 +1,12 @@
-"""Span-level metrics: per-field exact-span P/R/F1 and full-record exact match."""
+"""Span-level scoring for gpu-cite.
+
+The package-specific part is span *normalisation*: edge punctuation and cue words
+(``vol.``, ``pp.``, ``(Eds.)``) are trimmed from gold and predicted spans so that different
+tagging conventions (ours, anystyle's, GROBID's) agree on the same field, and AUTHOR /
+EDITOR lists are collapsed to their union span. Precision / recall / F1 come from
+``gpu_utils_training.metrics.span_prf``; record-level exact match, type accuracy and
+author-entity F1 are accumulated here.
+"""
 
 from __future__ import annotations
 
@@ -6,6 +14,7 @@ from collections import defaultdict
 from typing import Any
 
 from gpu_utils_training.features import Token
+from gpu_utils_training.metrics import Span, format_prf_table, span_prf
 
 from .labels import ROLES, spans_from_tags
 
@@ -81,20 +90,18 @@ def entity_spans(text: str, tags: list[int], tokens: list[Token], role: str) -> 
 
 
 class SpanScorer:
-    """Accumulates per-role TP/FP/FN over records plus exact-match counts."""
+    """Accumulates records; ``summary()`` is the metrics dict used by train, evaluate and MODEL_CARD.md."""
 
     def __init__(self) -> None:
-        self.tp: dict[str, int] = defaultdict(int)
-        self.fp: dict[str, int] = defaultdict(int)
-        self.fn: dict[str, int] = defaultdict(int)
+        self.gold: list[list[Span]] = []
+        self.pred: list[list[Span]] = []
+        self.gold_authors: list[list[Span]] = []
+        self.pred_authors: list[list[Span]] = []
         self.records = 0
         self.exact = 0
         self.exact_fields = 0
         self.type_correct = 0
         self.type_total = 0
-        self.author_tp = 0
-        self.author_fp = 0
-        self.author_fn = 0
 
     def add(
         self,
@@ -109,14 +116,9 @@ class SpanScorer:
     ) -> None:
         roles = roles or ROLES
         self.records += 1
-        all_ok = extra_ok
-        for role in roles:
-            g, p = gold.get(role, set()), pred.get(role, set())
-            self.tp[role] += len(g & p)
-            self.fp[role] += len(p - g)
-            self.fn[role] += len(g - p)
-            if g != p:
-                all_ok = False
+        self.gold.append([(r, s, e) for r in roles for s, e in sorted(gold.get(r, ()))])
+        self.pred.append([(r, s, e) for r in roles for s, e in sorted(pred.get(r, ()))])
+        all_ok = extra_ok and all(gold.get(r, set()) == pred.get(r, set()) for r in roles)
         self.exact_fields += all_ok
         if gold_type is not None:
             self.type_total += 1
@@ -124,49 +126,32 @@ class SpanScorer:
             all_ok = all_ok and gold_type == pred_type
         self.exact += all_ok
         if gold_authors is not None and pred_authors is not None:
-            g, p = set(gold_authors), set(pred_authors)
-            self.author_tp += len(g & p)
-            self.author_fp += len(p - g)
-            self.author_fn += len(g - p)
-
-    @staticmethod
-    def _prf(tp: int, fp: int, fn: int) -> tuple[float, float, float]:
-        p = tp / (tp + fp) if tp + fp else 0.0
-        r = tp / (tp + fn) if tp + fn else 0.0
-        f = 2 * p * r / (p + r) if p + r else 0.0
-        return p, r, f
+            self.gold_authors.append([("AUTHOR", s, e) for s, e in gold_authors])
+            self.pred_authors.append([("AUTHOR", s, e) for s, e in pred_authors])
 
     def summary(self, roles: list[str] | None = None) -> dict[str, Any]:
         roles = roles or ROLES
-        per: dict[str, dict[str, float]] = {}
-        ttp = tfp = tfn = 0
-        for role in roles:
-            tp, fp, fn = self.tp[role], self.fp[role], self.fn[role]
-            if tp + fp + fn == 0:
-                continue
-            p, r, f = self._prf(tp, fp, fn)
-            per[role] = {"p": round(p, 4), "r": round(r, 4), "f1": round(f, 4), "support": tp + fn}
-            ttp, tfp, tfn = ttp + tp, tfp + fp, tfn + fn
-        mp, mr, mf = self._prf(ttp, tfp, tfn)
+        prf = span_prf(self.pred, self.gold)
+        per, micro, macro = prf["per_label"], prf["micro"], prf["macro"]
+        assert isinstance(per, dict) and isinstance(micro, dict) and isinstance(macro, dict)
         out: dict[str, Any] = {
             "records": self.records,
-            "fields": per,
-            "micro_f1": round(mf, 4),
-            "macro_f1": round(sum(v["f1"] for v in per.values()) / max(1, len(per)), 4),
+            "fields": {role: {k: round(v, 4) for k, v in per[role].items()} for role in roles if role in per},
+            "micro": {k: round(v, 4) for k, v in micro.items()},
+            "micro_f1": round(micro["f1"], 4),
+            "macro_f1": round(macro["f1"], 4),
             "exact_fields": round(self.exact_fields / max(1, self.records), 4),
             "exact_match": round(self.exact / max(1, self.records), 4),
         }
         if self.type_total:
             out["type_accuracy"] = round(self.type_correct / self.type_total, 4)
-        if self.author_tp + self.author_fp + self.author_fn:
-            p, r, f = self._prf(self.author_tp, self.author_fp, self.author_fn)
-            out["author_entity_f1"] = round(f, 4)
+        if self.gold_authors:
+            authors = span_prf(self.pred_authors, self.gold_authors)["micro"]
+            assert isinstance(authors, dict)
+            out["author_entity_f1"] = round(authors["f1"], 4)
         return out
 
 
 def format_table(summary: dict[str, Any]) -> str:
-    lines = ["| Field | P | R | F1 | Support |", "|---|---|---|---|---|"]
-    for role, v in summary["fields"].items():
-        lines.append(f"| {role} | {v['p']:.3f} | {v['r']:.3f} | {v['f1']:.3f} | {v['support']} |")
-    lines.append(f"| **micro** | | | **{summary['micro_f1']:.3f}** | |")
-    return "\n".join(lines)
+    """Markdown P/R/F1 table in role order (``gpu_utils_training.metrics.format_prf_table``)."""
+    return format_prf_table({"per_label": summary["fields"], "micro": summary["micro"]})
