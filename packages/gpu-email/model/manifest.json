@@ -1,0 +1,242 @@
+{
+  "format": 1,
+  "name": "gpu-email",
+  "labels": [
+    "reply",
+    "attribution",
+    "quote",
+    "signature",
+    "disclaimer",
+    "forward_header",
+    "greeting",
+    "closing"
+  ],
+  "fields": [
+    "O",
+    "B-NAME",
+    "I-NAME",
+    "B-TITLE",
+    "I-TITLE",
+    "B-COMPANY",
+    "I-COMPANY",
+    "B-PHONE",
+    "I-PHONE",
+    "B-EMAIL",
+    "I-EMAIL",
+    "B-URL",
+    "I-URL",
+    "B-ADDRESS",
+    "I-ADDRESS"
+  ],
+  "hidden": 48,
+  "head": 64,
+  "dilations": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "slots": 37,
+  "rows": 2267,
+  "checkpoint": {
+    "seed": 0,
+    "steps": 8156,
+    "epochs": 3,
+    "metrics": {
+      "kind_token_acc": 0.9955243828923155,
+      "bio_token_f1": 0.993268382906424
+    }
+  },
+  "tensors": [
+    {
+      "name": "emb",
+      "offset": 0,
+      "length": 108816,
+      "shape": [
+        2267,
+        48
+      ],
+      "scale": 0.04694153416541315
+    },
+    {
+      "name": "conv0.w",
+      "offset": 108816,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.01662161465614073
+    },
+    {
+      "name": "conv0.b",
+      "offset": 115728,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.008438435293013049
+    },
+    {
+      "name": "conv1.w",
+      "offset": 115776,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.019452256541098317
+    },
+    {
+      "name": "conv1.b",
+      "offset": 122688,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.009478092193603516
+    },
+    {
+      "name": "conv2.w",
+      "offset": 122736,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.018174159911371047
+    },
+    {
+      "name": "conv2.b",
+      "offset": 129648,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.00788584784153969
+    },
+    {
+      "name": "conv3.w",
+      "offset": 129696,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.02197578453248547
+    },
+    {
+      "name": "conv3.b",
+      "offset": 136608,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.007656941010105995
+    },
+    {
+      "name": "conv4.w",
+      "offset": 136656,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.030235352054719004
+    },
+    {
+      "name": "conv4.b",
+      "offset": 143568,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.009282066937415831
+    },
+    {
+      "name": "conv5.w",
+      "offset": 143616,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.022827829084088726
+    },
+    {
+      "name": "conv5.b",
+      "offset": 150528,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.00636366730736148
+    },
+    {
+      "name": "head.w",
+      "offset": 150576,
+      "length": 3072,
+      "shape": [
+        48,
+        64
+      ],
+      "scale": 0.016851380948097475
+    },
+    {
+      "name": "head.b",
+      "offset": 153648,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.007769258272263312
+    },
+    {
+      "name": "kind.w",
+      "offset": 153712,
+      "length": 512,
+      "shape": [
+        64,
+        8
+      ],
+      "scale": 0.03970916425028155
+    },
+    {
+      "name": "kind.b",
+      "offset": 154224,
+      "length": 8,
+      "shape": [
+        8
+      ],
+      "scale": 0.00572620572582368
+    },
+    {
+      "name": "bio.w",
+      "offset": 154232,
+      "length": 960,
+      "shape": [
+        64,
+        15
+      ],
+      "scale": 0.026645143185892412
+    },
+    {
+      "name": "bio.b",
+      "offset": 155192,
+      "length": 15,
+      "shape": [
+        15
+      ],
+      "scale": 0.008420855768265264
+    }
+  ],
+  "parameters": 155207
+}

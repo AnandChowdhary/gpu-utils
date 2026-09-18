@@ -9,4 +9,9 @@ export {
   tokenize,
 } from "./tokenize.ts";
 export type { Backend, FeatureRows } from "./types.ts";
-export { decodeInt6, type ModelManifest, type TensorEntry, tensor } from "./weights.ts";
+export {
+  decodeInt6,
+  type ModelManifest,
+  type TensorEntry,
+  tensor,
+} from "./weights.ts";

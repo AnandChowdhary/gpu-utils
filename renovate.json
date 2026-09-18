@@ -4,7 +4,13 @@
   "schedule": ["before 6am on monday"],
   "labels": ["dependencies"],
   "packageRules": [
-    { "matchManagers": ["github-actions"], "groupName": "Actions dependencies" },
-    { "matchManagers": ["pep621", "pip_requirements"], "groupName": "Python dependencies" }
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "Actions dependencies"
+    },
+    {
+      "matchManagers": ["pep621", "pip_requirements"],
+      "groupName": "Python dependencies"
+    }
   ]
 }

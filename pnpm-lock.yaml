@@ -45,6 +45,12 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/gpu-email:
+    devDependencies:
+      '@gpu-utils/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/gpu-log:
     devDependencies:
       '@gpu-utils/runtime':
@@ -52,6 +58,12 @@ importers:
         version: link:../runtime
 
   packages/gpu-paste:
+    devDependencies:
+      '@gpu-utils/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/gpu-view:
     devDependencies:
       '@gpu-utils/runtime':
         specifier: workspace:*

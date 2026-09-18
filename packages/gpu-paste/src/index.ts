@@ -187,7 +187,12 @@ export async function parse(text: string, options: PasteOptions = {}): Promise<P
     ms: performance.now() - t0,
   });
   if (!text.trim()) {
-    return { kind: "empty", confidence: 1, spans: [], diagnostics: diag("rule:empty", "none", 0) };
+    return {
+      kind: "empty",
+      confidence: 1,
+      spans: [],
+      diagnostics: diag("rule:empty", "none", 0),
+    };
   }
   const rule = detectWhole(text);
   if (rule?.note) notes.push(rule.note);

@@ -33,7 +33,10 @@ describe("parsePages", () => {
   it("keeps article numbers and single pages", () => {
     expect(parsePages("e12345")).toEqual({ from: "e12345", to: "e12345" });
     expect(parsePages("082002")).toEqual({ from: "082002", to: "082002" });
-    expect(parsePages("e12345-e12346")).toEqual({ from: "e12345", to: "e12346" });
+    expect(parsePages("e12345-e12346")).toEqual({
+      from: "e12345",
+      to: "e12346",
+    });
   });
 });
 

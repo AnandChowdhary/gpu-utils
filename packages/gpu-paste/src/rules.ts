@@ -355,7 +355,10 @@ export function parseColor(text: string): Color | undefined {
         Math.max(0, Math.min(255, Math.round(v))),
       ) as [number, number, number];
     }
-    const out: Color = { hex: `#${rgb.map((v) => pad(v.toString(16))).join("")}`, rgb };
+    const out: Color = {
+      hex: `#${rgb.map((v) => pad(v.toString(16))).join("")}`,
+      rgb,
+    };
     if (a !== undefined) out.alpha = a;
     return out;
   }
@@ -375,7 +378,9 @@ function ipv4(s: string): { address: string; port?: number; prefix?: number } | 
   if (!m) return undefined;
   const octets = m.slice(1, 5).map(Number);
   if (octets.some((o) => o > 255)) return undefined;
-  const out: { address: string; port?: number; prefix?: number } = { address: octets.join(".") };
+  const out: { address: string; port?: number; prefix?: number } = {
+    address: octets.join("."),
+  };
   if (m[5]) out.port = Number(m[5]);
   if (m[6]) out.prefix = Number(m[6]);
   return out;
@@ -390,7 +395,9 @@ function ipv6(s: string): { address: string; prefix?: number } | undefined {
   const groups = parts.flatMap((p) => (p ? p.split(":") : []));
   if (groups.some((g) => g.length === 0 || g.length > 4)) return undefined;
   if (parts.length === 2 ? groups.length > 7 : groups.length !== 8) return undefined;
-  const out: { address: string; prefix?: number } = { address: body.toLowerCase() };
+  const out: { address: string; prefix?: number } = {
+    address: body.toLowerCase(),
+  };
   if (m[2]) out.prefix = Number(m[2]);
   return out;
 }
@@ -529,7 +536,10 @@ export function parseDelimited(
       (c) => c.trim().split(/\s+/).length <= 4 && !/[.!?]$/.test(c.trim()),
     ).length;
     if (delimiter !== "\t" && shortCells < cells.length * 0.6) continue;
-    const out: { delimiter: string; rows: string[][]; header?: string[] } = { delimiter, rows };
+    const out: { delimiter: string; rows: string[][]; header?: string[] } = {
+      delimiter,
+      rows,
+    };
     const first = rows[0]!;
     const numeric = (c: string) => parseNumber(c) !== undefined;
     if (
@@ -573,9 +583,14 @@ const EXTENSIONS = new Set(
   ),
 );
 
-export function parsePath(
-  text: string,
-): { segments: string[]; basename: string; extension?: string; absolute: boolean } | undefined {
+export function parsePath(text: string):
+  | {
+      segments: string[];
+      basename: string;
+      extension?: string;
+      absolute: boolean;
+    }
+  | undefined {
   const s = text.trim();
   const isWin = WIN_PATH.test(s);
   const isPosix = POSIX_PATH.test(s) || REL_PATH.test(s);
@@ -586,7 +601,12 @@ export function parsePath(
   const segments = s.split(/[\\/]+/).filter(Boolean);
   const basename = segments[segments.length - 1] ?? "";
   const dot = basename.lastIndexOf(".");
-  const out: { segments: string[]; basename: string; extension?: string; absolute: boolean } = {
+  const out: {
+    segments: string[];
+    basename: string;
+    extension?: string;
+    absolute: boolean;
+  } = {
     segments,
     basename,
     absolute: isWin || s.startsWith("/"),
@@ -617,7 +637,11 @@ export function detectWhole(text: string): RuleMatch | undefined {
       const [h, p] = s.split(".");
       const header = base64urlJson(h!) as Record<string, unknown>;
       if (header && typeof header === "object" && "alg" in header) {
-        return { kind: "jwt", confidence: 1, parsed: { header, payload: base64urlJson(p!) } };
+        return {
+          kind: "jwt",
+          confidence: 1,
+          parsed: { header, payload: base64urlJson(p!) },
+        };
       }
     } catch {}
   }
@@ -641,13 +665,23 @@ export function detectWhole(text: string): RuleMatch | undefined {
     };
   const color = parseColor(s);
   if (color && !/^#\d{3,4}$/.test(s))
-    return { kind: "color", confidence: 1, parsed: color, spanKind: "color", value: color.hex };
+    return {
+      kind: "color",
+      confidence: 1,
+      parsed: color,
+      spanKind: "color",
+      value: color.hex,
+    };
   if (EMAIL_RE.test(s)) {
     const [local, domain] = s.split("@");
     return {
       kind: "email",
       confidence: 1,
-      parsed: { address: s.toLowerCase(), local, domain: domain!.toLowerCase() },
+      parsed: {
+        address: s.toLowerCase(),
+        local,
+        domain: domain!.toLowerCase(),
+      },
       spanKind: "email",
       value: s.toLowerCase(),
     };
@@ -684,7 +718,12 @@ export function detectWhole(text: string): RuleMatch | undefined {
   }
   const number = parseNumber(s);
   if (number !== undefined && !(/^\d{10,11}$/.test(s) && /^[2-9]/.test(s))) {
-    return { kind: "number", confidence: 1, parsed: number, value: String(number) };
+    return {
+      kind: "number",
+      confidence: 1,
+      parsed: number,
+      value: String(number),
+    };
   }
   const phone = parsePhone(s);
   if (phone)
@@ -696,7 +735,12 @@ export function detectWhole(text: string): RuleMatch | undefined {
       value: phone.e164 ?? phone.digits,
     };
   const path = parsePath(s);
-  if (path) return { kind: "path", confidence: path.absolute ? 0.95 : 0.8, parsed: path };
+  if (path)
+    return {
+      kind: "path",
+      confidence: path.absolute ? 0.95 : 0.8,
+      parsed: path,
+    };
   if (s[0] === "{" || s[0] === "[") {
     try {
       return { kind: "json", confidence: 1, parsed: JSON.parse(s) };
@@ -706,7 +750,11 @@ export function detectWhole(text: string): RuleMatch | undefined {
   if (html) return { kind: "html", confidence: 0.9, parsed: html };
   const table = parseDelimited(text);
   if (table)
-    return { kind: table.delimiter === "\t" ? "tsv" : "csv", confidence: 0.85, parsed: table };
+    return {
+      kind: table.delimiter === "\t" ? "tsv" : "csv",
+      confidence: 0.85,
+      parsed: table,
+    };
   return undefined;
 }
 
