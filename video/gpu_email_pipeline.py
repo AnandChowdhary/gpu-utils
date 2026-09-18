@@ -45,8 +45,8 @@ KIND_COLOR = {
     "quote": "#6B7280",
 }
 PARAMS = "155,207"
-SIZE = "~ 95 KiB"
-LATENCY = "~ 3 ms"
+SIZE = "93 KiB"
+LATENCY = "36 ms (CPU)"
 
 
 def email_block(tinted: bool = False) -> VGroup:
@@ -144,6 +144,6 @@ class GpuEmailPipeline(ExplainerScene):
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.16).move_to(RIGHT * 3.1)
         self.play(tinted.animate.shift(LEFT * 1.0), run_time=0.6)
         self.play(LaggedStart(*[FadeIn(o, shift=RIGHT * 0.1) for o in out], lag_ratio=0.15), run_time=1.6)
-        foot = note(f"{SIZE} Brotli · warm call {LATENCY} on a 1 KB email · probabilistic tagger + exact rules")
+        foot = note(f"{SIZE} Brotli · warm CPU call {LATENCY} on a 1 KB email · probabilistic tagger + exact rules")
         self.play(FadeIn(foot), run_time=0.6)
         self.wait(2.6)
