@@ -20,7 +20,24 @@ SHADER = PKG / "src" / "shader.wgsl"
 wgpu = pytest.importorskip("wgpu")
 
 ENTRIES = ["embed", "gates", "scan_local", "scan_fixup", "pool", "head"]
-TENSORS = ["emb", "wa_f", "ba_f", "wu_f", "bu_f", "wa_b", "ba_b", "wu_b", "bu_b", "conv", "bc", "w1", "wg", "b1", "w2", "b2"]
+TENSORS = [
+    "emb",
+    "wa_f",
+    "ba_f",
+    "wu_f",
+    "bu_f",
+    "wa_b",
+    "ba_b",
+    "wu_b",
+    "bu_b",
+    "conv",
+    "bc",
+    "w1",
+    "wg",
+    "b1",
+    "w2",
+    "b2",
+]
 D, W, H, CHUNK = 24, 72, 32, 256
 
 
@@ -30,7 +47,9 @@ def decode_weights(encoded: str, tensors: list[dict]) -> np.ndarray:
     out = np.zeros(len(encoded), dtype=np.float32)
     for t in tensors:
         for i in range(t["length"]):
-            out[t["offset"] + i] = np.float32(lookup[encoded[t["offset"] + i]] * t["scale"])
+            out[t["offset"] + i] = np.float32(
+                lookup[encoded[t["offset"] + i]] * t["scale"]
+            )
     return out
 
 
@@ -43,7 +62,9 @@ def device():
     return adapter.request_device_sync()
 
 
-def run_shader(device, manifest: dict, weights: np.ndarray, rows: list[list[int]]) -> np.ndarray:
+def run_shader(
+    device, manifest: dict, weights: np.ndarray, rows: list[list[int]]
+) -> np.ndarray:
     n = len(rows)
     out_cols = manifest["out"]
     width = manifest["width"]
@@ -52,19 +73,42 @@ def run_shader(device, manifest: dict, weights: np.ndarray, rows: list[list[int]
     params[:4] = [n, -(-n // CHUNK), out_cols, width]
     params[4 : 4 + len(TENSORS)] = [offsets[name] for name in TENSORS]
     module = device.create_shader_module(code=SHADER.read_text())
-    pipelines = {e: device.create_compute_pipeline(layout="auto", compute={"module": module, "entry_point": e}) for e in ENTRIES}
+    pipelines = {
+        e: device.create_compute_pipeline(
+            layout="auto", compute={"module": module, "entry_point": e}
+        )
+        for e in ENTRIES
+    }
     U = wgpu.BufferUsage
     bufs = [
         device.create_buffer_with_data(data=params, usage=U.UNIFORM | U.COPY_DST),
-        device.create_buffer_with_data(data=np.asarray(rows, dtype=np.uint32).ravel(), usage=U.STORAGE | U.COPY_DST),
+        device.create_buffer_with_data(
+            data=np.asarray(rows, dtype=np.uint32).ravel(), usage=U.STORAGE | U.COPY_DST
+        ),
         device.create_buffer_with_data(data=weights, usage=U.STORAGE | U.COPY_DST),
-        device.create_buffer_with_data(data=np.zeros(n * D + n * W + H, dtype=np.float32), usage=U.STORAGE | U.COPY_DST),
-        device.create_buffer_with_data(data=np.zeros(6 * n * D, dtype=np.float32), usage=U.STORAGE | U.COPY_DST),
-        device.create_buffer_with_data(data=np.zeros(n * out_cols, dtype=np.float32), usage=U.STORAGE | U.COPY_DST | U.COPY_SRC),
+        device.create_buffer_with_data(
+            data=np.zeros(n * D + n * W + H, dtype=np.float32),
+            usage=U.STORAGE | U.COPY_DST,
+        ),
+        device.create_buffer_with_data(
+            data=np.zeros(6 * n * D, dtype=np.float32), usage=U.STORAGE | U.COPY_DST
+        ),
+        device.create_buffer_with_data(
+            data=np.zeros(n * out_cols, dtype=np.float32),
+            usage=U.STORAGE | U.COPY_DST | U.COPY_SRC,
+        ),
     ]
-    entries = [{"binding": i, "resource": {"buffer": b, "offset": 0, "size": b.size}} for i, b in enumerate(bufs)]
+    entries = [
+        {"binding": i, "resource": {"buffer": b, "offset": 0, "size": b.size}}
+        for i, b in enumerate(bufs)
+    ]
     # Auto layouts are exclusive to their pipeline: one bind group per pass (as in runtime/program.ts).
-    bind_groups = {e: device.create_bind_group(layout=pipelines[e].get_bind_group_layout(0), entries=entries) for e in ENTRIES}
+    bind_groups = {
+        e: device.create_bind_group(
+            layout=pipelines[e].get_bind_group_layout(0), entries=entries
+        )
+        for e in ENTRIES
+    }
     dispatch = [
         ("embed", (-(-(n * D) // 64), 1, 1)),
         ("gates", (-(-(2 * n * D) // 64), 1, 1)),
@@ -112,19 +156,27 @@ def test_wgsl_long_input_crosses_chunks(device) -> None:
 
     manifest = json.loads(MANIFEST.read_text())
     weights = decode_weights(WEIGHTS.read_text(), manifest["tensors"])
-    text = ("card with rounded corners, subtle shadow, blue on hover, hidden on mobile, " * 12).strip()
+    text = (
+        "card with rounded corners, subtle shadow, blue on hover, hidden on mobile, "
+        * 12
+    ).strip()
     rows = featurize(text)
     assert len(rows) > CHUNK
     got = run_shader(device, manifest, weights, rows)
     # reference: torch model with the same dequantized weights
     model = Tagger()
-    t = {e["name"]: weights[e["offset"] : e["offset"] + e["length"]].reshape(e["shape"]) for e in manifest["tensors"]}
+    t = {
+        e["name"]: weights[e["offset"] : e["offset"] + e["length"]].reshape(e["shape"])
+        for e in manifest["tensors"]
+    }
     with torch.no_grad():
         for name, p in model.named_parameters():
             p.copy_(torch.from_numpy(np.ascontiguousarray(t[name])))
     model.quant = False
     model.eval()
     with torch.no_grad():
-        ref = model(torch.tensor([rows]), torch.ones(1, len(rows), dtype=torch.bool))[0].numpy()
+        ref = model(torch.tensor([rows]), torch.ones(1, len(rows), dtype=torch.bool))[
+            0
+        ].numpy()
     assert dequantized is not None
     assert np.abs(got - ref).max() < 1e-3

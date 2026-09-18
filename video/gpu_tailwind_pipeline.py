@@ -35,7 +35,7 @@ class GpuTailwindPipeline(ExplainerScene):
         # 1. phrase
         cap = self.swap_caption(None, "Natural language")
         cells = VGroup(*[TokenCell(w, muted=(w == " " or w == ",")) for w in WORDS])
-        cells.arrange(buff=0.05).scale(0.82).move_to(UP * 0.9)
+        cells.arrange(buff=0.05).scale(0.78).move_to(UP * 0.9)
         self.play(LaggedStart(*[FadeIn(c, shift=DOWN * 0.08) for c in cells], lag_ratio=0.04))
         self.wait(1.2)
 
@@ -89,6 +89,10 @@ class GpuTailwindPipeline(ExplainerScene):
         for (start, end, cls), bracket in zip(SEGMENTS, brackets):
             cell = VGroup(*[TokenCell(part) for part in cls.split(" ")]).arrange(buff=0.05).scale(0.7)
             cell.next_to(bracket, DOWN, buff=0.25)
+            if cell.get_left()[0] < cells.get_left()[0]:
+                cell.align_to(cells, LEFT)
+            if cell.get_right()[0] > cells.get_right()[0]:
+                cell.align_to(cells, RIGHT)
             outputs.add(cell)
         # stagger vertically so neighbours do not overlap
         for i, cell in enumerate(outputs):

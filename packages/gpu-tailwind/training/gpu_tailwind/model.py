@@ -75,7 +75,9 @@ class Tagger(nn.Module):
         e = e * m
         bsz, t, _ = e.shape
 
-        def scan(wa: Tensor, ba: Tensor, wu: Tensor, bu: Tensor, reverse: bool) -> Tensor:
+        def scan(
+            wa: Tensor, ba: Tensor, wu: Tensor, bu: Tensor, reverse: bool
+        ) -> Tensor:
             a = torch.sigmoid(e @ fq(wa, q) + fq(ba, q))
             u = torch.tanh(e @ fq(wu, q) + fq(bu, q))
             b = (1 - a) * u
@@ -94,9 +96,16 @@ class Tagger(nn.Module):
         x = torch.cat([e, hf, hb], -1) * m  # [B, T, 3D]
         conv = fq(self.conv, q)
         xp = torch.nn.functional.pad(x, (0, 0, 1, 1))
-        c = xp[:, :-2] * conv[0] + xp[:, 1:-1] * conv[1] + xp[:, 2:] * conv[2] + fq(self.bc, q)
+        c = (
+            xp[:, :-2] * conv[0]
+            + xp[:, 1:-1] * conv[1]
+            + xp[:, 2:] * conv[2]
+            + fq(self.bc, q)
+        )
         g = x.sum(1) / mask.sum(1, keepdim=True).clamp(min=1).to(e.dtype)  # [B, 3D]
-        z = torch.relu(c @ fq(self.w1, q) + (g @ fq(self.wg, q)).unsqueeze(1) + fq(self.b1, q))
+        z = torch.relu(
+            c @ fq(self.w1, q) + (g @ fq(self.wg, q)).unsqueeze(1) + fq(self.b1, q)
+        )
         return z @ fq(self.w2, q) + fq(self.b2, q)
 
 
@@ -104,4 +113,4 @@ def count_params(model: nn.Module) -> int:
     return sum(p.numel() for p in model.parameters())
 
 
-__all__ = ["Tagger", "D", "H", "OUT", "WIDTH", "count_params"]
+__all__ = ["OUT", "WIDTH", "D", "H", "Tagger", "count_params"]

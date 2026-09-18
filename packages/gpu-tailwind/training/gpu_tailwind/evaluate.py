@@ -8,7 +8,6 @@ compiler; run `pnpm --filter gpu-tailwind eval` for those (scripts/eval.ts).
 
 from __future__ import annotations
 
-import json
 from collections import Counter
 
 import torch
@@ -25,13 +24,15 @@ def spans(labels: list[int]) -> set[tuple[int, int, str]]:
     kind = None
     for i, l in enumerate(labels + [0]):
         name = LABELS[l] if l >= 0 and l < len(LABELS) else "O"
-        if name.startswith("B-") or name in ("O", "SEP", "NEG") or (name.startswith("I-") and name[2:] != kind):
+        if (
+            name.startswith("B-")
+            or name in ("O", "SEP", "NEG")
+            or (name.startswith("I-") and name[2:] != kind)
+        ):
             if start is not None:
                 out.add((start, i, kind))  # type: ignore[arg-type]
                 start = None
-            if name.startswith("B-"):
-                start, kind = i, name[2:]
-            elif name.startswith("I-"):
+            if name.startswith("B-") or name.startswith("I-"):
                 start, kind = i, name[2:]
     return out
 
@@ -47,7 +48,9 @@ def main() -> None:
     fn = Counter()
     tok_ok = tok_n = seq_ok = seq_n = b_ok = b_n = 0
     with torch.no_grad():
-        for feats, labels, bound, mask in batches(data, 256, __import__("random").Random(0), False):
+        for feats, labels, bound, mask in batches(
+            data, 256, __import__("random").Random(0), False
+        ):
             out = model(feats, mask)
             pred = out[..., : OUT - 1].argmax(-1)
             for i in range(feats.shape[0]):
@@ -75,7 +78,9 @@ def main() -> None:
     for kind in ("PROP", "VAL", "VAR"):
         p = tp[kind] / max(1, tp[kind] + fp[kind])
         r = tp[kind] / max(1, tp[kind] + fn[kind])
-        print(f"span {kind:5s} precision {p:.4f} recall {r:.4f} f1 {2 * p * r / max(1e-9, p + r):.4f}")
+        print(
+            f"span {kind:5s} precision {p:.4f} recall {r:.4f} f1 {2 * p * r / max(1e-9, p + r):.4f}"
+        )
 
 
 if __name__ == "__main__":

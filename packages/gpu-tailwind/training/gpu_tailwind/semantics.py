@@ -11,10 +11,62 @@ from dataclasses import dataclass
 
 from .lexicon import PRESETS, PROPS, VALUES, words_of
 
-HUES = ["red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose", "slate", "gray", "zinc", "neutral", "stone", "mauve", "olive", "mist", "taupe"]
+HUES = [
+    "red",
+    "orange",
+    "amber",
+    "yellow",
+    "lime",
+    "green",
+    "emerald",
+    "teal",
+    "cyan",
+    "sky",
+    "blue",
+    "indigo",
+    "violet",
+    "purple",
+    "fuchsia",
+    "pink",
+    "rose",
+    "slate",
+    "gray",
+    "zinc",
+    "neutral",
+    "stone",
+    "mauve",
+    "olive",
+    "mist",
+    "taupe",
+]
 SHADES = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"]
-SIZES = ["xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl", "9xl"]
-WEIGHTS = ["thin", "extralight", "light", "normal", "medium", "semibold", "bold", "extrabold", "black"]
+SIZES = [
+    "xs",
+    "sm",
+    "md",
+    "lg",
+    "xl",
+    "2xl",
+    "3xl",
+    "4xl",
+    "5xl",
+    "6xl",
+    "7xl",
+    "8xl",
+    "9xl",
+]
+WEIGHTS = [
+    "thin",
+    "extralight",
+    "light",
+    "normal",
+    "medium",
+    "semibold",
+    "bold",
+    "extrabold",
+    "black",
+]
+
 
 def norm_key(p: str) -> str:
     return " ".join(words_of(p))
@@ -32,15 +84,96 @@ for _k, _ps in VALUES.items():
             if re.search(r"[^a-z0-9 ]", _p):
                 VAL_OF.setdefault(_p.replace(" ", ""), _k)
 
-SPACING = ["p", "px", "py", "pt", "pr", "pb", "pl", "m", "mx", "my", "mt", "mr", "mb", "ml", "gap", "gap-x", "gap-y", "space-x", "space-y"]
+SPACING = [
+    "p",
+    "px",
+    "py",
+    "pt",
+    "pr",
+    "pb",
+    "pl",
+    "m",
+    "mx",
+    "my",
+    "mt",
+    "mr",
+    "mb",
+    "ml",
+    "gap",
+    "gap-x",
+    "gap-y",
+    "space-x",
+    "space-y",
+]
 INSETS = ["top", "bottom", "left", "right", "inset"]
 SIZING = ["w", "h", "size", "min-w", "max-w", "min-h", "max-h"]
-COLORS = ["text", "bg", "border", "border-t", "border-b", "border-l", "border-r", "border-x", "border-y", "ring", "outline", "shadow"]
-SZ_SPACING = {"none": "0", "xs": "1", "sm": "2", "md": "4", "lg": "8", "xl": "12", "2xl": "16", "3xl": "24", "4xl": "32", "5xl": "40", "6xl": "48", "7xl": "64"}
-SZ_HEIGHT = {"none": "0", "xs": "8", "sm": "12", "md": "16", "lg": "24", "xl": "32", "2xl": "48", "3xl": "64", "4xl": "96"}
-SZ_DURATION = {"xs": "75", "sm": "150", "md": "300", "lg": "500", "xl": "700", "2xl": "1000"}
-SZ_OPACITY = {"none": "0", "xs": "10", "sm": "25", "md": "50", "lg": "75", "xl": "90", "full": "100"}
-WEIGHT_NUM = {"100": "thin", "200": "extralight", "300": "light", "400": "normal", "500": "medium", "600": "semibold", "700": "bold", "800": "extrabold", "900": "black"}
+COLORS = [
+    "text",
+    "bg",
+    "border",
+    "border-t",
+    "border-b",
+    "border-l",
+    "border-r",
+    "border-x",
+    "border-y",
+    "ring",
+    "outline",
+    "shadow",
+]
+SZ_SPACING = {
+    "none": "0",
+    "xs": "1",
+    "sm": "2",
+    "md": "4",
+    "lg": "8",
+    "xl": "12",
+    "2xl": "16",
+    "3xl": "24",
+    "4xl": "32",
+    "5xl": "40",
+    "6xl": "48",
+    "7xl": "64",
+}
+SZ_HEIGHT = {
+    "none": "0",
+    "xs": "8",
+    "sm": "12",
+    "md": "16",
+    "lg": "24",
+    "xl": "32",
+    "2xl": "48",
+    "3xl": "64",
+    "4xl": "96",
+}
+SZ_DURATION = {
+    "xs": "75",
+    "sm": "150",
+    "md": "300",
+    "lg": "500",
+    "xl": "700",
+    "2xl": "1000",
+}
+SZ_OPACITY = {
+    "none": "0",
+    "xs": "10",
+    "sm": "25",
+    "md": "50",
+    "lg": "75",
+    "xl": "90",
+    "full": "100",
+}
+WEIGHT_NUM = {
+    "100": "thin",
+    "200": "extralight",
+    "300": "light",
+    "400": "normal",
+    "500": "medium",
+    "600": "semibold",
+    "700": "bold",
+    "800": "extrabold",
+    "900": "black",
+}
 
 
 @dataclass
@@ -143,7 +276,11 @@ def parse_value(text: str) -> Value | None:
         return Value("pct", joined[:-1])
     if re.fullmatch(r"\d+/\d+", joined):
         return Value("frac", joined)
-    if len(words) == 2 and words[0] in ("light", "dark", "pale", "deep") and words[1] in ("gray", "grey"):
+    if (
+        len(words) == 2
+        and words[0] in ("light", "dark", "pale", "deep")
+        and words[1] in ("gray", "grey")
+    ):
         return Value("col", f"gray-{MOD_OF[words[0]]}")
     return None
 
@@ -182,7 +319,11 @@ def spacing_value(k: str, v: Value | None, neg: bool) -> list[str]:
     if v.kind == "sz":
         if v.value == "full":
             return [f"{k}-full"] if k in INSETS else []
-        s = shift_size(v.value, v.intensity, "xs", "7xl") if v.value != "none" else "none"
+        s = (
+            shift_size(v.value, v.intensity, "xs", "7xl")
+            if v.value != "none"
+            else "none"
+        )
         n = SZ_SPACING.get(s)
         return [f"{k}-{n}"] if n else []
     if v.kind == "kw":
@@ -199,7 +340,15 @@ def sizing_value(k: str, v: Value | None, neg: bool) -> list[str]:
     if neg:
         return [f"{k}-0"]
     if v is None:
-        return {"w": ["w-full"], "h": ["h-full"], "size": ["size-full"], "min-w": ["min-w-0"], "max-w": ["max-w-full"], "min-h": ["min-h-full"], "max-h": ["max-h-full"]}[k]
+        return {
+            "w": ["w-full"],
+            "h": ["h-full"],
+            "size": ["size-full"],
+            "min-w": ["min-w-0"],
+            "max-w": ["max-w-full"],
+            "min-h": ["min-h-full"],
+            "max-h": ["max-h-full"],
+        }[k]
     horizontal = k in ("w", "min-w", "max-w", "size")
     if v.kind == "num":
         return [f"{k}-{v.value}"] if is_spacing_num(v.value) else []
@@ -256,13 +405,20 @@ def text_value(v: Value | None, neg: bool) -> list[str]:
             return ["font-light"]
         return [f"text-gray-{shift_shade(v.value, v.intensity)}"]
     if v.kind == "wt":
-        return ["font-normal"] if neg else [f"font-{shift_weight(v.value, v.intensity)}"]
+        return (
+            ["font-normal"] if neg else [f"font-{shift_weight(v.value, v.intensity)}"]
+        )
     if v.kind == "num":
         return [f"text-[{v.value}px]"] if is_int(v.value, 6, 200) else []
     if v.kind == "unit":
         return [f"text-[{v.value}]"] if unit_ok(v, ("px", "rem", "em")) else []
     if v.kind == "spec":
-        return {"center": ["text-center"], "hcenter": ["text-center"], "vcenter": ["align-middle"], "sr-only": ["sr-only"]}.get(v.value, [])
+        return {
+            "center": ["text-center"],
+            "hcenter": ["text-center"],
+            "vcenter": ["align-middle"],
+            "sr-only": ["sr-only"],
+        }.get(v.value, [])
     if v.kind == "kw":
         return kw_text(v.value, neg)
     return []
@@ -275,15 +431,61 @@ def shift_weight(w: str, by: int) -> str:
 
 
 TEXT_KW = {
-    "center": "text-center", "left": "text-left", "right": "text-right", "justify": "text-justify", "start": "text-start", "end": "text-end",
-    "uppercase": "uppercase", "lowercase": "lowercase", "capitalize": "capitalize", "normal-case": "normal-case",
-    "italic": "italic", "not-italic": "not-italic", "underline": "underline", "no-underline": "no-underline", "line-through": "line-through", "overline": "overline",
-    "truncate": "truncate", "nowrap": "text-nowrap", "wrap": "text-wrap", "balance": "text-balance", "pretty": "text-pretty", "break-words": "break-words", "break-all": "break-all",
-    "mono": "font-mono", "serif": "font-serif", "sans": "font-sans", "tighter": "tracking-tighter", "tight": "tracking-tight", "wide": "tracking-wide", "wider": "tracking-wider", "widest": "tracking-widest",
-    "snug": "leading-snug", "relaxed": "leading-relaxed", "loose": "leading-loose", "antialiased": "antialiased", "pre": "whitespace-pre", "pre-wrap": "whitespace-pre-wrap", "pre-line": "whitespace-pre-line",
-    "hidden": "hidden", "select-none": "select-none", "select-all": "select-all", "select-text": "select-text", "invisible": "invisible", "grayscale": "grayscale",
+    "center": "text-center",
+    "left": "text-left",
+    "right": "text-right",
+    "justify": "text-justify",
+    "start": "text-start",
+    "end": "text-end",
+    "uppercase": "uppercase",
+    "lowercase": "lowercase",
+    "capitalize": "capitalize",
+    "normal-case": "normal-case",
+    "italic": "italic",
+    "not-italic": "not-italic",
+    "underline": "underline",
+    "no-underline": "no-underline",
+    "line-through": "line-through",
+    "overline": "overline",
+    "truncate": "truncate",
+    "nowrap": "text-nowrap",
+    "wrap": "text-wrap",
+    "balance": "text-balance",
+    "pretty": "text-pretty",
+    "break-words": "break-words",
+    "break-all": "break-all",
+    "mono": "font-mono",
+    "serif": "font-serif",
+    "sans": "font-sans",
+    "tighter": "tracking-tighter",
+    "tight": "tracking-tight",
+    "wide": "tracking-wide",
+    "wider": "tracking-wider",
+    "widest": "tracking-widest",
+    "snug": "leading-snug",
+    "relaxed": "leading-relaxed",
+    "loose": "leading-loose",
+    "antialiased": "antialiased",
+    "pre": "whitespace-pre",
+    "pre-wrap": "whitespace-pre-wrap",
+    "pre-line": "whitespace-pre-line",
+    "hidden": "hidden",
+    "select-none": "select-none",
+    "select-all": "select-all",
+    "select-text": "select-text",
+    "invisible": "invisible",
+    "grayscale": "grayscale",
 }
-NEG_KW = {"uppercase": "normal-case", "lowercase": "normal-case", "capitalize": "normal-case", "italic": "not-italic", "underline": "no-underline", "wrap": "text-nowrap", "nowrap": "text-wrap", "truncate": "text-wrap"}
+NEG_KW = {
+    "uppercase": "normal-case",
+    "lowercase": "normal-case",
+    "capitalize": "normal-case",
+    "italic": "not-italic",
+    "underline": "no-underline",
+    "wrap": "text-nowrap",
+    "nowrap": "text-wrap",
+    "truncate": "text-wrap",
+}
 
 
 def kw_text(kw: str, neg: bool) -> list[str]:
@@ -294,23 +496,124 @@ def kw_text(kw: str, neg: bool) -> list[str]:
 
 
 STANDALONE_KW = {
-    "center": "flex items-center justify-center", "between": "flex justify-between", "around": "flex justify-around", "evenly": "flex justify-evenly", "stretch": "items-stretch", "baseline": "items-baseline",
-    "row": "flex flex-row", "col": "flex flex-col", "row-reverse": "flex flex-row-reverse", "col-reverse": "flex flex-col-reverse", "reverse": "flex-row-reverse", "wrap": "flex-wrap", "nowrap": "whitespace-nowrap", "wrap-reverse": "flex-wrap-reverse",
-    "visible": "block", "block": "block", "inline": "inline", "inline-block": "inline-block", "inline-flex": "inline-flex", "inline-grid": "inline-grid", "contents": "contents", "table": "table",
-    "absolute": "absolute", "relative": "relative", "fixed": "fixed", "sticky": "sticky", "static": "static", "scroll": "overflow-scroll", "overflow-auto": "overflow-auto", "clip": "overflow-hidden", "overflow-visible": "overflow-visible",
-    "pointer": "cursor-pointer", "not-allowed": "cursor-not-allowed", "wait": "cursor-wait", "grab": "cursor-grab", "move": "cursor-move", "text-cursor": "cursor-text", "default-cursor": "cursor-default",
-    "events-none": "pointer-events-none", "events-auto": "pointer-events-auto", "cover": "object-cover", "contain": "object-contain", "fill": "object-fill", "square": "aspect-square", "video": "aspect-video", "aspect-auto": "aspect-auto",
-    "spin": "animate-spin", "ping": "animate-ping", "pulse": "animate-pulse", "bounce": "animate-bounce", "disc": "list-disc", "decimal": "list-decimal", "first": "order-first", "last": "order-last",
-    "colors": "transition-colors", "all": "transition-all", "opacity": "transition-opacity", "shadow": "transition-shadow", "transform": "transition-transform", "linear": "ease-linear", "ease-in": "ease-in", "ease-out": "ease-out", "ease-in-out": "ease-in-out",
-    "fast": "duration-150", "slow": "duration-500", "grow": "grow", "no-grow": "grow-0", "shrink": "shrink", "no-shrink": "shrink-0", "flex-none": "flex-none", "flex-auto": "flex-auto", "blur": "blur-sm", "isolate": "isolate", "group": "group", "peer": "peer",
-    "mx-auto": "mx-auto", "screen": "h-screen", "fit": "w-fit", "min": "w-min", "max": "w-max", "prose": "max-w-prose", "top": "top-0", "bottom": "bottom-0",
+    "center": "flex items-center justify-center",
+    "between": "flex justify-between",
+    "around": "flex justify-around",
+    "evenly": "flex justify-evenly",
+    "stretch": "items-stretch",
+    "baseline": "items-baseline",
+    "row": "flex flex-row",
+    "col": "flex flex-col",
+    "row-reverse": "flex flex-row-reverse",
+    "col-reverse": "flex flex-col-reverse",
+    "reverse": "flex-row-reverse",
+    "wrap": "flex-wrap",
+    "nowrap": "whitespace-nowrap",
+    "wrap-reverse": "flex-wrap-reverse",
+    "visible": "block",
+    "block": "block",
+    "inline": "inline",
+    "inline-block": "inline-block",
+    "inline-flex": "inline-flex",
+    "inline-grid": "inline-grid",
+    "contents": "contents",
+    "table": "table",
+    "absolute": "absolute",
+    "relative": "relative",
+    "fixed": "fixed",
+    "sticky": "sticky",
+    "static": "static",
+    "scroll": "overflow-scroll",
+    "overflow-auto": "overflow-auto",
+    "clip": "overflow-hidden",
+    "overflow-visible": "overflow-visible",
+    "pointer": "cursor-pointer",
+    "not-allowed": "cursor-not-allowed",
+    "wait": "cursor-wait",
+    "grab": "cursor-grab",
+    "move": "cursor-move",
+    "text-cursor": "cursor-text",
+    "default-cursor": "cursor-default",
+    "events-none": "pointer-events-none",
+    "events-auto": "pointer-events-auto",
+    "cover": "object-cover",
+    "contain": "object-contain",
+    "fill": "object-fill",
+    "square": "aspect-square",
+    "video": "aspect-video",
+    "aspect-auto": "aspect-auto",
+    "spin": "animate-spin",
+    "ping": "animate-ping",
+    "pulse": "animate-pulse",
+    "bounce": "animate-bounce",
+    "disc": "list-disc",
+    "decimal": "list-decimal",
+    "first": "order-first",
+    "last": "order-last",
+    "colors": "transition-colors",
+    "all": "transition-all",
+    "opacity": "transition-opacity",
+    "shadow": "transition-shadow",
+    "transform": "transition-transform",
+    "linear": "ease-linear",
+    "ease-in": "ease-in",
+    "ease-out": "ease-out",
+    "ease-in-out": "ease-in-out",
+    "fast": "duration-150",
+    "slow": "duration-500",
+    "grow": "grow",
+    "no-grow": "grow-0",
+    "shrink": "shrink",
+    "no-shrink": "shrink-0",
+    "flex-none": "flex-none",
+    "flex-auto": "flex-auto",
+    "blur": "blur-sm",
+    "isolate": "isolate",
+    "group": "group",
+    "peer": "peer",
+    "mx-auto": "mx-auto",
+    "screen": "h-screen",
+    "fit": "w-fit",
+    "min": "w-min",
+    "max": "w-max",
+    "prose": "max-w-prose",
+    "top": "top-0",
+    "bottom": "bottom-0",
 }
 STANDALONE_SPEC = {
-    "center": "flex items-center justify-center", "vcenter": "flex items-center", "hcenter": "flex justify-center", "fullscreen": "w-screen h-screen", "cover-parent": "absolute inset-0",
-    "pin-top": "top-0", "pin-bottom": "bottom-0", "pin-left": "left-0", "pin-right": "right-0", "top-right": "top-0 right-0", "top-left": "top-0 left-0", "bottom-right": "bottom-0 right-0", "bottom-left": "bottom-0 left-0",
-    "full-width": "w-full", "full-height": "h-full", "flex-center": "flex items-center justify-center", "sr-only": "sr-only",
+    "center": "flex items-center justify-center",
+    "vcenter": "flex items-center",
+    "hcenter": "flex justify-center",
+    "fullscreen": "w-screen h-screen",
+    "cover-parent": "absolute inset-0",
+    "pin-top": "top-0",
+    "pin-bottom": "bottom-0",
+    "pin-left": "left-0",
+    "pin-right": "right-0",
+    "top-right": "top-0 right-0",
+    "top-left": "top-0 left-0",
+    "bottom-right": "bottom-0 right-0",
+    "bottom-left": "bottom-0 left-0",
+    "full-width": "w-full",
+    "full-height": "h-full",
+    "flex-center": "flex items-center justify-center",
+    "sr-only": "sr-only",
 }
-NEG_STANDALONE = {"visible": "hidden", "hidden": "block", "grow": "grow-0", "shrink": "shrink-0", "scroll": "overflow-hidden", "pointer": "cursor-default", "wrap": "flex-nowrap", "nowrap": "flex-wrap", "blur": "blur-none", "center": "", "italic": "not-italic", "underline": "no-underline", "uppercase": "normal-case"}
+NEG_STANDALONE = {
+    "visible": "hidden",
+    "hidden": "block",
+    "grow": "grow-0",
+    "shrink": "shrink-0",
+    "scroll": "overflow-hidden",
+    "pointer": "cursor-default",
+    "wrap": "flex-nowrap",
+    "nowrap": "flex-wrap",
+    "blur": "blur-none",
+    "center": "",
+    "italic": "not-italic",
+    "underline": "no-underline",
+    "uppercase": "normal-case",
+}
 
 
 def standalone(v: Value, neg: bool) -> list[str]:
@@ -321,7 +624,9 @@ def standalone(v: Value, neg: bool) -> list[str]:
         s = shift_shade(v.value, v.intensity)
         return [f"bg-gray-{s}"] + (["text-white"] if int(s) >= 700 else [])
     if v.kind == "wt":
-        return ["font-normal"] if neg else [f"font-{shift_weight(v.value, v.intensity)}"]
+        return (
+            ["font-normal"] if neg else [f"font-{shift_weight(v.value, v.intensity)}"]
+        )
     if v.kind == "rad":
         return ["rounded-none"] if neg else [f"rounded-{v.value}"]
     if v.kind == "sz":
@@ -362,12 +667,28 @@ def border_value(k: str, v: Value | None, neg: bool) -> list[str]:
     if v.kind == "mod":
         return [k, f"{k}-gray-{shift_shade(v.value, v.intensity)}"]
     if v.kind == "num":
-        return ([k] if v.value == "1" else [f"{k}-{v.value}"]) if v.value in ("0", "1", "2", "4", "8") else []
+        return (
+            ([k] if v.value == "1" else [f"{k}-{v.value}"])
+            if v.value in ("0", "1", "2", "4", "8")
+            else []
+        )
     if v.kind == "unit":
         return [f"{k}-[{v.value}]"] if unit_ok(v, ("px",)) else []
     if v.kind == "sz":
-        s = shift_size(v.value, v.intensity, "xs", "xl") if v.value in SIZES else v.value
-        return {"none": [f"{k}-0"], "xs": [k], "sm": [k], "md": [f"{k}-2"], "lg": [f"{k}-4"], "xl": [f"{k}-8"], "full": [f"{k}-8"]}.get(s, [k])
+        s = (
+            shift_size(v.value, v.intensity, "xs", "xl")
+            if v.value in SIZES
+            else v.value
+        )
+        return {
+            "none": [f"{k}-0"],
+            "xs": [k],
+            "sm": [k],
+            "md": [f"{k}-2"],
+            "lg": [f"{k}-4"],
+            "xl": [f"{k}-8"],
+            "full": [f"{k}-8"],
+        }.get(s, [k])
     if v.kind == "kw" and v.value in ("dashed", "dotted", "solid", "double", "none"):
         return [f"{k}-0"] if v.value == "none" else [k, f"border-{v.value}"]
     return []
@@ -409,8 +730,20 @@ def ring_value(k: str, v: Value | None, neg: bool) -> list[str]:
     if v.kind == "num":
         return [f"{k}-{v.value}"] if v.value in ("0", "1", "2", "4", "8") else []
     if v.kind == "sz":
-        s = shift_size(v.value, v.intensity, "xs", "xl") if v.value in SIZES else v.value
-        return {"none": ["ring-0" if k == "ring" else "outline-hidden"], "xs": [f"{k}-1"], "sm": [f"{k}-1"], "md": [f"{k}-2"], "lg": [f"{k}-4"], "xl": [f"{k}-8"], "full": [f"{k}-8"]}.get(s, [base])
+        s = (
+            shift_size(v.value, v.intensity, "xs", "xl")
+            if v.value in SIZES
+            else v.value
+        )
+        return {
+            "none": ["ring-0" if k == "ring" else "outline-hidden"],
+            "xs": [f"{k}-1"],
+            "sm": [f"{k}-1"],
+            "md": [f"{k}-2"],
+            "lg": [f"{k}-4"],
+            "xl": [f"{k}-8"],
+            "full": [f"{k}-8"],
+        }.get(s, [base])
     if v.kind == "kw" and v.value in ("hidden", "none"):
         return ["ring-0"] if k == "ring" else ["outline-hidden"]
     return []
@@ -443,8 +776,16 @@ def opacity_value(v: Value | None, neg: bool) -> list[str]:
     if v is None:
         return ["opacity-50"]
     if v.kind in ("num", "pct"):
-        n = int(float(v.value) * 100) if v.kind == "num" and float(v.value) <= 1 and "." in v.value else int(float(v.value))
-        return [f"opacity-{n}"] if 0 <= n <= 100 and re.fullmatch(r"\d+(\.\d+)?", v.value) else []
+        n = (
+            int(float(v.value) * 100)
+            if v.kind == "num" and float(v.value) <= 1 and "." in v.value
+            else int(float(v.value))
+        )
+        return (
+            [f"opacity-{n}"]
+            if 0 <= n <= 100 and re.fullmatch(r"\d+(\.\d+)?", v.value)
+            else []
+        )
     if v.kind == "frac":
         a, b = v.value.split("/")
         return [f"opacity-{round(int(a) * 100 / int(b))}"]
@@ -466,9 +807,25 @@ def z_value(v: Value | None, neg: bool) -> list[str]:
     if v.kind == "num":
         return [f"z-{v.value}"] if is_int(v.value, 0, 100) else []
     if v.kind == "kw":
-        return {"top": ["z-50"], "first": ["z-50"], "bottom": ["z-0"], "last": ["z-0"], "auto": ["z-auto"], "negative": ["-z-10"]}.get(v.value, [])
+        return {
+            "top": ["z-50"],
+            "first": ["z-50"],
+            "bottom": ["z-0"],
+            "last": ["z-0"],
+            "auto": ["z-auto"],
+            "negative": ["-z-10"],
+        }.get(v.value, [])
     if v.kind == "sz":
-        return {"none": ["z-0"], "xs": ["z-0"], "sm": ["z-10"], "md": ["z-20"], "lg": ["z-30"], "xl": ["z-40"], "2xl": ["z-50"], "full": ["z-50"]}.get(v.value, [])
+        return {
+            "none": ["z-0"],
+            "xs": ["z-0"],
+            "sm": ["z-10"],
+            "md": ["z-20"],
+            "lg": ["z-30"],
+            "xl": ["z-40"],
+            "2xl": ["z-50"],
+            "full": ["z-50"],
+        }.get(v.value, [])
     return []
 
 
@@ -478,7 +835,15 @@ def flex_value(v: Value | None, neg: bool) -> list[str]:
     if v is None:
         return ["flex"]
     if v.kind == "kw":
-        if v.value in ("row", "col", "row-reverse", "col-reverse", "wrap", "nowrap", "wrap-reverse"):
+        if v.value in (
+            "row",
+            "col",
+            "row-reverse",
+            "col-reverse",
+            "wrap",
+            "nowrap",
+            "wrap-reverse",
+        ):
             return ["flex", f"flex-{v.value}"]
         if v.value in ("center",):
             return ["flex", "items-center", "justify-center"]
@@ -499,15 +864,40 @@ def flex_value(v: Value | None, neg: bool) -> list[str]:
     if v.kind == "sz" and v.value == "none":
         return ["flex-none"]
     if v.kind == "spec":
-        return {"center": ["flex", "items-center", "justify-center"], "vcenter": ["flex", "items-center"], "hcenter": ["flex", "justify-center"], "flex-center": ["flex", "items-center", "justify-center"]}.get(v.value, [])
+        return {
+            "center": ["flex", "items-center", "justify-center"],
+            "vcenter": ["flex", "items-center"],
+            "hcenter": ["flex", "justify-center"],
+            "flex-center": ["flex", "items-center", "justify-center"],
+        }.get(v.value, [])
     return []
 
 
-JUSTIFY_MAP = {"start": "start", "end": "end", "center": "center", "between": "between", "around": "around", "evenly": "evenly", "stretch": "stretch", "left": "start", "right": "end"}
-ITEMS_MAP = {"start": "start", "end": "end", "center": "center", "baseline": "baseline", "stretch": "stretch", "top": "start", "bottom": "end"}
+JUSTIFY_MAP = {
+    "start": "start",
+    "end": "end",
+    "center": "center",
+    "between": "between",
+    "around": "around",
+    "evenly": "evenly",
+    "stretch": "stretch",
+    "left": "start",
+    "right": "end",
+}
+ITEMS_MAP = {
+    "start": "start",
+    "end": "end",
+    "center": "center",
+    "baseline": "baseline",
+    "stretch": "stretch",
+    "top": "start",
+    "bottom": "end",
+}
 
 
-def simple_kw(prefix: str, allowed: dict[str, str], v: Value | None, default: str, neg: str | None) -> list[str]:
+def simple_kw(
+    prefix: str, allowed: dict[str, str], v: Value | None, default: str, neg: str | None
+) -> list[str]:
     if v is None:
         return [f"{prefix}-{default}"]
     if v.kind == "kw" and v.value in allowed:
@@ -544,16 +934,35 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     if k == "family":
         if v is None:
             return ["font-sans"]
-        return [f"font-{v.value}"] if v.kind == "kw" and v.value in ("sans", "serif", "mono") else []
+        return (
+            [f"font-{v.value}"]
+            if v.kind == "kw" and v.value in ("sans", "serif", "mono")
+            else []
+        )
     if k == "tracking":
         if neg:
             return ["tracking-normal"]
         if v is None:
             return ["tracking-wide"]
-        if v.kind == "kw" and v.value in ("tighter", "tight", "wide", "wider", "widest"):
+        if v.kind == "kw" and v.value in (
+            "tighter",
+            "tight",
+            "wide",
+            "wider",
+            "widest",
+        ):
             return [f"tracking-{v.value}"]
         if v.kind == "sz":
-            return {"none": ["tracking-normal"], "xs": ["tracking-tighter"], "sm": ["tracking-tight"], "md": ["tracking-normal"], "lg": ["tracking-wide"], "xl": ["tracking-wider"], "2xl": ["tracking-widest"], "full": ["tracking-widest"]}.get(v.value, [])
+            return {
+                "none": ["tracking-normal"],
+                "xs": ["tracking-tighter"],
+                "sm": ["tracking-tight"],
+                "md": ["tracking-normal"],
+                "lg": ["tracking-wide"],
+                "xl": ["tracking-wider"],
+                "2xl": ["tracking-widest"],
+                "full": ["tracking-widest"],
+            }.get(v.value, [])
         return []
     if k == "leading":
         if neg:
@@ -563,14 +972,29 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if v.kind == "kw" and v.value in ("tight", "snug", "relaxed", "loose"):
             return [f"leading-{v.value}"]
         if v.kind == "sz":
-            return {"none": ["leading-none"], "xs": ["leading-none"], "sm": ["leading-tight"], "md": ["leading-normal"], "lg": ["leading-relaxed"], "xl": ["leading-loose"], "2xl": ["leading-loose"]}.get(v.value, [])
+            return {
+                "none": ["leading-none"],
+                "xs": ["leading-none"],
+                "sm": ["leading-tight"],
+                "md": ["leading-normal"],
+                "lg": ["leading-relaxed"],
+                "xl": ["leading-loose"],
+                "2xl": ["leading-loose"],
+            }.get(v.value, [])
         if v.kind == "num":
             return [f"leading-{v.value}"] if is_int(v.value, 3, 10) else []
         return []
     if k == "align":
         if v is None:
             return ["text-center"]
-        if v.kind == "kw" and v.value in ("left", "center", "right", "justify", "start", "end"):
+        if v.kind == "kw" and v.value in (
+            "left",
+            "center",
+            "right",
+            "justify",
+            "start",
+            "end",
+        ):
             return [f"text-{v.value}"]
         if v.kind == "spec" and v.value in ("center", "hcenter"):
             return ["text-center"]
@@ -584,23 +1008,51 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
             return ["normal-case"]
         if v is None:
             return []
-        return kw_text(v.value, False) if v.kind == "kw" and v.value in ("uppercase", "lowercase", "capitalize", "normal-case") else []
+        return (
+            kw_text(v.value, False)
+            if v.kind == "kw"
+            and v.value in ("uppercase", "lowercase", "capitalize", "normal-case")
+            else []
+        )
     if k == "decoration":
         if neg:
             return ["no-underline"]
         if v is None:
             return ["underline"]
-        return kw_text(v.value, False) if v.kind == "kw" and v.value in ("underline", "no-underline", "line-through", "overline") else []
+        return (
+            kw_text(v.value, False)
+            if v.kind == "kw"
+            and v.value in ("underline", "no-underline", "line-through", "overline")
+            else []
+        )
     if k == "wrap":
         if neg:
             return ["text-nowrap"]
         if v is None:
             return ["text-wrap"]
-        return kw_text(v.value, False) if v.kind == "kw" and v.value in ("truncate", "nowrap", "wrap", "balance", "pretty", "break-words", "break-all") else []
+        return (
+            kw_text(v.value, False)
+            if v.kind == "kw"
+            and v.value
+            in (
+                "truncate",
+                "nowrap",
+                "wrap",
+                "balance",
+                "pretty",
+                "break-words",
+                "break-all",
+            )
+            else []
+        )
     if k == "whitespace":
         if v is None or (v.kind == "kw" and v.value == "wrap"):
             return ["whitespace-normal"]
-        return [f"whitespace-{v.value}"] if v.kind == "kw" and v.value in ("pre", "pre-wrap", "pre-line", "nowrap") else []
+        return (
+            [f"whitespace-{v.value}"]
+            if v.kind == "kw" and v.value in ("pre", "pre-wrap", "pre-line", "nowrap")
+            else []
+        )
     if k == "bg":
         if neg or (v is not None and v.kind == "sz" and v.value == "none"):
             return ["bg-transparent"]
@@ -612,7 +1064,11 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     if k == "border-style":
         if v is None:
             return ["border-solid"]
-        return [f"border-{v.value}"] if v.kind == "kw" and v.value in ("dashed", "dotted", "solid", "double") else []
+        return (
+            [f"border-{v.value}"]
+            if v.kind == "kw" and v.value in ("dashed", "dotted", "solid", "double")
+            else []
+        )
     if k.startswith("rounded"):
         return rounded_value(k, v, neg)
     if k in ("ring", "outline"):
@@ -626,14 +1082,27 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     if k == "position":
         if v is None:
             return ["relative"]
-        return [v.value] if v.kind == "kw" and v.value in ("absolute", "relative", "fixed", "sticky", "static") else []
+        return (
+            [v.value]
+            if v.kind == "kw"
+            and v.value in ("absolute", "relative", "fixed", "sticky", "static")
+            else []
+        )
     if k in ("overflow", "overflow-x", "overflow-y"):
         if neg:
             return [f"{k}-hidden"]
         if v is None:
             return [f"{k}-auto"]
         if v.kind == "kw":
-            m = {"hidden": "hidden", "clip": "hidden", "scroll": "scroll", "overflow-auto": "auto", "auto": "auto", "visible": "visible", "overflow-visible": "visible"}
+            m = {
+                "hidden": "hidden",
+                "clip": "hidden",
+                "scroll": "scroll",
+                "overflow-auto": "auto",
+                "auto": "auto",
+                "visible": "visible",
+                "overflow-visible": "visible",
+            }
             return [f"{k}-{m[v.value]}"] if v.value in m else []
         return []
     if k == "display":
@@ -644,7 +1113,18 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if v.kind == "kw":
             if v.value == "visible":
                 return ["block"]
-            if v.value in ("block", "inline", "inline-block", "flex", "inline-flex", "grid", "inline-grid", "hidden", "contents", "table"):
+            if v.value in (
+                "block",
+                "inline",
+                "inline-block",
+                "flex",
+                "inline-flex",
+                "grid",
+                "inline-grid",
+                "hidden",
+                "contents",
+                "table",
+            ):
                 return [v.value]
         return []
     if k == "flex":
@@ -662,13 +1142,29 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
             return ["flex-nowrap"]
         if v is None:
             return ["flex-wrap"]
-        return [f"flex-{v.value}"] if v.kind == "kw" and v.value in ("wrap", "nowrap", "wrap-reverse") else []
+        return (
+            [f"flex-{v.value}"]
+            if v.kind == "kw" and v.value in ("wrap", "nowrap", "wrap-reverse")
+            else []
+        )
     if k == "grow":
-        if neg or (v is not None and ((v.kind == "num" and v.value == "0") or (v.kind == "kw" and v.value == "no-grow"))):
+        if neg or (
+            v is not None
+            and (
+                (v.kind == "num" and v.value == "0")
+                or (v.kind == "kw" and v.value == "no-grow")
+            )
+        ):
             return ["grow-0"]
         return ["grow"]
     if k == "shrink":
-        if neg or (v is not None and ((v.kind == "num" and v.value == "0") or (v.kind == "kw" and v.value == "no-shrink"))):
+        if neg or (
+            v is not None
+            and (
+                (v.kind == "num" and v.value == "0")
+                or (v.kind == "kw" and v.value == "no-shrink")
+            )
+        ):
             return ["shrink-0"]
         return ["shrink"]
     if k == "justify":
@@ -676,9 +1172,28 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     if k == "items":
         return simple_kw("items", ITEMS_MAP, v, "center", None)
     if k == "self":
-        return simple_kw("self", {"start": "start", "end": "end", "center": "center", "stretch": "stretch", "auto": "auto", "baseline": "baseline"}, v, "center", None)
+        return simple_kw(
+            "self",
+            {
+                "start": "start",
+                "end": "end",
+                "center": "center",
+                "stretch": "stretch",
+                "auto": "auto",
+                "baseline": "baseline",
+            },
+            v,
+            "center",
+            None,
+        )
     if k == "place":
-        return simple_kw("place-items", {"start": "start", "end": "end", "center": "center", "stretch": "stretch"}, v, "center", None)
+        return simple_kw(
+            "place-items",
+            {"start": "start", "end": "end", "center": "center", "stretch": "stretch"},
+            v,
+            "center",
+            None,
+        )
     if k == "grid":
         if v is None:
             return ["grid"]
@@ -700,7 +1215,11 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     if k == "rows":
         if v is None:
             return ["grid", "grid-rows-2"]
-        return ["grid", f"grid-rows-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 6) else []
+        return (
+            ["grid", f"grid-rows-{v.value}"]
+            if v.kind == "num" and is_int(v.value, 1, 6)
+            else []
+        )
     if k == "col-span":
         if v is None:
             return ["col-span-2"]
@@ -712,13 +1231,19 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     if k == "row-span":
         if v is None:
             return ["row-span-2"]
-        return [f"row-span-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 6) else []
+        return (
+            [f"row-span-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 6) else []
+        )
     if k == "order":
         if v is None:
             return []
         if v.kind == "num":
             return [f"order-{v.value}"] if is_int(v.value, 1, 12) else []
-        return [f"order-{v.value}"] if v.kind == "kw" and v.value in ("first", "last") else []
+        return (
+            [f"order-{v.value}"]
+            if v.kind == "kw" and v.value in ("first", "last")
+            else []
+        )
     if k == "transition":
         if neg:
             return ["transition-none"]
@@ -732,9 +1257,16 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
             if v.value == "slow":
                 return ["transition", "duration-500"]
             if v.value in ("linear", "ease-in", "ease-out", "ease-in-out"):
-                return ["transition", f"ease-{v.value}" if v.value == "linear" else v.value]
+                return [
+                    "transition",
+                    f"ease-{v.value}" if v.value == "linear" else v.value,
+                ]
         if v.kind == "num":
-            return ["transition", f"duration-{v.value}"] if is_int(v.value, 0, 5000) else []
+            return (
+                ["transition", f"duration-{v.value}"]
+                if is_int(v.value, 0, 5000)
+                else []
+            )
         if v.kind == "unit" and v.value.endswith("ms"):
             return ["transition", f"duration-{v.value[:-2]}"]
         if v.kind == "unit" and v.value.endswith("s"):
@@ -767,25 +1299,48 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
             return ["ease-in-out"]
         if v.kind == "kw" and v.value == "linear":
             return ["ease-linear"]
-        return [v.value] if v.kind == "kw" and v.value in ("ease-in", "ease-out", "ease-in-out") else []
+        return (
+            [v.value]
+            if v.kind == "kw" and v.value in ("ease-in", "ease-out", "ease-in-out")
+            else []
+        )
     if k == "animate":
         if neg or (v is not None and v.kind == "sz" and v.value == "none"):
             return ["animate-none"]
         if v is None:
             return ["animate-pulse"]
-        return [f"animate-{v.value}"] if v.kind == "kw" and v.value in ("spin", "ping", "pulse", "bounce") else []
+        return (
+            [f"animate-{v.value}"]
+            if v.kind == "kw" and v.value in ("spin", "ping", "pulse", "bounce")
+            else []
+        )
     if k == "cursor":
         if v is None:
             return ["cursor-pointer"]
         if v.kind == "kw":
-            m = {"pointer": "pointer", "not-allowed": "not-allowed", "wait": "wait", "grab": "grab", "move": "move", "text-cursor": "text", "default-cursor": "default", "auto": "auto"}
+            m = {
+                "pointer": "pointer",
+                "not-allowed": "not-allowed",
+                "wait": "wait",
+                "grab": "grab",
+                "move": "move",
+                "text-cursor": "text",
+                "default-cursor": "default",
+                "auto": "auto",
+            }
             return [f"cursor-{m[v.value]}"] if v.value in m else []
         return []
     if k == "select":
         if neg or v is None:
             return ["select-none"]
         if v.kind == "kw":
-            m = {"select-none": "none", "select-all": "all", "select-text": "text", "all": "all", "text-cursor": "text"}
+            m = {
+                "select-none": "none",
+                "select-all": "all",
+                "select-text": "text",
+                "all": "all",
+                "text-cursor": "text",
+            }
             return [f"select-{m[v.value]}"] if v.value in m else []
         if v.kind == "sz" and v.value == "none":
             return ["select-none"]
@@ -794,14 +1349,27 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if neg or v is None:
             return ["pointer-events-none"]
         if v.kind == "kw" and v.value in ("events-none", "events-auto", "auto"):
-            return ["pointer-events-auto" if v.value != "events-none" else "pointer-events-none"]
+            return [
+                "pointer-events-auto"
+                if v.value != "events-none"
+                else "pointer-events-none"
+            ]
         if v.kind == "sz" and v.value == "none":
             return ["pointer-events-none"]
         return []
     if k == "object":
         if v is None:
             return ["object-cover"]
-        if v.kind == "kw" and v.value in ("cover", "contain", "fill", "center", "top", "bottom", "left", "right"):
+        if v.kind == "kw" and v.value in (
+            "cover",
+            "contain",
+            "fill",
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+        ):
             return [f"object-{v.value}"]
         return []
     if k == "aspect":
@@ -826,7 +1394,15 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
         if v.kind == "pct":
             return [f"scale-{v.value}"] if is_int(v.value, 0, 200) else []
         if v.kind == "sz":
-            return {"none": ["scale-100"], "xs": ["scale-95"], "sm": ["scale-105"], "md": ["scale-110"], "lg": ["scale-125"], "xl": ["scale-150"], "2xl": ["scale-150"]}.get(v.value, [])
+            return {
+                "none": ["scale-100"],
+                "xs": ["scale-95"],
+                "sm": ["scale-105"],
+                "md": ["scale-110"],
+                "lg": ["scale-125"],
+                "xl": ["scale-150"],
+                "2xl": ["scale-150"],
+            }.get(v.value, [])
         return []
     if k == "rotate":
         if neg:
@@ -874,13 +1450,19 @@ def emit(k: str, v: Value | None, neg: bool) -> list[str]:
     if k == "columns":
         if v is None:
             return ["columns-2"]
-        return [f"columns-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 12) else []
+        return (
+            [f"columns-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 12) else []
+        )
     if k == "lineclamp":
         if neg:
             return ["line-clamp-none"]
         if v is None:
             return ["line-clamp-3"]
-        return [f"line-clamp-{v.value}"] if v.kind == "num" and is_int(v.value, 1, 6) else []
+        return (
+            [f"line-clamp-{v.value}"]
+            if v.kind == "num" and is_int(v.value, 1, 6)
+            else []
+        )
     if k == "container":
         return ["container", "mx-auto"]
     return []
@@ -891,4 +1473,20 @@ def accepts(k: str, v: Value) -> bool:
     return len(emit(k, v, False)) > 0
 
 
-__all__ = ["Value", "parse_value", "emit", "accepts", "standalone", "PROP_OF", "VAL_OF", "MOD_OF", "HUES", "SHADES", "SIZES", "WEIGHTS", "shift_size", "shift_shade", "shift_weight"]
+__all__ = [
+    "HUES",
+    "MOD_OF",
+    "PROP_OF",
+    "SHADES",
+    "SIZES",
+    "VAL_OF",
+    "WEIGHTS",
+    "Value",
+    "accepts",
+    "emit",
+    "parse_value",
+    "shift_shade",
+    "shift_size",
+    "shift_weight",
+    "standalone",
+]

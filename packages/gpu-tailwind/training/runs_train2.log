@@ -40,3 +40,8 @@ epoch 5 step 6000/30480 loss 0.0568 lr 3.67e-03 163s
 epoch 5 done: loss 0.0569 heldout {'token_acc': 0.9813090302155224, 'seq_acc': 0.7336666666666667, 'boundary_acc': 0.9994568889006636} (166s)
 epoch 6 step 6200/30480 loss 0.0501 lr 3.64e-03 170s
 epoch 6 step 6400/30480 loss 0.0516 lr 3.62e-03 176s
+epoch 6 step 6600/30480 loss 0.0524 lr 3.60e-03 181s
+epoch 6 step 6800/30480 loss 0.0534 lr 3.57e-03 187s
+epoch 6 step 7000/30480 loss 0.0536 lr 3.54e-03 194s
+epoch 6 done: loss 0.0537 heldout {'token_acc': 0.9818124014783219, 'seq_acc': 0.747, 'boundary_acc': 0.9994039024519479} (198s)
+epoch 7 step 7200/30480 loss 0.0449 lr 3.52e-03 201s

@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import random
 import time
 from collections import Counter
@@ -44,7 +43,9 @@ class Bag(nn.Module):
         self.h = nn.Linear(D, H)
         self.out = nn.Linear(H, k)
 
-    def forward(self, ids: torch.Tensor, offsets: torch.Tensor, counts: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, ids: torch.Tensor, offsets: torch.Tensor, counts: torch.Tensor
+    ) -> torch.Tensor:
         e = self.emb(ids, offsets) / counts.unsqueeze(1)
         return self.out(torch.relu(self.h(e)))
 
@@ -64,7 +65,9 @@ def main() -> None:
     index = {c: i for i, c in enumerate(vocab)}
     unreachable = sum(1 for r in heldout for c in r["classes"] if c not in index)
     total = sum(len(r["classes"]) for r in heldout)
-    print(f"vocab {len(vocab)} classes (freq >= {MIN_FREQ}); held-out classes outside vocab: {unreachable}/{total} = {unreachable / total:.1%}")
+    print(
+        f"vocab {len(vocab)} classes (freq >= {MIN_FREQ}); held-out classes outside vocab: {unreachable}/{total} = {unreachable / total:.1%}"
+    )
 
     def encode(rows: list[dict]):
         out = []
@@ -94,20 +97,27 @@ def main() -> None:
             offsets = torch.tensor([0] + [len(b[0]) for b in batch[:-1]]).cumsum(0)
             counts = torch.tensor([len(b[0]) / 7 for b in batch])
             y = torch.stack([b[1] for b in batch])
-            loss = nn.functional.binary_cross_entropy_with_logits(model(ids, offsets, counts), y)
+            loss = nn.functional.binary_cross_entropy_with_logits(
+                model(ids, offsets, counts), y
+            )
             opt.zero_grad()
             loss.backward()
             opt.step()
             step += 1
             if step % 200 == 0:
-                print(f"step {step} loss {loss.item():.4f} {time.time() - start:.0f}s", flush=True)
+                print(
+                    f"step {step} loss {loss.item():.4f} {time.time() - start:.0f}s",
+                    flush=True,
+                )
             if (time.time() - start) / 60 >= args.minutes:
                 break
     model.eval()
     exact = tp = fp = fn = 0
     with torch.no_grad():
         for ids, _, gold in he:
-            logits = model(torch.tensor(ids), torch.tensor([0]), torch.tensor([len(ids) / 7]))[0]
+            logits = model(
+                torch.tensor(ids), torch.tensor([0]), torch.tensor([len(ids) / 7])
+            )[0]
             pred = {vocab[i] for i in (logits > 0).nonzero().flatten().tolist()}
             g = set(gold)
             exact += int(pred == g)
@@ -116,7 +126,17 @@ def main() -> None:
             fn += len(g - pred)
     p = tp / max(1, tp + fp)
     r = tp / max(1, tp + fn)
-    result = {"params": params, "vocab": len(vocab), "unreachable_class_rate": unreachable / total, "exact": exact / len(he), "precision": p, "recall": r, "f1": 2 * p * r / max(1e-9, p + r), "steps": step, "minutes": (time.time() - start) / 60}
+    result = {
+        "params": params,
+        "vocab": len(vocab),
+        "unreachable_class_rate": unreachable / total,
+        "exact": exact / len(he),
+        "precision": p,
+        "recall": r,
+        "f1": 2 * p * r / max(1e-9, p + r),
+        "steps": step,
+        "minutes": (time.time() - start) / 60,
+    }
     print(json.dumps(result, indent=2))
     RUNS.mkdir(exist_ok=True)
     (RUNS / "baseline_multilabel.json").write_text(json.dumps(result, indent=2))

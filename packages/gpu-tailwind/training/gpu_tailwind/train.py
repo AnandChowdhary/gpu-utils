@@ -28,7 +28,9 @@ LABEL_ID = {l: i for i, l in enumerate(LABELS)}
 def load(name: str, limit: int | None = None) -> list[dict]:
     path = CACHE / f"{name}.jsonl"
     if not path.exists():
-        raise SystemExit(f"{path} missing: run `uv run python -m gpu_tailwind.data` first")
+        raise SystemExit(
+            f"{path} missing: run `uv run python -m gpu_tailwind.data` first"
+        )
     rows = [json.loads(l) for l in path.open()]
     return rows[:limit] if limit else rows
 
@@ -70,8 +72,12 @@ def batches(data: list, bsz: int, rng: random.Random, shuffle: bool):
 
 def loss_fn(out: Tensor, labels: Tensor, bound: Tensor, mask: Tensor) -> Tensor:
     roles = out[..., : OUT - 1]
-    ce = torch.nn.functional.cross_entropy(roles.reshape(-1, OUT - 1), labels.reshape(-1), ignore_index=-100)
-    bce = torch.nn.functional.binary_cross_entropy_with_logits(out[..., OUT - 1], bound, reduction="none")
+    ce = torch.nn.functional.cross_entropy(
+        roles.reshape(-1, OUT - 1), labels.reshape(-1), ignore_index=-100
+    )
+    bce = torch.nn.functional.binary_cross_entropy_with_logits(
+        out[..., OUT - 1], bound, reduction="none"
+    )
     bce = (bce * mask).sum() / mask.sum().clamp(min=1)
     return ce + 0.5 * bce
 
@@ -94,7 +100,11 @@ def evaluate(model: Tagger, data: list, bsz: int = 256) -> dict[str, float]:
         b_correct += int(((bp == bound) & mask).sum())
         b_total += int(mask.sum())
     model.train()
-    return {"token_acc": correct / max(total, 1), "seq_acc": seq_ok / max(seq_n, 1), "boundary_acc": b_correct / max(b_total, 1)}
+    return {
+        "token_acc": correct / max(total, 1),
+        "seq_acc": seq_ok / max(seq_n, 1),
+        "boundary_acc": b_correct / max(b_total, 1),
+    }
 
 
 def main() -> None:
@@ -115,7 +125,9 @@ def main() -> None:
     train = encode(load("train", args.limit))
     heldout = encode(load("heldout", 3000))
     model = Tagger()
-    print(f"params: {count_params(model)}  train: {len(train)}  heldout: {len(heldout)}")
+    print(
+        f"params: {count_params(model)}  train: {len(train)}  heldout: {len(heldout)}"
+    )
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
     steps_per_epoch = math.ceil(len(train) / args.bsz)
     total_steps = steps_per_epoch * args.epochs
@@ -149,16 +161,29 @@ def main() -> None:
             n += 1
             step += 1
             if step % 200 == 0:
-                print(f"epoch {epoch} step {step}/{total_steps} loss {running / n:.4f} lr {lr_at(step):.2e} {time.time() - start:.0f}s", flush=True)
+                print(
+                    f"epoch {epoch} step {step}/{total_steps} loss {running / n:.4f} lr {lr_at(step):.2e} {time.time() - start:.0f}s",
+                    flush=True,
+                )
             if (time.time() - start) / 60 > args.minutes:
                 stop = True
                 break
         model.quant = True
         ev = evaluate(model, heldout)
-        print(f"epoch {epoch} done: loss {running / max(n, 1):.4f} heldout {ev} ({time.time() - start:.0f}s)", flush=True)
+        print(
+            f"epoch {epoch} done: loss {running / max(n, 1):.4f} heldout {ev} ({time.time() - start:.0f}s)",
+            flush=True,
+        )
         if ev["token_acc"] > best:
             best = ev["token_acc"]
-            metrics = {"epoch": epoch, "step": step, "seed": args.seed, **ev, "params": count_params(model), "minutes": (time.time() - start) / 60}
+            metrics = {
+                "epoch": epoch,
+                "step": step,
+                "seed": args.seed,
+                **ev,
+                "params": count_params(model),
+                "minutes": (time.time() - start) / 60,
+            }
             torch.save(model.state_dict(), RUNS / "best.pt")
             (RUNS / "metrics.json").write_text(json.dumps(metrics, indent=2))
         if stop:

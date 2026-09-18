@@ -14,7 +14,16 @@ import sys
 import urllib.request
 from pathlib import Path
 
-from .lexicon import NEG_WORDS, PRESETS, PROPS, SEP_WORDS, SPELLING, VALUES, VAR_RULES, words_of
+from .lexicon import (
+    NEG_WORDS,
+    PRESETS,
+    PROPS,
+    SEP_WORDS,
+    SPELLING,
+    VALUES,
+    VAR_RULES,
+    words_of,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 THEME = ROOT / "training" / "data" / "tailwind-theme.txt"
@@ -29,7 +38,10 @@ def parse_theme(css: str) -> dict[str, list[str]]:
         m = re.match(r"color-([a-z]+)-50$", name)
         if m:
             hues.append(m.group(1))
-    shades = sorted({n.rsplit("-", 1)[1] for n in vars_ if re.match(r"color-[a-z]+-\d+$", n)}, key=int)
+    shades = sorted(
+        {n.rsplit("-", 1)[1] for n in vars_ if re.match(r"color-[a-z]+-\d+$", n)},
+        key=int,
+    )
 
     def scale(prefix: str, drop: tuple[str, ...] = ()) -> list[str]:
         out = []
@@ -60,9 +72,9 @@ def parse_theme(css: str) -> dict[str, list[str]]:
 def main() -> None:
     if "--fetch" in sys.argv or not THEME.exists():
         THEME.parent.mkdir(parents=True, exist_ok=True)
-        THEME.write_bytes(urllib.request.urlopen(URL, timeout=30).read())  # noqa: S310
+        THEME.write_bytes(urllib.request.urlopen(URL, timeout=30).read())
     theme = parse_theme(THEME.read_text())
-    norm = lambda p: " ".join(words_of(p))  # noqa: E731
+    norm = lambda p: " ".join(words_of(p))
     props = {norm(p): k for k, ps in PROPS.items() for p in ps}
     vals: dict[str, str] = {}
     mods: dict[str, str] = {}
@@ -86,7 +98,9 @@ def main() -> None:
         "spelling": SPELLING,
     }
     OUT.write_text(json.dumps(table, separators=(",", ":"), sort_keys=True) + "\n")
-    print(f"wrote {OUT} ({OUT.stat().st_size} bytes): {len(props)} props, {len(vals)} vals, {len(theme['hues'])} hues")
+    print(
+        f"wrote {OUT} ({OUT.stat().st_size} bytes): {len(props)} props, {len(vals)} vals, {len(theme['hues'])} hues"
+    )
 
 
 if __name__ == "__main__":

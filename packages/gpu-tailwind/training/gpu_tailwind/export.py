@@ -1,6 +1,6 @@
 """Export runs/best.pt to ../model/{manifest.json,weights.txt,fixtures.json}.
 
-    uv run python -m gpu_tailwind.export
+uv run python -m gpu_tailwind.export
 """
 
 from __future__ import annotations
@@ -14,12 +14,29 @@ from gpu_utils_training.quant import export, quantize
 
 from .data import CACHE, LABELS
 from .features import ROWS, WIDTH, featurize
-from .model import D, H, OUT, Tagger
+from .model import OUT, D, H, Tagger
 from .train import RUNS
 
 MODEL_DIR = Path(__file__).resolve().parents[2] / "model"
 UNFAMILIAR = Path(__file__).resolve().parents[1] / "data" / "unfamiliar.json"
-ORDER = ["emb", "wa_f", "ba_f", "wu_f", "bu_f", "wa_b", "ba_b", "wu_b", "bu_b", "conv", "bc", "w1", "wg", "b1", "w2", "b2"]
+ORDER = [
+    "emb",
+    "wa_f",
+    "ba_f",
+    "wu_f",
+    "bu_f",
+    "wa_b",
+    "ba_b",
+    "wu_b",
+    "bu_b",
+    "conv",
+    "bc",
+    "w1",
+    "wg",
+    "b1",
+    "w2",
+    "b2",
+]
 
 
 def dequantized(model: Tagger) -> Tagger:
@@ -28,7 +45,11 @@ def dequantized(model: Tagger) -> Tagger:
     with torch.no_grad():
         for name, p in model.named_parameters():
             q, scale = quantize(p.detach().numpy().astype(np.float32))
-            getattr(out, name).copy_(torch.from_numpy((q.astype(np.float32) * np.float32(scale)).astype(np.float32)))
+            getattr(out, name).copy_(
+                torch.from_numpy(
+                    (q.astype(np.float32) * np.float32(scale)).astype(np.float32)
+                )
+            )
     out.quant = False
     out.eval()
     return out
@@ -59,7 +80,13 @@ def main() -> None:
             "rows": ROWS,
             "width": WIDTH,
             "labels": LABELS,
-            "checkpoint": {"seed": metrics.get("seed"), "epoch": metrics.get("epoch"), "step": metrics.get("step"), "token_acc": metrics.get("token_acc"), "seq_acc": metrics.get("seq_acc")},
+            "checkpoint": {
+                "seed": metrics.get("seed"),
+                "epoch": metrics.get("epoch"),
+                "step": metrics.get("step"),
+                "token_acc": metrics.get("token_acc"),
+                "seq_acc": metrics.get("seq_acc"),
+            },
         },
     )
     dq = dequantized(model)
@@ -74,7 +101,9 @@ def main() -> None:
         rows, logits = logits_for(dq, t)
         fixtures.append({"text": t, "features": rows, "logits": logits})
     (MODEL_DIR / "fixtures.json").write_text(json.dumps(fixtures) + "\n")
-    print(f"exported {manifest['parameters']} params, {len(fixtures)} fixtures -> {MODEL_DIR}")
+    print(
+        f"exported {manifest['parameters']} params, {len(fixtures)} fixtures -> {MODEL_DIR}"
+    )
 
 
 if __name__ == "__main__":

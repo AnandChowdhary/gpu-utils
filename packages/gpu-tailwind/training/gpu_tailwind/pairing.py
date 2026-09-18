@@ -11,7 +11,45 @@ from dataclasses import dataclass
 from .lexicon import resolve_variant, words_of
 from .semantics import Value, emit, parse_value, standalone
 
-VARIANT_ORDER = ["sm", "md", "lg", "xl", "2xl", "max-sm", "max-md", "max-lg", "max-xl", "print", "motion-reduce", "landscape", "portrait", "rtl", "ltr", "dark", "group-hover", "group-focus", "first", "last", "odd", "even", "empty", "open", "checked", "required", "invalid", "disabled", "visited", "hover", "focus", "focus-visible", "focus-within", "active", "placeholder", "before", "after"]
+VARIANT_ORDER = [
+    "sm",
+    "md",
+    "lg",
+    "xl",
+    "2xl",
+    "max-sm",
+    "max-md",
+    "max-lg",
+    "max-xl",
+    "print",
+    "motion-reduce",
+    "landscape",
+    "portrait",
+    "rtl",
+    "ltr",
+    "dark",
+    "group-hover",
+    "group-focus",
+    "first",
+    "last",
+    "odd",
+    "even",
+    "empty",
+    "open",
+    "checked",
+    "required",
+    "invalid",
+    "disabled",
+    "visited",
+    "hover",
+    "focus",
+    "focus-visible",
+    "focus-within",
+    "active",
+    "placeholder",
+    "before",
+    "after",
+]
 NUMERIC = ("num", "unit", "pct", "frac")
 
 
@@ -32,8 +70,12 @@ def apply_variants(classes: list[str], variants: list[str]) -> list[str]:
         others = [v for v in variants if v != only]
         trivial = all(c in ("block", "visible", "flex") for c in classes)
         if trivial:
-            return apply_variants(["sm:hidden" if only == "only-mobile" else "max-lg:hidden"], others)
-        return apply_variants(classes, [*others, "max-sm" if only == "only-mobile" else "lg"])
+            return apply_variants(
+                ["sm:hidden" if only == "only-mobile" else "max-lg:hidden"], others
+            )
+        return apply_variants(
+            classes, [*others, "max-sm" if only == "only-mobile" else "lg"]
+        )
     ordered = sorted(set(variants), key=VARIANT_ORDER.index)
     prefix = ":".join(ordered)
     return [f"{prefix}:{c}" for c in classes]
