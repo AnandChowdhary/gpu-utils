@@ -83,7 +83,7 @@ Per-class precision/recall are micro-averaged over every emitted/expected class 
 macro averages over distinct classes: held-out P 94.9% / R 94.7%,
 unfamiliar P 60.4% / R 60.4%.
 
-What the unfamiliar set shows (all 41 misses are in `training/runs/unfamiliar_misses.txt`;
+What the unfamiliar set shows (all 41 misses are listed in `training/runs/unfamiliar_misses.txt`, written by `pnpm eval`;
 nothing below was fixed or tuned after seeing them):
 
 - **Variant scope errors dominate.** On phrasings the generator never produced, the tagger
