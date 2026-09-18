@@ -45,6 +45,13 @@ const M_SEQ: u32 = 38u; // then 2*s entries (start, len), then n token→sequenc
 
 const CHUNK: u32 = 256u;
 
+// Every entry point must statically reference every binding: WebGPU "auto" bind group
+// layouts are exclusive to their pipeline and runtime/program.ts builds one bind group per
+// pass from the full binding list. The compiler folds this away.
+fn touch() -> f32 {
+  return f32(params.n) + f32(info[0]) + f32(features[0]) + weights[0] + state[0] + logits[0];
+}
+
 fn sigmoid(x: f32) -> f32 { return 1.0 / (1.0 + exp(-x)); }
 fn relu(x: f32) -> f32 { return max(x, 0.0); }
 fn tok_seq(t: u32) -> u32 { return info[M_SEQ + 2u * params.s + t]; }
@@ -54,6 +61,7 @@ fn seq_len(s: u32) -> u32 { return info[M_SEQ + 2u * s + 1u]; }
 // 1. summed sparse embeddings: state.e[t, c] = Σ emb[row, c]  (id 0 = padding row)
 @compute @workgroup_size(64)
 fn embed(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   let E = params.e;
   if (id.x >= params.n * E) { return; }
   let t = id.x / E;
@@ -93,12 +101,14 @@ fn gates(gid: u32, din: u32, xoff: u32, wa_f: u32, ba_f: u32, wb_f: u32, bb_f: u
 
 @compute @workgroup_size(64)
 fn gates1(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   gates(id.x, params.e, info[ST_E], M_S1F_WA, M_S1F_BA, M_S1F_WB, M_S1F_BB,
         M_S1B_WA, M_S1B_BA, M_S1B_WB, M_S1B_BB, ST_G1);
 }
 
 @compute @workgroup_size(64)
 fn gates2(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   gates(id.x, 2u * params.h, info[ST_Y], M_S2F_WA, M_S2F_BA, M_S2F_WB, M_S2F_BB,
         M_S2B_WA, M_S2B_BA, M_S2B_WB, M_S2B_BB, ST_G2);
 }
@@ -162,17 +172,20 @@ fn scan_layer(wg: u32, lid: u32, gates_off: u32, out_off: u32) {
 
 @compute @workgroup_size(256)
 fn scan1(@builtin(workgroup_id) wg: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+  _ = touch();
   scan_layer(wg.x, lid.x, info[ST_G1], info[ST_H1]);
 }
 
 @compute @workgroup_size(256)
 fn scan2(@builtin(workgroup_id) wg: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+  _ = touch();
   scan_layer(wg.x, lid.x, info[ST_G2], info[ST_H2]);
 }
 
 // Depthwise conv (kernel 3, zero padded at sequence edges) with residual: y = h1 + relu(conv).
 @compute @workgroup_size(64)
 fn conv(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   let C = 2u * params.h;
   if (id.x >= params.n * C) { return; }
   let t = id.x / C;
@@ -195,6 +208,7 @@ fn conv(@builtin(global_invocation_id) id: vec3<u32>) {
 // Mean and max of h2 over each sequence: pool[s, c] and pool[s, C + c].
 @compute @workgroup_size(64)
 fn pool(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   let C = 2u * params.h;
   if (id.x >= params.s * C) { return; }
   let s = id.x / C;
@@ -217,6 +231,7 @@ fn pool(@builtin(global_invocation_id) id: vec3<u32>) {
 // g[t, j] = relu([h2_t | y_t | mean_s] · W1 + b1)
 @compute @workgroup_size(64)
 fn head_hidden(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   let HEAD = params.head;
   if (id.x >= params.n * HEAD) { return; }
   let t = id.x / HEAD;
@@ -236,6 +251,7 @@ fn head_hidden(@builtin(global_invocation_id) id: vec3<u32>) {
 // tags[t, k] = g_t · Wt + bt ; parts[t, p] = g_t · Wp + bp  (parts stored after all tags)
 @compute @workgroup_size(64)
 fn head_out(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   let K = params.k;
   let P = params.p;
   let KP = K + P;
@@ -261,6 +277,7 @@ fn head_out(@builtin(global_invocation_id) id: vec3<u32>) {
 // c[s, j] = relu([mean_s | max_s] · Wc + bc)
 @compute @workgroup_size(64)
 fn type_hidden(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   let H = params.h;
   if (id.x >= params.s * H) { return; }
   let s = id.x / H;
@@ -276,6 +293,7 @@ fn type_hidden(@builtin(global_invocation_id) id: vec3<u32>) {
 // type[s, ty] = c_s · Wd + bd  (stored after tags and parts)
 @compute @workgroup_size(64)
 fn type_out(@builtin(global_invocation_id) id: vec3<u32>) {
+  _ = touch();
   let T = params.t;
   if (id.x >= params.s * T) { return; }
   let s = id.x / T;

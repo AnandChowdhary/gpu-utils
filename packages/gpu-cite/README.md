@@ -61,9 +61,10 @@ below 50% confidence).
    comes with a UTF-16 span into the input.
 
 The WebGPU path (`src/shader.wgsl`) runs the same network over a whole batch of references in
-one command buffer; the scans are Hillis–Steele parallel prefix scans over affine maps. Under
-`backend: "auto"` inputs below 256 tokens use the CPU reference path, which is also the
-fallback when WebGPU is unavailable.
+one command buffer; the scans are Hillis–Steele parallel prefix scans over affine maps. It is
+checked against the PyTorch fixtures on a real adapter in `training/tests/test_wgsl.py`
+(worst deviation 1.9e-5). Under `backend: "auto"` inputs below 256 tokens use the CPU
+reference path, which is also the fallback when WebGPU is unavailable.
 
 ## Size and speed
 

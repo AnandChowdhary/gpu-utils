@@ -134,12 +134,17 @@ Neither corpus was used for training or tuning.
 | Cold start (import + int6 decode + first parse, Node 24, CPU) | 29 ms |
 | Warm `parse()` one reference (~40–80 tokens), CPU | ~4 ms median |
 | Warm `parseMany()` 1 KB / 7 references, CPU | ~22 ms median |
-| WebGPU | used under `auto` for ≥256 tokens; one command buffer of 11 passes per batch of up to 512 references. Estimated a few ms per batch dominated by dispatch + readback; not measured here (no adapter in the training sandbox). |
+| WebGPU | used under `auto` for ≥256 tokens; one command buffer of 11 passes per batch of up to 512 references. Wall-clock not benchmarked on a real GPU (only a llvmpipe software adapter was available); expect dispatch + readback to dominate. |
 
-The WGSL kernels were validated with `naga` 30 (parse, type-check, uniformity analysis) and
-are minified by `wgslender` at build time; the CPU path is the source of truth and matches
-PyTorch on 24 fixtures at 1e-4. A live GPU-vs-CPU logit comparison still needs a browser or
-a Dawn-enabled Node; the Dawn bindings fail to load in this sandbox.
+WGSL parity: `training/tests/test_wgsl.py` runs the real `src/shader.wgsl` through wgpu-py on
+a WebGPU adapter (llvmpipe / CPU Vulkan in CI and on the dev box; any GPU elsewhere) with the
+same batched buffer layout as `src/gpu.ts` and one bind group per pipeline, as
+`runtime/program.ts` does. Against the PyTorch fixtures the worst deviation is 1.9e-5 over
+24 references / 1,498 tokens dispatched in one command buffer, and 1.5e-5 on a 341-token
+reference that crosses the 256-token scan-chunk boundary (test tolerance 1e-3). The kernels
+are also `naga`-validated (parse, type-check, uniformity analysis) and minified by
+`wgslender` at build time. The CPU path remains the source of truth and matches PyTorch on
+the same 24 fixtures at 1e-4.
 
 ## Limitations and intended use
 - Real-world field boundaries are right roughly 70–80% of the time and whole records
@@ -155,6 +160,7 @@ a Dawn-enabled Node; the Dawn bindings fail to load in this sandbox.
   patents and legal cases come out as `article`.
 - Never generates text. Outputs are probabilistic except DOI / arXiv / URL, which are regex
   matches.
+- WebGPU latency has only been exercised on a software adapter; real-GPU timings are pending.
 
 ## Checkpoint
 - Promoted: `training/runs/default` — 2026-09-17, seed 0, epoch 3 of 4 (best held-out exact
