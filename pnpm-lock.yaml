@@ -63,6 +63,12 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/gpu-tailwind:
+    devDependencies:
+      '@gpu-utils/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/gpu-view:
     devDependencies:
       '@gpu-utils/runtime':
