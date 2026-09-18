@@ -47,34 +47,38 @@ below 50% confidence).
    *eds.*, *Proceedings*, *University*, months, publisher words, and "inside a DOI/URL/arXiv
    regex match"). No learned vocabulary; the featurizer is byte-for-byte identical in
    TypeScript and Python.
-2. **Model.** Summed 32-dim embeddings → bidirectional gated affine scan (32 units per
-   direction) → depthwise conv (k=3) with residual → second bidirectional scan → mean/max
-   pooled context. A two-layer head emits one BIO tag per token over 15 roles (AUTHOR, TITLE,
-   CONTAINER, YEAR, VOLUME, ISSUE, PAGES, PUBLISHER, LOCATION, EDITION, DOI, ARXIV, URL,
-   ACCESSED, EDITOR), a 3-way name-part label (given / family / other) and, from the pooled
-   vector, the document type. 76,411 parameters, int6, trained with a linear-chain CRF.
-3. **Compiler.** Viterbi over the learned CRF transitions with hard BIO constraints runs on
-   the CPU. A deterministic TypeScript compiler (`src/decode.ts`) turns entities into typed
-   values: trims quotes and brackets, strips *vol./no./pp./ed.* cues, parses page ranges
-   (`1477-81` → `1477`–`1481`), splits names with the name-part head, and locates DOIs, arXiv
-   ids and URLs with regexes so identifiers are never hallucinated by the model. Every field
-   comes with a UTF-16 span into the input.
+2. **Model.** The shared *scan* family (`ScanTagger` from `gpu_utils_training`, run by
+   `scanTaggerForward` in `@gpu-utils/runtime`): summed 32-dim embeddings → two layers of
+   bidirectional gated affine scan (32 units per direction) each followed by a residual
+   5-tap depthwise conv → mean-pooled context → two-layer head. The head emits 34 columns
+   per token: one BIO tag over 15 roles (AUTHOR, TITLE, CONTAINER, YEAR, VOLUME, ISSUE,
+   PAGES, PUBLISHER, LOCATION, EDITION, DOI, ARXIV, URL, ACCESSED, EDITOR) and a 3-way
+   name-part label (given / family / other); the pooled head emits the document type.
+   76,747 parameters, int6, trained with a linear-chain CRF whose 31×31 transition matrix
+   is exported as an extra tensor that only the decoder reads.
+3. **Compiler.** Viterbi over the learned CRF transitions plus the runtime's hard BIO
+   constraints (`viterbi`, `bioTransitions`, `bioStartMask`) runs on the CPU. A deterministic
+   TypeScript compiler (`src/decode.ts`) turns entities into typed values: trims quotes and
+   brackets, strips *vol./no./pp./ed.* cues, parses page ranges (`1477-81` → `1477`–`1481`),
+   splits names with the name-part columns, and locates DOIs, arXiv ids and URLs with
+   regexes so identifiers are never hallucinated by the model. Every field comes with a
+   UTF-16 span into the input.
 
-The WebGPU path (`src/shader.wgsl`) runs the same network over a whole batch of references in
-one command buffer; the scans are Hillis–Steele parallel prefix scans over affine maps. It is
-checked against the PyTorch fixtures on a real adapter in `training/tests/test_wgsl.py`
-(worst deviation 1.9e-5). Under `backend: "auto"` inputs below 256 tokens use the CPU
+The WebGPU path is the runtime's canonical `scan_tagger.wgsl` kernel (`runScanTagger`),
+which runs a whole batch of references in one command buffer; this package ships no shader
+of its own. It is checked against the PyTorch fixtures on a real adapter in
+`training/tests/test_wgsl.py`. Under `backend: "auto"` inputs below 256 tokens use the CPU
 reference path, which is also the fallback when WebGPU is unavailable.
 
 ## Size and speed
 
 | Measure | Value |
 |---|---|
-| Parameters | 76,411 (int6) |
-| Package (min + Brotli, weights included) | 54.1 KiB (budget 78.1 KiB) |
-| Cold start (import, decode weights, first parse), Node 24 CPU | 29 ms |
-| Warm `parse()` of one reference, CPU | ~4 ms |
-| Warm `parseMany()` of 1 KB / 7 references, CPU | ~22 ms |
+| Parameters | 76,747 (int6) |
+| Package (min + Brotli, weights included) | 52.3 KiB (budget 78.1 KiB) |
+| Cold start (import, decode weights, first parse), Node 24 CPU | 25 ms |
+| Warm `parse()` of one reference, CPU | ~5 ms |
+| Warm `parseMany()` of 1.2 KB / 7 references, CPU | ~35 ms |
 
 The 80,000-byte budget (instead of the 40 KB default) is justified by the 15-role tag set:
 the summed-embedding table alone is 47K of the 76K parameters and each parameter is one
@@ -84,8 +88,9 @@ Brotli-compressed character.
 
 - Trained on synthetic renderings of CrossRef/arXiv metadata. On real, hand-labelled corpora
   it is a **field-boundary suggester, not a ground truth**: micro-F1 0.78 on anystyle's core
-  set, 0.71 on GROBID's citation corpus, 0.75 on our hand-written unfamiliar set; full-record
-  exact match on real data is 23–33%. See [MODEL_CARD.md](./MODEL_CARD.md).
+  set, 0.73 on GROBID's citation corpus, 0.77 on our hand-written unfamiliar set; full-record
+  exact match on real data is 30–32%. See [MODEL_CARD.md](./MODEL_CARD.md), which also has the
+  side-by-side comparison against the pre-migration hand-written model.
 - Weak on: legal citations, patents, standards, journal-abbreviation-only physics references
   with `ibid.`, non-Latin scripts (Cyrillic, CJK), references where the container and the
   location are glued (`Journal 12, London`), `in press`/`forthcoming` dates (no `year` is
@@ -103,7 +108,8 @@ cd packages/gpu-cite/training
 uv sync
 uv run python -m gpu_cite.sources   # download CrossRef/arXiv metadata + anystyle/GROBID eval corpora
 uv run python -m gpu_cite.data      # render 120K labelled references in 19 styles
-uv run python -m gpu_cite.train     # 4 epochs, QAT int6, ~13 min on 2 CPU threads
+uv run python -m gpu_cite.train     # 5 epochs, QAT int6, ~16 min on 2 CPU threads
 uv run python -m gpu_cite.evaluate  # held-out, unfamiliar, anystyle, GROBID
 uv run python -m gpu_cite.export    # write ../model/{manifest.json,weights.txt,fixtures.json}
+uv run pytest                       # features, fixtures, WGSL parity on the canonical kernel
 ```

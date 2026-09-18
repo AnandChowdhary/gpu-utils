@@ -24,8 +24,8 @@ from manim import (
 from style import ACCENT, BOX_FILL, LINE, MUTED, WHITE_TEXT, ExplainerScene, TokenCell, activation_strip, mono, note
 
 # From MODEL_CARD.md
-PARAMS = "76,411 parameters"
-SIZE = "54.1 KiB Brotli"
+PARAMS = "76,747 parameters"
+SIZE = "52.3 KiB Brotli"
 LATENCY = "~4 ms per reference, CPU path"
 
 REFERENCE = "Smith, J., & Doe, A. (2019). A study of things. Journal of Stuff, 12(3), 45–67. doi:10.1000/xyz123"
