@@ -1,6 +1,6 @@
 {
   "name": "gpu-paste",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Understand pasted text: detect what it is and extract structured fields, on-device",
   "author": "Anand Chowdhary (https://anandchowdhary.com)",
   "license": "MIT",

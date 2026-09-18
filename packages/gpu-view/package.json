@@ -1,6 +1,6 @@
 {
   "name": "gpu-view",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Natural language to table view specs: filter, sort, group, aggregate, limit, chart",
   "author": "Anand Chowdhary (https://anandchowdhary.com)",
   "license": "MIT",
