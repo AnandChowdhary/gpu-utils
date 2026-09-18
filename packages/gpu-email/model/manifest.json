@@ -1,9 +1,242 @@
 {
   "format": 1,
   "name": "gpu-email",
-  "hidden": 32,
-  "labels": ["O"],
-  "tensors": [],
-  "parameters": 0,
-  "checkpoint": null
+  "labels": [
+    "reply",
+    "attribution",
+    "quote",
+    "signature",
+    "disclaimer",
+    "forward_header",
+    "greeting",
+    "closing"
+  ],
+  "fields": [
+    "O",
+    "B-NAME",
+    "I-NAME",
+    "B-TITLE",
+    "I-TITLE",
+    "B-COMPANY",
+    "I-COMPANY",
+    "B-PHONE",
+    "I-PHONE",
+    "B-EMAIL",
+    "I-EMAIL",
+    "B-URL",
+    "I-URL",
+    "B-ADDRESS",
+    "I-ADDRESS"
+  ],
+  "hidden": 48,
+  "head": 64,
+  "dilations": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "slots": 37,
+  "rows": 2267,
+  "checkpoint": {
+    "seed": 0,
+    "steps": 8155,
+    "epochs": 3,
+    "metrics": {
+      "kind_token_acc": 0.9936808723668679,
+      "bio_token_f1": 0.9916347779656493
+    }
+  },
+  "tensors": [
+    {
+      "name": "emb",
+      "offset": 0,
+      "length": 108816,
+      "shape": [
+        2267,
+        48
+      ],
+      "scale": 0.04834987271216608
+    },
+    {
+      "name": "conv0.w",
+      "offset": 108816,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.014800744671975412
+    },
+    {
+      "name": "conv0.b",
+      "offset": 115728,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.006989156526903953
+    },
+    {
+      "name": "conv1.w",
+      "offset": 115776,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.019593627222122684
+    },
+    {
+      "name": "conv1.b",
+      "offset": 122688,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.01197572196683576
+    },
+    {
+      "name": "conv2.w",
+      "offset": 122736,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.016456821272450108
+    },
+    {
+      "name": "conv2.b",
+      "offset": 129648,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.008624988217507639
+    },
+    {
+      "name": "conv3.w",
+      "offset": 129696,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.021299654437649633
+    },
+    {
+      "name": "conv3.b",
+      "offset": 136608,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.006969519199863557
+    },
+    {
+      "name": "conv4.w",
+      "offset": 136656,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.025750327494836623
+    },
+    {
+      "name": "conv4.b",
+      "offset": 143568,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.006873413439719907
+    },
+    {
+      "name": "conv5.w",
+      "offset": 143616,
+      "length": 6912,
+      "shape": [
+        3,
+        48,
+        48
+      ],
+      "scale": 0.01983975979589647
+    },
+    {
+      "name": "conv5.b",
+      "offset": 150528,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.007043749574692019
+    },
+    {
+      "name": "head.w",
+      "offset": 150576,
+      "length": 3072,
+      "shape": [
+        48,
+        64
+      ],
+      "scale": 0.01786222573249571
+    },
+    {
+      "name": "head.b",
+      "offset": 153648,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.009585560329498784
+    },
+    {
+      "name": "kind.w",
+      "offset": 153712,
+      "length": 512,
+      "shape": [
+        64,
+        8
+      ],
+      "scale": 0.036548129973873016
+    },
+    {
+      "name": "kind.b",
+      "offset": 154224,
+      "length": 8,
+      "shape": [
+        8
+      ],
+      "scale": 0.005131808500136098
+    },
+    {
+      "name": "bio.w",
+      "offset": 154232,
+      "length": 960,
+      "shape": [
+        64,
+        15
+      ],
+      "scale": 0.018910281119808074
+    },
+    {
+      "name": "bio.b",
+      "offset": 155192,
+      "length": 15,
+      "shape": [
+        15
+      ],
+      "scale": 0.007301822304725647
+    }
+  ],
+  "parameters": 155207
 }

@@ -922,12 +922,13 @@ def render(lines: list[Line], gen: Gen) -> Example:
     spans: list[tuple[int, int, str]] = []
     line_kinds: list[int] = []
     offset = 0
-    for i, ln in enumerate(lines):
+    for ln in lines:
         for s, e, f in ln.spans:
-            spans.append((offset + s, offset + e, f))
+            # line spans are code-point offsets; the document uses UTF-16 units
+            spans.append((offset + _u16(ln.text[:s]), offset + _u16(ln.text[:e]), f))
         texts.append(ln.text)
         line_kinds.append(-1 if ln.text.strip(" \t") == "" else ln.kind)
-        offset += len(ln.text.encode("utf-16-le")) // 2 + len(nl)
+        offset += _u16(ln.text) + len(nl)
     text = nl.join(texts)
     if r.random() < 0.5:
         text += nl

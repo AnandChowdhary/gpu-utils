@@ -60,6 +60,7 @@ def decode_line_kinds(tokens: list[Token], lines: list[LineInfo], logits: np.nda
         return kinds
     em = np.zeros((len(active), K))
     delim_seen = False
+    history_seen = False
     for a, li in enumerate(active):
         line = lines[li]
         idx = [i for i in range(line.start, line.end) if tokens[i].cls not in (CLASS_SPACE, CLASS_NEWLINE)]
@@ -75,6 +76,10 @@ def decode_line_kinds(tokens: list[Token], lines: list[LineInfo], logits: np.nda
             delim_seen = True
         elif delim_seen:
             em[a, [REPLY, GREETING, CLOSING]] = NEG
+            if line.is_attrib_marker or line.is_forward_marker or line.is_header:
+                history_seen = True
+            if not history_seen:
+                em[a, [QUOTE, DISCLAIMER]] = NEG
     path = viterbi(em, TRANSITIONS)
     for a, li in enumerate(active):
         kinds[li] = path[a]

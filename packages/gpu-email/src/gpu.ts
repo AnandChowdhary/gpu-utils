@@ -40,8 +40,8 @@ export async function forwardGpu(model: Model, features: FeatureRows): Promise<F
   const flat = new Uint32Array(n * slots);
   for (const [i, row] of features.rows.entries()) flat.set(row, i * slots);
 
-  const meta = new Uint32Array(7 + 3 * SHADER_LAYERS);
-  meta.set([
+  const offsets = new Uint32Array(7 + 3 * SHADER_LAYERS);
+  offsets.set([
     offsetOf(model, "emb"),
     offsetOf(model, "head.w"),
     offsetOf(model, "head.b"),
@@ -51,9 +51,9 @@ export async function forwardGpu(model: Model, features: FeatureRows): Promise<F
     offsetOf(model, "bio.b"),
   ]);
   for (let l = 0; l < SHADER_LAYERS; l++) {
-    meta[7 + 3 * l] = offsetOf(model, `conv${l}.w`);
-    meta[8 + 3 * l] = offsetOf(model, `conv${l}.b`);
-    meta[9 + 3 * l] = m.dilations[l]!;
+    offsets[7 + 3 * l] = offsetOf(model, `conv${l}.w`);
+    offsets[8 + 3 * l] = offsetOf(model, `conv${l}.b`);
+    offsets[9 + 3 * l] = m.dilations[l]!;
   }
 
   const params = program.buffer(
@@ -61,7 +61,7 @@ export async function forwardGpu(model: Model, features: FeatureRows): Promise<F
     new Uint32Array([n, slots, SHADER_LAYERS, 0]),
     GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   );
-  const metaBuf = program.buffer("meta", meta);
+  const offsetsBuf = program.buffer("offsets", offsets);
   const featureBuf = program.buffer("features", flat);
   const weights = program.buffer("weights", model.weights);
   const state = program.buffer("state", new Float32Array((SHADER_LAYERS + 1) * n * SHADER_DIM));
@@ -74,7 +74,7 @@ export async function forwardGpu(model: Model, features: FeatureRows): Promise<F
   const channelGroups = Math.ceil((n * SHADER_DIM) / 64);
   const tokenGroups = Math.ceil(n / 64);
   const out = await program.run(
-    [params, metaBuf, featureBuf, weights, state, logits],
+    [params, offsetsBuf, featureBuf, weights, state, logits],
     [
       { entry: "embed", workgroups: [channelGroups] },
       ...Array.from({ length: SHADER_LAYERS }, (_, l) => ({

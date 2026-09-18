@@ -32,9 +32,12 @@ def test_oracle_logits_roundtrip_generated_email() -> None:
         out = decode(tokens, infos, logits, ex.text)
         gold = [k for k in ex.line_kinds[: len(infos)]]
         pred = out["line_kinds"]
-        # rules ('>' → quote, '--' → signature) may legitimately override a generated label
+        # rules ('>' → quote, '--' → signature, everything below '--' → signature)
+        # may legitimately override a generated label
+        after_delim = False
         for g, p, ln in zip(gold, pred, infos):
-            if g < 0 or ln.quote_prefixed or ln.delimiter:
+            after_delim = after_delim or ln.delimiter
+            if g < 0 or ln.quote_prefixed or after_delim:
                 continue
             assert g == p, (meta, ln.text)
         assert out["reply"] == ex.reply or any(ln.delimiter for ln in infos)

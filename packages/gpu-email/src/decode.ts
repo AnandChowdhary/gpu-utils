@@ -109,6 +109,7 @@ export function decodeLineKinds(
   const emissions = new Float32Array(active.length * K);
   const lp = new Float64Array(K);
   let delimSeen = false;
+  let historySeen = false;
   for (let a = 0; a < active.length; a++) {
     const line = lines[active[a]!]!;
     const acc = new Float64Array(K);
@@ -136,10 +137,16 @@ export function decodeLineKinds(
       for (let j = 0; j < K; j++) emissions[base + j] = j === SIGNATURE ? 0 : NEG;
       delimSeen = true;
     } else if (delimSeen) {
-      // After an RFC 3676 "-- " delimiter nothing new can be written by the author.
+      // After an RFC 3676 "-- " delimiter everything is signature until quoted history
+      // starts (an attribution / forward / header marker line); nothing new can follow it.
       emissions[base + REPLY] = NEG;
       emissions[base + GREETING] = NEG;
       emissions[base + CLOSING] = NEG;
+      if (line.isAttribMarker || line.isForwardMarker || line.isHeader) historySeen = true;
+      if (!historySeen) {
+        emissions[base + QUOTE] = NEG;
+        emissions[base + DISCLAIMER] = NEG;
+      }
     }
   }
   const trans = new Float32Array(K * K);

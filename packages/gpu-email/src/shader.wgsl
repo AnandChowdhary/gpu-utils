@@ -2,7 +2,7 @@
 //
 // Layout
 //   params:  n tokens, slots per token, number of conv layers
-//   meta:    u32 table of tensor offsets into `weights`:
+//   offsets:    u32 table of tensor offsets into `weights`:
 //            [0] emb  [1] head.w [2] head.b [3] kind.w [4] kind.b [5] bio.w [6] bio.b
 //            then per layer l: [7+3l] conv.w  [8+3l] conv.b  [9+3l] dilation
 //   state:   (L+1) slabs of n*DIM floats; layer l reads slab l and writes slab l+1
@@ -21,7 +21,7 @@ const LOGITS: u32 = 23u;
 struct Params { n: u32, slots: u32, layers: u32, _pad: u32 }
 
 @group(0) @binding(0) var<uniform> params: Params;
-@group(0) @binding(1) var<storage, read> meta: array<u32>;
+@group(0) @binding(1) var<storage, read> offsets: array<u32>;
 @group(0) @binding(2) var<storage, read> features: array<u32>;
 @group(0) @binding(3) var<storage, read> weights: array<f32>;
 @group(0) @binding(4) var<storage, read_write> state: array<f32>;
@@ -35,7 +35,7 @@ fn embed(@builtin(global_invocation_id) id: vec3<u32>) {
   if (gid >= params.n * DIM) { return; }
   let t = gid / DIM;
   let d = gid % DIM;
-  let emb = meta[0];
+  let emb = offsets[0];
   var acc: f32 = 0.0;
   for (var s: u32 = 0u; s < params.slots; s = s + 1u) {
     let row = features[t * params.slots + s];
@@ -48,9 +48,9 @@ fn conv_layer(l: u32, gid: u32) {
   if (gid >= params.n * DIM) { return; }
   let t = gid / DIM;
   let co = gid % DIM;
-  let w = meta[7u + 3u * l];
-  let b = meta[8u + 3u * l];
-  let dil = meta[9u + 3u * l];
+  let w = offsets[7u + 3u * l];
+  let b = offsets[8u + 3u * l];
+  let dil = offsets[9u + 3u * l];
   let src = l * params.n * DIM;
   let dst = (l + 1u) * params.n * DIM;
   var acc: f32 = 0.0;
@@ -78,12 +78,12 @@ fn head(@builtin(global_invocation_id) id: vec3<u32>) {
   let t = id.x;
   if (t >= params.n) { return; }
   let xBase = params.layers * params.n * DIM + t * DIM;
-  let headW = meta[1];
-  let headB = meta[2];
-  let kindW = meta[3];
-  let kindB = meta[4];
-  let bioW = meta[5];
-  let bioB = meta[6];
+  let headW = offsets[1];
+  let headB = offsets[2];
+  let kindW = offsets[3];
+  let kindB = offsets[4];
+  let bioW = offsets[5];
+  let bioB = offsets[6];
   var h: array<f32, HEAD>;
   for (var j: u32 = 0u; j < HEAD; j = j + 1u) { h[j] = weights[headB + j]; }
   for (var d: u32 = 0u; d < DIM; d = d + 1u) {

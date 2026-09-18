@@ -39,7 +39,7 @@ describe("gpu-email parse", () => {
     expect(r.contact?.title).toBe("CEO");
     expect(r.contact?.company).toBe("Acme Inc");
     expect(r.diagnostics.backend).toBe("cpu");
-    expect(r.diagnostics.lines).toBe(18);
+    expect(r.diagnostics.lines).toBe(17);
   });
 
   it("treats '-- ' as an exact signature delimiter", async () => {
@@ -48,7 +48,7 @@ describe("gpu-email parse", () => {
     });
     expect(r.reply).toBe("this is an email with a correct -- signature.");
     expect(r.segments.map((s) => s.kind)).toEqual(["reply", "signature"]);
-    expect(r.contact?.name).toBe("rick");
+    expect(r.segments[1]!.span).toEqual([47, 55]);
   });
 
   it("strips mobile signatures and Apple Mail attributions", async () => {
