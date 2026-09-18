@@ -471,7 +471,11 @@ def add_doi(B: Builder, rec: dict[str, Any], rng: Rng) -> None:
 
 
 def add_arxiv(B: Builder, rec: dict[str, Any], rng: Rng, form: str) -> None:
-    aid = rec["arxiv"]
+    aid = rec.get("arxiv")
+    if not aid:  # DOI-only preprints (bioRxiv, SSRN, ...)
+        B.o(rng.choice(["bioRxiv. ", "SSRN. ", "medRxiv. ", "Preprint. ", "PsyArXiv. ", ""]))
+        add_doi(B, rec, rng)
+        return
     if form == "prefix":
         B.o(rng.choice(["arXiv:", "arXiv: ", "arxiv:", "arXiv preprint arXiv:", "arXiv e-prints, arXiv:", "ArXiv:"]))
         B.f(aid, "ARXIV")
@@ -2167,9 +2171,9 @@ def realize(rec: dict[str, Any], rng: Rng, pools: Pools) -> dict[str, Any] | Non
     r["authors"] = [dict(a) for a in rec["authors"]]
     t = r["type"]
     # Rebalance types: many CrossRef articles become other genres with synthesized details.
-    if t == "article" and rng.random() < 0.30:
-        t = rng.choices(["book", "thesis", "report", "web", "chapter", "conference"], weights=[8, 5, 5, 7, 3, 3])[0]
-    if t == "preprint" and rng.random() < 0.15 and r.get("doi"):
+    if t == "article" and rng.random() < 0.38:
+        t = rng.choices(["book", "thesis", "report", "web", "chapter", "conference"], weights=[8, 5, 5, 10, 4, 4])[0]
+    if t == "preprint" and rng.random() < 0.45:
         t = "article"
         r["container"] = rng.choice(pools.containers)
         r["volume"] = str(rng.randint(1, 250))
@@ -2196,8 +2200,8 @@ def realize(rec: dict[str, Any], rng: Rng, pools: Pools) -> dict[str, Any] | Non
             r["location"] = rng.choice(CITIES)
         else:
             r.pop("location", None)
-        if rng.random() < 0.25:
-            r["edition"] = rng.choice(ORDINALS[:6] + ORDINAL_WORDS[:5] + ["Rev.", "2", "3"])
+        if rng.random() < 0.45:
+            r["edition"] = rng.choice(ORDINALS[:6] + ORDINAL_WORDS[:5] + ["Rev.", "2", "3", "Revised", "4th"])
         if rng.random() < 0.6:
             r.pop("doi", None)
     elif t == "chapter":
@@ -2207,7 +2211,7 @@ def realize(rec: dict[str, Any], rng: Rng, pools: Pools) -> dict[str, Any] | Non
             r.pop(k, None) if rng.random() < 0.7 else None
         if not r.get("editors") or rng.random() < 0.2:
             r["editors"] = [pools.person(rng) for _ in range(rng.choice([1, 1, 2, 2, 3]))]
-        if rng.random() < 0.3:
+        if rng.random() < 0.15:
             r.pop("editors", None)
         r["publisher"] = _clean_publisher(r["publisher"]) if r.get("publisher") and rng.random() < 0.5 else rng.choice(PUBLISHERS)
         if rng.random() < 0.5:
