@@ -11,7 +11,10 @@ import type { Model } from "./model.ts";
 let programPromise: Promise<Program> | undefined;
 
 function program(model: Model): Promise<Program> {
-  programPromise ??= createProgram(scanTaggerShader, scanTaggerEntries(model.manifest.scanLayers ?? 1));
+  programPromise ??= createProgram(
+    scanTaggerShader,
+    scanTaggerEntries(model.manifest.scanLayers ?? 1),
+  );
   return programPromise;
 }
 

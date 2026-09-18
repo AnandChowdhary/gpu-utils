@@ -1,256 +1,283 @@
 {
-	"format": 1,
-	"name": "gpu-view",
-	"hidden": 32,
-	"headGate": 16,
-	"conv": 5,
-	"labels": [
-		"O",
-		"FIELD",
-		"OP",
-		"VALUE",
-		"TIME_VALUE",
-		"CONJ",
-		"NEG",
-		"SORT_FIELD",
-		"SORT_DIR",
-		"GROUP_FIELD",
-		"AGG_FN",
-		"AGG_FIELD",
-		"LIMIT",
-		"CHART"
-	],
-	"featureRows": 639,
-	"slots": 28,
-	"blocks": [
-		{
-			"name": "shape",
-			"offset": 0,
-			"size": 8
-		},
-		{
-			"name": "length",
-			"offset": 8,
-			"size": 8
-		},
-		{
-			"name": "word",
-			"offset": 16,
-			"size": 128
-		},
-		{
-			"name": "skeleton",
-			"offset": 144,
-			"size": 64
-		},
-		{
-			"name": "keyword",
-			"offset": 208,
-			"size": 366
-		},
-		{
-			"name": "flags",
-			"offset": 574,
-			"size": 10
-		},
-		{
-			"name": "field_kind",
-			"offset": 584,
-			"size": 6
-		},
-		{
-			"name": "field_pos",
-			"offset": 590,
-			"size": 3
-		},
-		{
-			"name": "quality",
-			"offset": 593,
-			"size": 5
-		},
-		{
-			"name": "alias",
-			"offset": 598,
-			"size": 2
-		},
-		{
-			"name": "enum_any",
-			"offset": 600,
-			"size": 2
-		},
-		{
-			"name": "enum_pos",
-			"offset": 602,
-			"size": 3
-		},
-		{
-			"name": "enum_unique",
-			"offset": 605,
-			"size": 2
-		},
-		{
-			"name": "enum_prev",
-			"offset": 607,
-			"size": 2
-		},
-		{
-			"name": "enum_next",
-			"offset": 609,
-			"size": 2
-		},
-		{
-			"name": "prev_kind",
-			"offset": 611,
-			"size": 6
-		},
-		{
-			"name": "prev_dist",
-			"offset": 617,
-			"size": 6
-		},
-		{
-			"name": "next_kind",
-			"offset": 623,
-			"size": 6
-		},
-		{
-			"name": "next_dist",
-			"offset": 629,
-			"size": 6
-		},
-		{
-			"name": "position",
-			"offset": 635,
-			"size": 4
-		}
-	],
-	"checkpoint": {
-		"run": "default",
-		"seed": 0,
-		"epochs": 14,
-		"samples": 160000,
-		"date": "2026-09-18"
-	},
-	"tensors": [
-		{
-			"name": "embedding",
-			"offset": 0,
-			"length": 20448,
-			"shape": [639, 32],
-			"scale": 0.09947749876206921
-		},
-		{
-			"name": "encoder_bias",
-			"offset": 20448,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.005921552738835735
-		},
-		{
-			"name": "convolution",
-			"offset": 20480,
-			"length": 160,
-			"shape": [5, 32],
-			"scale": 0.03485483507956228
-		},
-		{
-			"name": "gate_weight",
-			"offset": 20640,
-			"length": 1024,
-			"shape": [32, 32],
-			"scale": 0.059531158016574
-		},
-		{
-			"name": "gate_bias",
-			"offset": 21664,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.11894774436950684
-		},
-		{
-			"name": "candidate_weight",
-			"offset": 21696,
-			"length": 1024,
-			"shape": [32, 32],
-			"scale": 0.04011564100942304
-		},
-		{
-			"name": "candidate_bias",
-			"offset": 22720,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.00689178224532835
-		},
-		{
-			"name": "combine_weight",
-			"offset": 22752,
-			"length": 2048,
-			"shape": [32, 64],
-			"scale": 0.041445916698824976
-		},
-		{
-			"name": "combine_bias",
-			"offset": 24800,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.009894992074658793
-		},
-		{
-			"name": "global_weight",
-			"offset": 24832,
-			"length": 1024,
-			"shape": [32, 32],
-			"scale": 0.04358465056265554
-		},
-		{
-			"name": "global_bias",
-			"offset": 25856,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.019163423968899633
-		},
-		{
-			"name": "head_gate_weight",
-			"offset": 25888,
-			"length": 1024,
-			"shape": [16, 64],
-			"scale": 0.03552052282517956
-		},
-		{
-			"name": "head_gate_bias",
-			"offset": 26912,
-			"length": 16,
-			"shape": [16],
-			"scale": 0.004977248849407319
-		},
-		{
-			"name": "head_hidden_weight",
-			"offset": 26928,
-			"length": 5120,
-			"shape": [64, 80],
-			"scale": 0.04044722741649997
-		},
-		{
-			"name": "head_hidden_bias",
-			"offset": 32048,
-			"length": 64,
-			"shape": [64],
-			"scale": 0.0059089146314128755
-		},
-		{
-			"name": "output_weight",
-			"offset": 32112,
-			"length": 960,
-			"shape": [15, 64],
-			"scale": 0.05268732578523697
-		},
-		{
-			"name": "output_bias",
-			"offset": 33072,
-			"length": 15,
-			"shape": [15],
-			"scale": 0.006059685541737464
-		}
-	],
-	"parameters": 33087
+  "format": 1,
+  "name": "gpu-view",
+  "family": "scan",
+  "featureRows": 788,
+  "paddingId": 788,
+  "hidden": 32,
+  "head": 64,
+  "scanLayers": 1,
+  "convTaps": 5,
+  "tags": 15,
+  "pooled": 0,
+  "slots": 28,
+  "labels": [
+    "O",
+    "FIELD",
+    "OP",
+    "VALUE",
+    "TIME_VALUE",
+    "CONJ",
+    "NEG",
+    "SORT_FIELD",
+    "SORT_DIR",
+    "GROUP_FIELD",
+    "AGG_FN",
+    "AGG_FIELD",
+    "LIMIT",
+    "CHART"
+  ],
+  "boundary": true,
+  "blocks": [
+    {
+      "name": "shape",
+      "offset": 0,
+      "size": 8
+    },
+    {
+      "name": "length",
+      "offset": 8,
+      "size": 8
+    },
+    {
+      "name": "word",
+      "offset": 16,
+      "size": 128
+    },
+    {
+      "name": "skeleton",
+      "offset": 144,
+      "size": 64
+    },
+    {
+      "name": "keyword",
+      "offset": 208,
+      "size": 512
+    },
+    {
+      "name": "flags",
+      "offset": 720,
+      "size": 12
+    },
+    {
+      "name": "field_kind",
+      "offset": 732,
+      "size": 6
+    },
+    {
+      "name": "field_pos",
+      "offset": 738,
+      "size": 3
+    },
+    {
+      "name": "quality",
+      "offset": 741,
+      "size": 6
+    },
+    {
+      "name": "alias",
+      "offset": 747,
+      "size": 2
+    },
+    {
+      "name": "enum_any",
+      "offset": 749,
+      "size": 2
+    },
+    {
+      "name": "enum_pos",
+      "offset": 751,
+      "size": 3
+    },
+    {
+      "name": "enum_unique",
+      "offset": 754,
+      "size": 2
+    },
+    {
+      "name": "enum_prev",
+      "offset": 756,
+      "size": 2
+    },
+    {
+      "name": "enum_next",
+      "offset": 758,
+      "size": 2
+    },
+    {
+      "name": "prev_kind",
+      "offset": 760,
+      "size": 6
+    },
+    {
+      "name": "prev_dist",
+      "offset": 766,
+      "size": 6
+    },
+    {
+      "name": "next_kind",
+      "offset": 772,
+      "size": 6
+    },
+    {
+      "name": "next_dist",
+      "offset": 778,
+      "size": 6
+    },
+    {
+      "name": "position",
+      "offset": 784,
+      "size": 4
+    }
+  ],
+  "checkpoint": {
+    "run": null,
+    "date": "2026-09-18"
+  },
+  "tensors": [
+    {
+      "name": "embed",
+      "offset": 0,
+      "length": 25216,
+      "shape": [
+        788,
+        32
+      ],
+      "scale": 0.01401058223939711
+    },
+    {
+      "name": "scan0.f.wa",
+      "offset": 25216,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.019484717999735186
+    },
+    {
+      "name": "scan0.f.ba",
+      "offset": 26240,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.0967741935483871
+    },
+    {
+      "name": "scan0.f.wu",
+      "offset": 26272,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.01726549094723117
+    },
+    {
+      "name": "scan0.f.bu",
+      "offset": 27296,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "scan0.b.wa",
+      "offset": 27328,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.017972100165582473
+    },
+    {
+      "name": "scan0.b.ba",
+      "offset": 28352,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.0967741935483871
+    },
+    {
+      "name": "scan0.b.wu",
+      "offset": 28384,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.019889195119180986
+    },
+    {
+      "name": "scan0.b.bu",
+      "offset": 29408,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "conv0.w",
+      "offset": 29440,
+      "length": 320,
+      "shape": [
+        5,
+        64
+      ],
+      "scale": 0.012390301112205751
+    },
+    {
+      "name": "conv0.b",
+      "offset": 29760,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "head.w",
+      "offset": 29824,
+      "length": 8192,
+      "shape": [
+        128,
+        64
+      ],
+      "scale": 0.01300932611188581
+    },
+    {
+      "name": "head.b",
+      "offset": 38016,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "tags.w",
+      "offset": 38080,
+      "length": 960,
+      "shape": [
+        64,
+        15
+      ],
+      "scale": 0.012701433512472337
+    },
+    {
+      "name": "tags.b",
+      "offset": 39040,
+      "length": 15,
+      "shape": [
+        15
+      ],
+      "scale": 1.0
+    }
+  ],
+  "parameters": 39055
 }

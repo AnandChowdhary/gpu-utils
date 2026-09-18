@@ -33,7 +33,8 @@ describe("gpu-view parity", () => {
     expect(logits.length).toBe(c.rows.length * outs);
     let worst = 0;
     for (let t = 0; t < c.rows.length; t++) {
-      for (let o = 0; o < outs; o++) worst = Math.max(worst, Math.abs(logits[t * outs + o]! - c.logits[t]![o]!));
+      for (let o = 0; o < outs; o++)
+        worst = Math.max(worst, Math.abs(logits[t * outs + o]! - c.logits[t]![o]!));
     }
     expect(worst).toBeLessThan(1e-4);
   });
