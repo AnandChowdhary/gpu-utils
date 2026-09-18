@@ -64,13 +64,18 @@ def main() -> None:
     theme = parse_theme(THEME.read_text())
     props = {p: k for k, ps in PROPS.items() for p in ps}
     vals: dict[str, str] = {}
+    mods: dict[str, str] = {}
     for k, ps in VALUES.items():
         for p in ps:
-            vals.setdefault(p, k)
+            if k.startswith("mod:"):
+                mods.setdefault(p, k[4:])
+            else:
+                vals.setdefault(p, k)
     table = {
         "theme": theme,
         "props": props,
         "vals": vals,
+        "mods": mods,
         "vars": VAR_RULES,
         "presets": PRESETS,
         "seps": SEP_WORDS,
