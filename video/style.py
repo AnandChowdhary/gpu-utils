@@ -19,6 +19,7 @@ from manim import (
     Scene,
     Text,
     VGroup,
+    Wait,
     smooth,
 )
 
@@ -129,7 +130,10 @@ class ExplainerScene(Scene):
     slowdown = 1.55
 
     def play(self, *animations, **kwargs):
-        kwargs["run_time"] = kwargs.get("run_time", 1) * self.slowdown
+        # Scene.wait() is play(Wait(run_time=...)): forcing run_time here would clamp every
+        # hold to one slowed second, so leave bare waits alone (wait() already slows them).
+        if not (len(animations) == 1 and isinstance(animations[0], Wait)):
+            kwargs["run_time"] = kwargs.get("run_time", 1) * self.slowdown
         kwargs.setdefault("rate_func", smooth)
         return super().play(*animations, **kwargs)
 
