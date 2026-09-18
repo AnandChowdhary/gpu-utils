@@ -13,7 +13,7 @@ turns tags into typed output.
 
 | Package | Task | Size | Status |
 |---|---|---|---|
-| _coming soon_ | | | |
+| [gpu-cite](./packages/gpu-cite) | Parse citation and reference strings into structured bibliographic fields | 54.1 KiB | beta |
 
 ## Development
 

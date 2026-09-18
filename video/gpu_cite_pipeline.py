@@ -25,8 +25,8 @@ from style import ACCENT, BOX_FILL, LINE, MUTED, WHITE_TEXT, ExplainerScene, Tok
 
 # From MODEL_CARD.md
 PARAMS = "76,411 parameters"
-SIZE = "56.6 KB Brotli"
-LATENCY = "~0.5 ms warm, CPU path"
+SIZE = "54.1 KiB Brotli"
+LATENCY = "~4 ms per reference, CPU path"
 
 REFERENCE = "Smith, J., & Doe, A. (2019). A study of things. Journal of Stuff, 12(3), 45–67. doi:10.1000/xyz123"
 
