@@ -2,7 +2,7 @@
 
 from manim import DOWN, LEFT, RIGHT, UP, FadeIn, FadeOut, LaggedStart, Rectangle, ReplacementTransform, Transform, VGroup
 
-from style import ACCENT, MUTED, ExplainerScene, TokenCell, activation_strip, baseline_glyph, mono, note, visible_char
+from style import ACCENT, MUTED, ExplainerScene, TokenCell, activation_strip, mono, note
 
 LINE = "2024-01-15 10:30:00,123 [main] INFO com.example.Foo - Started in 12ms"
 ROLE_COLORS = {"TS": "#22C55E", "LEVEL": "#F59E0B", "SOURCE": "#A855F7", "THREAD": "#06B6D4", "MSG": "#F43F5E"}
@@ -95,10 +95,10 @@ class GpuLogPipeline(ExplainerScene):
         for i, c in enumerate(cells):
             role = role_of(i, tokens)
             if role and c.source.strip():
-                colored = baseline_glyph(visible_char(c.source), 17, ROLE_COLORS[role]).scale_to_fit_height(c.glyph.height)
-                colored.move_to(c.glyph)
-                anims.append(Transform(c.glyph, colored))
-                anims.append(Transform(c.box, c.box.copy().set_stroke(ROLE_COLORS[role])))
+                target = c.copy()
+                target.box.set_stroke(ROLE_COLORS[role])
+                target.glyph.set_color(ROLE_COLORS[role])
+                anims.append(Transform(c, target))
         self.play(LaggedStart(*anims, lag_ratio=0.01))
         legend = VGroup(*[mono(r, 15, col) for r, col in ROLE_COLORS.items()]).arrange(RIGHT, buff=0.5).move_to(DOWN * 0.7)
         kind = mono("kind: entry", 15, MUTED).move_to(DOWN * 1.3)

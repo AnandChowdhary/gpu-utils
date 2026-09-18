@@ -6,6 +6,8 @@ table (see FEATURE_SIZES). Parity with TypeScript is enforced by model/fixtures.
 
 from __future__ import annotations
 
+import unicodedata
+
 from gpu_utils_training.features import Token, hash_token, tokenize
 
 WORD_BUCKETS = 1024
@@ -34,7 +36,7 @@ EMBED_ROWS = _acc
 
 def _char_bucket(ch: str) -> int:
     """ASCII code, non-ASCII -> 128, decimal digits collapsed to '0' (like hash_token)."""
-    if ch.isdigit():
+    if unicodedata.category(ch) == "Nd":
         return 48
     code = ord(ch)
     return code if code < 128 else 128
