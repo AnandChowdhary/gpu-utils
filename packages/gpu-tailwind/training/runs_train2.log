@@ -1,0 +1,42 @@
+/home/vercel-sandbox/gpu-utils-wt/gpu-tailwind/packages/gpu-tailwind/training/gpu_tailwind/train.py:148: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  running += float(loss)
+params: 45218  train: 130000  heldout: 3000
+epoch 0 step 200/30480 loss 1.6974 lr 2.68e-03 5s
+epoch 0 step 400/30480 loss 1.0123 lr 4.00e-03 10s
+epoch 0 step 600/30480 loss 0.7381 lr 4.00e-03 16s
+epoch 0 step 800/30480 loss 0.5937 lr 4.00e-03 20s
+epoch 0 step 1000/30480 loss 0.5024 lr 3.99e-03 26s
+epoch 0 done: loss 0.4966 heldout {'token_acc': 0.9570809765402498, 'seq_acc': 0.5606666666666666, 'boundary_acc': 0.997337430952034} (26s)
+epoch 1 step 1200/30480 loss 0.1221 lr 3.99e-03 31s
+epoch 1 step 1400/30480 loss 0.1179 lr 3.99e-03 37s
+epoch 1 step 1600/30480 loss 0.1144 lr 3.98e-03 42s
+epoch 1 step 1800/30480 loss 0.1127 lr 3.98e-03 47s
+epoch 1 step 2000/30480 loss 0.1095 lr 3.97e-03 53s
+epoch 1 done: loss 0.1090 heldout {'token_acc': 0.9677842391808295, 'seq_acc': 0.627, 'boundary_acc': 0.998768065067359} (54s)
+epoch 2 step 2200/30480 loss 0.0878 lr 3.96e-03 59s
+epoch 2 step 2400/30480 loss 0.0860 lr 3.95e-03 64s
+epoch 2 step 2600/30480 loss 0.0844 lr 3.94e-03 70s
+epoch 2 step 2800/30480 loss 0.0839 lr 3.93e-03 76s
+epoch 2 step 3000/30480 loss 0.0834 lr 3.92e-03 81s
+epoch 2 done: loss 0.0832 heldout {'token_acc': 0.9733743095203402, 'seq_acc': 0.66, 'boundary_acc': 0.9988475447404326} (83s)
+epoch 3 step 3200/30480 loss 0.0719 lr 3.91e-03 87s
+epoch 3 step 3400/30480 loss 0.0722 lr 3.90e-03 93s
+epoch 3 step 3600/30480 loss 0.0721 lr 3.89e-03 98s
+epoch 3 step 3800/30480 loss 0.0712 lr 3.87e-03 103s
+epoch 3 step 4000/30480 loss 0.0706 lr 3.86e-03 109s
+epoch 3 done: loss 0.0703 heldout {'token_acc': 0.9768184286868633, 'seq_acc': 0.6976666666666667, 'boundary_acc': 0.9992449431058007} (111s)
+epoch 4 step 4200/30480 loss 0.0601 lr 3.84e-03 114s
+epoch 4 step 4400/30480 loss 0.0627 lr 3.83e-03 120s
+epoch 4 step 4600/30480 loss 0.0630 lr 3.81e-03 125s
+epoch 4 step 4800/30480 loss 0.0624 lr 3.79e-03 130s
+epoch 4 step 5000/30480 loss 0.0623 lr 3.77e-03 135s
+epoch 4 done: loss 0.0626 heldout {'token_acc': 0.9781960763534726, 'seq_acc': 0.716, 'boundary_acc': 0.9991522168205481} (138s)
+epoch 5 step 5200/30480 loss 0.0575 lr 3.75e-03 141s
+epoch 5 step 5400/30480 loss 0.0579 lr 3.73e-03 147s
+epoch 5 step 5600/30480 loss 0.0568 lr 3.71e-03 152s
+epoch 5 step 5800/30480 loss 0.0568 lr 3.69e-03 158s
+epoch 5 step 6000/30480 loss 0.0568 lr 3.67e-03 163s
+epoch 5 done: loss 0.0569 heldout {'token_acc': 0.9813090302155224, 'seq_acc': 0.7336666666666667, 'boundary_acc': 0.9994568889006636} (166s)
+epoch 6 step 6200/30480 loss 0.0501 lr 3.64e-03 170s
+epoch 6 step 6400/30480 loss 0.0516 lr 3.62e-03 176s

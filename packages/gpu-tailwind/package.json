@@ -35,7 +35,11 @@
     "wgsl",
     "browser",
     "on-device",
-    "tiny-model"
+    "tiny-model",
+    "tailwind",
+    "tailwindcss",
+    "css",
+    "natural-language"
   ],
   "scripts": {
     "build": "node --experimental-strip-types ../../tooling/build.ts",
@@ -44,12 +48,13 @@
     "test": "vitest run",
     "prepack": "cp ../../LICENSE ./LICENSE",
     "train": "cd training && uv run python -m gpu_tailwind.train",
-    "export": "cd training && uv run python -m gpu_tailwind.export"
+    "export": "cd training && uv run python -m gpu_tailwind.export",
+    "eval": "vitest run test/eval.test.ts"
   },
   "devDependencies": {
     "@gpu-utils/runtime": "workspace:*"
   },
   "gpuUtils": {
-    "sizeBudget": 40000
+    "sizeBudget": 60000
   }
 }
