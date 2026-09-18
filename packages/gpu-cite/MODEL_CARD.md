@@ -122,7 +122,7 @@ v2 is measurably worse at the distribution it was trained on.
 
 Token accuracy 0.996 · type accuracy 0.977 · author-entity F1 0.988 · macro-F1 0.991 ·
 full-record exact match **0.680** (0.692 ignoring the type). Exact match by style: apa 0.86,
-elsevier 0.85, harvard 0.81, ieee 0.80, springer 0.76, cse 0.75, physics 0.73, vancouver 0.73,
+elsevier 0.85, harvard 0.81, ieee 0.80, springer 0.76, cse 0.75, vancouver 0.73, physics 0.73,
 nature 0.72, ama 0.69, german 0.66, mla 0.65, wikipedia 0.62, plain 0.59, chicago_ad 0.59,
 acm 0.50, arxiv_listing 0.42, chicago_note 0.41, messy 0.40.
 
