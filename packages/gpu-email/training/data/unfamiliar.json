@@ -1,0 +1,1237 @@
+[
+  {
+    "name": "russian-android-attribution",
+    "lines": [
+      ["reply", "Hello"],
+      ["attribution", "02.04.2012 14:20 пользователь \"bob@xxx.mailgun.org\" <"],
+      ["attribution", "bob@xxx.mailgun.org> написал:"],
+      ["", ""],
+      ["quote", "> Hi"],
+      ["quote", ">"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "korean-gmail",
+    "lines": [
+      ["greeting", "안녕하세요 민수님,"],
+      ["", ""],
+      ["reply", "보내주신 자료 잘 받았습니다. 검토 후 내일 회신드리겠습니다."],
+      ["", ""],
+      ["closing", "감사합니다."],
+      ["signature", "박지영 드림"],
+      ["", ""],
+      ["attribution", "2024년 1월 5일 (금) 오후 3:14, 김민수 <minsu.kim@example.kr>님이 작성:"],
+      ["", ""],
+      ["quote", "> 자료 첨부드립니다."],
+      ["quote", "> 확인 부탁드립니다."]
+    ],
+    "contact": { "name": "박지영 드림" }
+  },
+  {
+    "name": "czech-thunderbird",
+    "lines": [
+      ["greeting", "Dobrý den,"],
+      ["", ""],
+      ["reply", "děkuji za rychlou odpověď. Termín mi vyhovuje."],
+      ["", ""],
+      ["closing", "S pozdravem"],
+      ["signature", "Jan Novák"],
+      ["signature", "Vedoucí projektu, Novák s.r.o."],
+      ["signature", "+420 601 234 567"],
+      ["", ""],
+      ["attribution", "Dne 5. 2. 2024 v 9:12 Petra Svobodová <petra@example.cz> napsal(a):"],
+      ["quote", "> Dobrý den,"],
+      ["quote", "> posílám nabídku v příloze."]
+    ],
+    "contact": {
+      "name": "Jan Novák",
+      "title": "Vedoucí projektu",
+      "company": "Novák s.r.o.",
+      "phone": ["+420 601 234 567"]
+    }
+  },
+  {
+    "name": "finnish-gmail",
+    "lines": [
+      ["greeting", "Hei Matti,"],
+      ["", ""],
+      ["reply", "Kiitos viestistä. Sopii hyvin, nähdään torstaina."],
+      ["", ""],
+      ["closing", "Terveisin,"],
+      ["signature", "Anna Korhonen"],
+      ["", ""],
+      [
+        "attribution",
+        "ke 5. helmik. 2024 klo 9.12 Matti Virtanen <matti.virtanen@example.fi> kirjoitti:"
+      ],
+      ["", ""],
+      ["quote", "> Hei Anna,"],
+      ["quote", "> sopisiko torstai klo 10?"]
+    ],
+    "contact": { "name": "Anna Korhonen" }
+  },
+  {
+    "name": "danish-apple",
+    "lines": [
+      ["reply", "Det lyder fint, tak."],
+      ["", ""],
+      ["signature", "Sendt fra min iPhone"],
+      ["", ""],
+      ["attribution", "Den 5. feb. 2024 kl. 09.12 skrev Lars Hansen <lars@example.dk>:"],
+      ["", ""],
+      ["quote", "> Hej,"],
+      ["quote", "> kan vi mødes på fredag?"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "turkish-outlook",
+    "lines": [
+      ["greeting", "Merhaba Ayşe Hanım,"],
+      ["", ""],
+      ["reply", "Dosyayı aldım, teşekkür ederim. Yarın dönüş yapacağım."],
+      ["", ""],
+      ["closing", "Saygılarımla,"],
+      ["signature", "Mehmet Yılmaz"],
+      ["signature", "Satış Müdürü | Yıldız Teknoloji A.Ş."],
+      ["signature", "Tel: +90 212 555 12 34"],
+      ["", ""],
+      ["attribution", "-----Özgün İleti-----"],
+      ["attribution", "Kimden: Ayşe Demir <ayse@example.com.tr>"],
+      ["attribution", "Gönderildi: 5 Şubat 2024 Pazartesi 09:12"],
+      ["attribution", "Kime: Mehmet Yılmaz"],
+      ["attribution", "Konu: Sözleşme"],
+      ["", ""],
+      ["quote", "Merhaba Mehmet Bey,"],
+      ["quote", "sözleşme ektedir."]
+    ],
+    "contact": {
+      "name": "Mehmet Yılmaz",
+      "title": "Satış Müdürü",
+      "company": "Yıldız Teknoloji A.Ş.",
+      "phone": ["+90 212 555 12 34"]
+    }
+  },
+  {
+    "name": "greek-gmail",
+    "lines": [
+      ["greeting", "Γεια σου Νίκο,"],
+      ["", ""],
+      ["reply", "Ευχαριστώ για την ενημέρωση. Θα το δω και θα σου πω αύριο."],
+      ["", ""],
+      ["closing", "Φιλικά,"],
+      ["signature", "Μαρία Παπαδοπούλου"],
+      ["", ""],
+      [
+        "attribution",
+        "Στις Δευ, 5 Φεβ 2024 στις 9:12 π.μ., ο/η Νίκος Γεωργίου <nikos@example.gr> έγραψε:"
+      ],
+      ["", ""],
+      ["quote", "> Καλημέρα,"],
+      ["quote", "> σου στέλνω το αρχείο."]
+    ],
+    "contact": { "name": "Μαρία Παπαδοπούλου" }
+  },
+  {
+    "name": "traditional-chinese-outlook",
+    "lines": [
+      ["greeting", "王經理您好，"],
+      ["", ""],
+      ["reply", "報價單已收到，我們會在本週五前回覆。"],
+      ["", ""],
+      ["closing", "謝謝！"],
+      ["signature", "陳美玲"],
+      ["signature", "業務專員 | 台灣科技股份有限公司"],
+      ["signature", "電話：+886 2 2345 6789"],
+      ["", ""],
+      ["attribution", "寄件者: 王大明 <daming.wang@example.tw>"],
+      ["attribution", "寄件日期: 2024年2月5日 上午 9:12"],
+      ["attribution", "收件者: 陳美玲"],
+      ["attribution", "主旨: 報價單"],
+      ["", ""],
+      ["quote", "陳小姐您好，"],
+      ["quote", "附件為本次報價單，請查收。"]
+    ],
+    "contact": {
+      "name": "陳美玲",
+      "title": "業務專員",
+      "company": "台灣科技股份有限公司",
+      "phone": ["+886 2 2345 6789"]
+    }
+  },
+  {
+    "name": "japanese-fullwidth-quote",
+    "lines": [
+      ["greeting", "田中様"],
+      ["", ""],
+      ["reply", "お世話になっております。山田です。"],
+      ["reply", "資料を拝見しました。来週の打ち合わせでご相談させてください。"],
+      ["", ""],
+      ["closing", "よろしくお願いいたします。"],
+      ["", ""],
+      ["signature", "山田太郎"],
+      ["signature", "株式会社サンプル 営業部"],
+      ["signature", "TEL: 03-1234-5678"],
+      ["", ""],
+      ["attribution", "2024/02/05 9:12 田中一郎 <tanaka@example.co.jp>:"],
+      ["quote", "＞山田様"],
+      ["quote", "＞"],
+      ["quote", "＞資料をお送りします。"],
+      ["quote", "＞ご確認ください。"]
+    ],
+    "contact": {
+      "name": "山田太郎",
+      "company": "株式会社サンプル 営業部",
+      "phone": ["03-1234-5678"]
+    }
+  },
+  {
+    "name": "lotus-notes",
+    "lines": [
+      ["reply", "Approved. Please go ahead and book it."],
+      ["", ""],
+      ["signature", "Robert"],
+      ["", ""],
+      ["", ""],
+      ["", ""],
+      ["attribution", "\"Linda Park\" <linda.park@example.com> wrote on 03/05/2024 10:15:22 AM:"],
+      ["", ""],
+      ["quote", "> From: \"Linda Park\" <linda.park@example.com>"],
+      ["quote", "> To: robert.chen@example.com"],
+      ["quote", "> Date: 03/05/2024 10:15 AM"],
+      ["quote", "> Subject: Travel request"],
+      ["quote", "> "],
+      ["quote", "> Hi Robert,"],
+      ["quote", "> "],
+      ["quote", "> Can I book the flights for the Denver trip?"]
+    ],
+    "contact": { "name": "Robert" }
+  },
+  {
+    "name": "lotus-pipe-quotes",
+    "lines": [
+      ["reply", "Yes, that matches what I have."],
+      ["", ""],
+      ["attribution", "Karen Hill/US/ACME@ACME wrote on 02/05/2024 04:30:11 PM:"],
+      ["", ""],
+      ["quote", "| Hi,"],
+      ["quote", "|"],
+      ["quote", "| the totals for January are attached."],
+      ["quote", "| Let me know if they match."],
+      ["quote", "|"],
+      ["quote", "| Karen"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "zendesk-top-marker",
+    "lines": [
+      ["disclaimer", "##- Please type your reply above this line -##"],
+      ["", ""],
+      ["reply", "Hi, I'm still seeing the error after the update. Screenshot attached."],
+      ["", ""],
+      ["closing", "Thanks"],
+      ["signature", "Dana"],
+      ["", ""],
+      ["attribution", "On Mon, 5 Feb at 9:12 AM , Support <support@example.zendesk.com> wrote:"],
+      ["quote", "> Your request (#48213) has been updated."],
+      ["quote", "> To add additional comments, reply to this email."]
+    ],
+    "contact": { "name": "Dana" }
+  },
+  {
+    "name": "jira-notification",
+    "lines": [
+      ["reply", "Looks like a regression from the cache change."],
+      ["", ""],
+      ["signature", "Priya"],
+      ["", ""],
+      [
+        "attribution",
+        "> On 5 Feb 2024, at 09:12, Sam Jones (Jira) <jira@example.atlassian.net> wrote:"
+      ],
+      ["quote", ">"],
+      ["quote", "> Sam Jones updated an issue"],
+      ["quote", ">"],
+      ["quote", "> ----------------------------------------"],
+      ["quote", "> Web / WEB-1234"],
+      ["quote", "> Login page blank after deploy"],
+      ["quote", "> ----------------------------------------"],
+      ["quote", ">"],
+      [
+        "quote",
+        "> Get Jira notifications on your phone! Download the Jira Cloud app for Android or iOS"
+      ]
+    ],
+    "contact": { "name": "Priya" }
+  },
+  {
+    "name": "markdown-code-fence",
+    "lines": [
+      ["reply", "You can reproduce it with:"],
+      ["", ""],
+      ["reply", "```"],
+      ["reply", "curl -X POST https://api.example.com/v1/items -d '{\"name\": \"test\"}'"],
+      ["reply", "```"],
+      ["", ""],
+      ["reply", "It returns a 500 instead of a 400."],
+      ["", ""],
+      ["reply", "| Field | Value |"],
+      ["reply", "|-------|-------|"],
+      ["reply", "| name  | test  |"],
+      ["", ""],
+      ["closing", "Cheers,"],
+      ["signature", "Tom"],
+      ["", ""],
+      ["attribution", "On Tue, Feb 6, 2024 at 11:02 AM Ana Ruiz <ana@example.com> wrote:"],
+      ["quote", "> Do you have a minimal repro?"]
+    ],
+    "contact": { "name": "Tom" }
+  },
+  {
+    "name": "ascii-art-signature",
+    "lines": [
+      ["reply", "Patch applied, thanks!"],
+      ["", ""],
+      ["signature", "+---------------------------+"],
+      ["signature", "| Klaus Berger              |"],
+      ["signature", "| Systems Administrator     |"],
+      ["signature", "| klaus@example.org         |"],
+      ["signature", "+---------------------------+"]
+    ],
+    "contact": {
+      "name": "Klaus Berger",
+      "title": "Systems Administrator",
+      "email": ["klaus@example.org"]
+    }
+  },
+  {
+    "name": "windows-mail-from-block",
+    "lines": [
+      ["reply", "Yes, Friday works."],
+      ["", ""],
+      ["signature", "Sent from Mail for Windows"],
+      ["", ""],
+      ["attribution", "From: Oliver Grant"],
+      ["attribution", "Sent: Monday, February 5, 2024 9:12 AM"],
+      ["attribution", "To: Emma Stone"],
+      ["attribution", "Subject: Friday?"],
+      ["", ""],
+      ["quote", "Would Friday work for the review?"],
+      ["", ""],
+      ["quote", "Oliver"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "slash-signature",
+    "lines": [
+      ["reply", "Done - the DNS change is live."],
+      ["", ""],
+      ["signature", "Nadia Hussain / Network Engineer / Beacon Networks"],
+      ["signature", "+44 20 7946 0958"]
+    ],
+    "contact": {
+      "name": "Nadia Hussain",
+      "title": "Network Engineer",
+      "company": "Beacon Networks",
+      "phone": ["+44 20 7946 0958"]
+    }
+  },
+  {
+    "name": "closing-and-name-same-line",
+    "lines": [
+      ["reply", "I'll have the numbers to you by Thursday."],
+      ["", ""],
+      ["signature", "Regards, Miguel"],
+      ["", ""],
+      ["attribution", "On 2/5/24, 9:12 AM, \"Laura Chen\" <laura@example.com> wrote:"],
+      ["", ""],
+      ["quote", "> When can we expect the Q4 numbers?"]
+    ],
+    "contact": { "name": "Miguel" }
+  },
+  {
+    "name": "single-initial",
+    "lines": [["reply", "ok, will do"], ["", ""], ["closing", "thanks,"], ["signature", "J"]],
+    "contact": { "name": "J" }
+  },
+  {
+    "name": "bottom-post-with-snip",
+    "lines": [
+      ["attribution", "On Mon, Feb 05, 2024 at 09:12:34AM +0100, Stefan Koch wrote:"],
+      ["quote", "> The patch breaks the build on arm64:"],
+      ["quote", "> "],
+      ["quote", "> [snip]"],
+      ["quote", "> "],
+      ["quote", "> Can you take a look?"],
+      ["", ""],
+      ["reply", "Fixed in v2, sorry about that. The cast was wrong on 32-bit targets."],
+      ["", ""],
+      ["reply", "[snip]"],
+      ["", ""],
+      ["quote", "> Also, please update the changelog."],
+      ["", ""],
+      ["reply", "Done."],
+      ["", ""],
+      ["closing", "Thanks,"],
+      ["signature", "Wei"]
+    ],
+    "contact": { "name": "Wei" }
+  },
+  {
+    "name": "date-word-in-body",
+    "lines": [
+      ["greeting", "Hi team,"],
+      ["", ""],
+      ["reply", "Date: TBD"],
+      ["reply", "Location: Room 4B"],
+      ["reply", "Agenda: roadmap review, hiring, budget"],
+      ["", ""],
+      ["reply", "From my side, nothing else to add."],
+      ["", ""],
+      ["closing", "Thanks,"],
+      ["signature", "Grace"]
+    ],
+    "contact": { "name": "Grace" }
+  },
+  {
+    "name": "out-of-office",
+    "lines": [
+      [
+        "reply",
+        "Thank you for your email. I am out of the office until Monday, 12 February with no access to email."
+      ],
+      ["reply", "For urgent matters please contact Sarah Lee at sarah.lee@example.com."],
+      ["", ""],
+      ["closing", "Kind regards,"],
+      ["signature", "Daniel Wright"],
+      ["signature", "Head of Partnerships, Halcyon Media"]
+    ],
+    "contact": {
+      "name": "Daniel Wright",
+      "title": "Head of Partnerships",
+      "company": "Halcyon Media"
+    }
+  },
+  {
+    "name": "calendar-invite-text",
+    "lines": [
+      ["reply", "You have been invited to the following event."],
+      ["", ""],
+      ["reply", "Roadmap review"],
+      ["reply", "When: Thu 8 Feb 2024 14:00 – 15:00 (CET)"],
+      ["reply", "Where: Zoom"],
+      ["reply", "Calendar: team@example.com"],
+      ["reply", "Who: Anna Schmidt - organizer, Ben Ford"],
+      ["", ""],
+      [
+        "disclaimer",
+        "Invitation from Google Calendar. You are receiving this email because you are an attendee. To stop receiving these emails, change your settings."
+      ]
+    ],
+    "contact": null
+  },
+  {
+    "name": "apple-forward-only",
+    "lines": [
+      ["forward_header", "Begin forwarded message:"],
+      ["", ""],
+      ["forward_header", "From: Accounts Payable <ap@example.com>"],
+      ["forward_header", "Subject: Invoice INV-2024-0042"],
+      ["forward_header", "Date: 5 February 2024 at 09:12:03 GMT"],
+      ["forward_header", "To: Paul Adams <paul@example.com>"],
+      ["", ""],
+      ["quote", "Hi Paul,"],
+      ["", ""],
+      ["quote", "Please find attached invoice INV-2024-0042, due in 30 days."],
+      ["", ""],
+      ["quote", "Best regards,"],
+      ["quote", "Accounts Payable"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "bottom-post-signature",
+    "lines": [
+      ["attribution", "On 05/02/2024 09:12, Ines Costa wrote:"],
+      ["quote", "> Can you review the PR today?"],
+      ["", ""],
+      ["reply", "Reviewed and approved. One small nit inline."],
+      ["", ""],
+      ["closing", "Best,"],
+      ["signature", "Rui Pereira"],
+      ["signature", "Staff Engineer @ Lumen"],
+      ["signature", "rui@example.pt | +351 912 345 678"]
+    ],
+    "contact": {
+      "name": "Rui Pereira",
+      "title": "Staff Engineer",
+      "company": "Lumen",
+      "email": ["rui@example.pt"],
+      "phone": ["+351 912 345 678"]
+    }
+  },
+  {
+    "name": "rfc-delimiter-with-contacts",
+    "lines": [
+      ["reply", "Merged. Thanks for the quick turnaround."],
+      ["", ""],
+      ["signature", "-- "],
+      ["signature", "Ahmed Khalil"],
+      ["signature", "https://ahmed.example.dev"],
+      ["signature", "+1.415.555.0142"]
+    ],
+    "contact": {
+      "name": "Ahmed Khalil",
+      "url": ["https://ahmed.example.dev"],
+      "phone": ["+1.415.555.0142"]
+    }
+  },
+  {
+    "name": "mobile-then-full-signature",
+    "lines": [
+      ["reply", "Yes please, send it over."],
+      ["", ""],
+      ["signature", "Sent from my iPhone"],
+      ["", ""],
+      ["signature", "Julia Weber"],
+      ["signature", "Projektleiterin"],
+      ["signature", "Mobil +49 171 234 5678"]
+    ],
+    "contact": { "name": "Julia Weber", "title": "Projektleiterin", "phone": ["+49 171 234 5678"] }
+  },
+  {
+    "name": "aligned-signature-table",
+    "lines": [
+      ["reply", "Attached is the signed copy."],
+      ["", ""],
+      ["closing", "Regards"],
+      ["", ""],
+      ["signature", "Peter Novak"],
+      ["signature", "Controller"],
+      ["signature", "Tel   +43 1 234 5678"],
+      ["signature", "Fax   +43 1 234 5679"],
+      ["signature", "Mail  peter.novak@example.at"]
+    ],
+    "contact": {
+      "name": "Peter Novak",
+      "title": "Controller",
+      "phone": ["+43 1 234 5678", "+43 1 234 5679"],
+      "email": ["peter.novak@example.at"]
+    }
+  },
+  {
+    "name": "german-two-blocks",
+    "lines": [
+      ["greeting", "Sehr geehrter Herr Braun,"],
+      ["", ""],
+      ["reply", "vielen Dank für Ihre Anfrage. Ein Angebot erhalten Sie bis Ende der Woche."],
+      ["", ""],
+      ["closing", "Mit freundlichen Grüßen"],
+      ["", ""],
+      ["signature", "i.A. Sabine Fischer"],
+      ["signature", "Vertriebsinnendienst"],
+      ["", ""],
+      ["signature", "Fischer & Söhne GmbH"],
+      ["signature", "Industriestraße 5"],
+      ["signature", "70565 Stuttgart"],
+      ["signature", "Tel.: 0711 123456-0"],
+      ["", ""],
+      [
+        "disclaimer",
+        "Geschäftsführer: Karl Fischer | Amtsgericht Stuttgart HRB 12345 | USt-IdNr. DE123456789"
+      ],
+      [
+        "disclaimer",
+        "Diese E-Mail kann vertrauliche Informationen enthalten. Wenn Sie nicht der Adressat sind, löschen Sie bitte diese Nachricht."
+      ]
+    ],
+    "contact": {
+      "name": "i.A. Sabine Fischer",
+      "title": "Vertriebsinnendienst",
+      "company": "Fischer & Söhne GmbH",
+      "address": "Industriestraße 5, 70565 Stuttgart",
+      "phone": ["0711 123456-0"]
+    }
+  },
+  {
+    "name": "indian-english",
+    "lines": [
+      ["greeting", "Dear Sir,"],
+      ["", ""],
+      [
+        "reply",
+        "Kindly find attached the revised quotation as discussed. Do the needful at the earliest."
+      ],
+      ["", ""],
+      ["closing", "Thanks & Regards,"],
+      ["signature", "Rahul Verma"],
+      ["signature", "Sr. Sales Executive"],
+      ["signature", "Sharma Enterprises Pvt. Ltd."],
+      ["signature", "Mob: 98765 43210"],
+      ["", ""],
+      ["signature", "Sent from Jio phone"]
+    ],
+    "contact": {
+      "name": "Rahul Verma",
+      "title": "Sr. Sales Executive",
+      "company": "Sharma Enterprises Pvt. Ltd.",
+      "phone": ["98765 43210"]
+    }
+  },
+  {
+    "name": "support-ticket-update",
+    "lines": [
+      ["reply", "Ticket #12345 has been updated."],
+      ["", ""],
+      ["reply", "Status: Pending customer"],
+      ["reply", "Assignee: Leo Martin"],
+      ["", ""],
+      ["reply", "----"],
+      ["reply", "Hi, we deployed a fix to staging. Can you confirm it works on your end?"],
+      ["reply", "----"],
+      ["", ""],
+      [
+        "disclaimer",
+        "You are receiving this because you opened the ticket. Reply to this email to add a comment, or visit https://help.example.com/tickets/12345"
+      ]
+    ],
+    "contact": null
+  },
+  {
+    "name": "only-signature",
+    "lines": [
+      ["signature", "Marta Kowalska"],
+      ["signature", "Account Manager, Vantage"],
+      ["signature", "+48 601 234 567"]
+    ],
+    "contact": {
+      "name": "Marta Kowalska",
+      "title": "Account Manager",
+      "company": "Vantage",
+      "phone": ["+48 601 234 567"]
+    }
+  },
+  { "name": "single-word", "lines": [["reply", "ok"]], "contact": null },
+  {
+    "name": "ps-after-signature",
+    "lines": [
+      ["reply", "See you tomorrow at 10."],
+      ["", ""],
+      ["closing", "Best,"],
+      ["signature", "Chloe"],
+      ["", ""],
+      ["reply", "PS: bring the adapter, the room only has HDMI."]
+    ],
+    "contact": { "name": "Chloe" }
+  },
+  {
+    "name": "one-long-line",
+    "lines": [
+      [
+        "reply",
+        "Hi Mark just a quick note to say the shipment left the warehouse this morning and the tracking number is 1Z999AA10123456784 so it should arrive by Wednesday at the latest let me know if you need anything else before then thanks Diane"
+      ]
+    ],
+    "contact": null
+  },
+  {
+    "name": "emoji-heavy",
+    "lines": [
+      ["greeting", "Hey!! 👋"],
+      ["", ""],
+      ["reply", "Launch is a go 🚀🚀🚀 Huge thanks to everyone 🙏"],
+      ["", ""],
+      ["closing", "🎉 Cheers,"],
+      ["signature", "Sofía ✨"],
+      ["signature", "Growth Lead · Ember"]
+    ],
+    "contact": { "name": "Sofía ✨", "title": "Growth Lead", "company": "Ember" }
+  },
+  {
+    "name": "tab-indented-quote",
+    "lines": [
+      ["reply", "Agreed, let's go with option two."],
+      ["", ""],
+      ["attribution", "Elena Rossi wrote:"],
+      ["quote", "\tOption one needs a schema migration, option two"],
+      ["quote", "\tonly changes the API layer. I'd prefer two."],
+      ["", ""],
+      ["closing", "Ciao,"],
+      ["signature", "Marco"]
+    ],
+    "contact": { "name": "Marco" }
+  },
+  {
+    "name": "original-message-subject-first",
+    "lines": [
+      ["reply", "Thanks, received."],
+      ["", ""],
+      ["attribution", "---- original message ----"],
+      ["attribution", "Subject: Contract draft"],
+      ["attribution", "Date: 2024-02-05 09:12"],
+      ["attribution", "From: legal@example.com"],
+      ["attribution", "To: ops@example.com"],
+      ["", ""],
+      ["quote", "Please find the contract draft attached for your review."]
+    ],
+    "contact": null
+  },
+  {
+    "name": "said-the-following",
+    "lines": [
+      ["reply", "No objections from me."],
+      ["", ""],
+      ["attribution", "Jane Doe said the following on 3/5/2024 10:15 AM:"],
+      ["quote", "> Proposal: we move the standup to 9:30."],
+      ["quote", "> Any objections?"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "spanish-outlook-full",
+    "lines": [
+      ["greeting", "Buenos días Carlos,"],
+      ["", ""],
+      ["reply", "Adjunto la factura corregida. Disculpa las molestias."],
+      ["", ""],
+      ["closing", "Un cordial saludo,"],
+      ["signature", "Lucía Fernández"],
+      ["signature", "Departamento de Administración"],
+      ["signature", "Grupo Solana, S.A."],
+      ["signature", "Tfno.: 91 123 45 67"],
+      ["", ""],
+      ["attribution", "De: Carlos Ortega <carlos.ortega@example.es>"],
+      ["attribution", "Enviado: viernes, 2 de febrero de 2024 10:02"],
+      ["attribution", "Para: Lucía Fernández"],
+      ["attribution", "Asunto: RE: Factura 2024-018"],
+      ["", ""],
+      ["quote", "Hola Lucía,"],
+      ["", ""],
+      ["quote", "la factura tiene un error en el IVA, ¿puedes revisarla?"],
+      ["", ""],
+      ["quote", "Gracias,"],
+      ["quote", "Carlos"]
+    ],
+    "contact": {
+      "name": "Lucía Fernández",
+      "title": "Departamento de Administración",
+      "company": "Grupo Solana, S.A.",
+      "phone": ["91 123 45 67"]
+    }
+  },
+  {
+    "name": "hotmail-quoted-headers",
+    "lines": [
+      ["", ""],
+      ["reply", "Hello"],
+      ["", ""],
+      ["quote", "> Subject: Test"],
+      ["quote", "> From: bob@xxx.mailgun.org"],
+      ["quote", "> To: xxx@gmail.com; xxx@hotmail.com"],
+      ["quote", "> Date: Mon, 2 Apr 2012 17:44:22 +0400"],
+      ["quote", "> "],
+      ["quote", "> Hi"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "pmp-signature",
+    "lines": [
+      ["reply", "Updated timeline attached. Milestone 3 slips one week."],
+      ["", ""],
+      ["closing", "Thank you,"],
+      ["", ""],
+      ["signature", "John Smith, PMP"],
+      ["signature", "Senior Project Manager | Acme Corp"],
+      ["signature", "555.123.4567 (o) | 555.987.6543 (m)"],
+      ["signature", "jsmith@acme.example"]
+    ],
+    "contact": {
+      "name": "John Smith, PMP",
+      "title": "Senior Project Manager",
+      "company": "Acme Corp",
+      "phone": ["555.123.4567", "555.987.6543"],
+      "email": ["jsmith@acme.example"]
+    }
+  },
+  {
+    "name": "arabic-greeting-closing",
+    "lines": [
+      ["greeting", "السلام عليكم أحمد،"],
+      ["", ""],
+      [
+        "reply",
+        "The revised proposal is attached. Let me know if the pricing works for your team."
+      ],
+      ["", ""],
+      ["closing", "مع خالص التحية،"],
+      ["signature", "Omar Al-Sayed"],
+      ["signature", "Business Development Manager"],
+      ["signature", "Gulf Horizon Trading LLC"],
+      ["signature", "+971 50 123 4567"]
+    ],
+    "contact": {
+      "name": "Omar Al-Sayed",
+      "title": "Business Development Manager",
+      "company": "Gulf Horizon Trading LLC",
+      "phone": ["+971 50 123 4567"]
+    }
+  },
+  {
+    "name": "caps-name-paren-title",
+    "lines": [
+      ["reply", "Confirmed for the 14th."],
+      ["", ""],
+      ["signature", "MARIA LOPEZ"],
+      ["signature", "(Regional Sales Director)"],
+      ["signature", "Northwind Traders"]
+    ],
+    "contact": {
+      "name": "MARIA LOPEZ",
+      "title": "Regional Sales Director",
+      "company": "Northwind Traders"
+    }
+  },
+  {
+    "name": "german-doctor-signature",
+    "lines": [
+      ["greeting", "Liebe Frau Weber,"],
+      ["", ""],
+      ["reply", "der Befund liegt vor, alles unauffällig. Wir sehen uns zur Kontrolle im März."],
+      ["", ""],
+      ["closing", "Herzliche Grüße"],
+      ["signature", "Dr. med. Anna Müller"],
+      ["signature", "Fachärztin für Innere Medizin"],
+      ["signature", "Praxis am Markt · Marktplatz 3 · 80331 München"],
+      ["signature", "Tel 089 123456"]
+    ],
+    "contact": {
+      "name": "Dr. med. Anna Müller",
+      "title": "Fachärztin für Innere Medizin",
+      "company": "Praxis am Markt",
+      "address": "Marktplatz 3, 80331 München",
+      "phone": ["089 123456"]
+    }
+  },
+  {
+    "name": "linkedin-connect",
+    "lines": [
+      ["reply", "Great meeting you at the conference!"],
+      ["", ""],
+      ["closing", "Talk soon,"],
+      ["signature", "Ben Carter"],
+      ["signature", "Connect with me: https://www.linkedin.com/in/bencarter"]
+    ],
+    "contact": { "name": "Ben Carter", "url": ["https://www.linkedin.com/in/bencarter"] }
+  },
+  {
+    "name": "yours-blank-name",
+    "lines": [
+      ["reply", "I've booked the table for 7."],
+      ["", ""],
+      ["closing", "Yours,"],
+      ["", ""],
+      ["signature", "Henry"]
+    ],
+    "contact": { "name": "Henry" }
+  },
+  {
+    "name": "reply-after-quote-thanks-inline",
+    "lines": [
+      ["attribution", "On Feb 5, 2024, at 09:12, Nora Fitzgerald <nora@example.ie> wrote:"],
+      ["", ""],
+      ["quote", "> Did the payment go through?"],
+      ["", ""],
+      ["reply", "Yes, it cleared this morning. Thanks, Sean"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "nested-original-in-quote-then-reply",
+    "lines": [
+      ["attribution", "On Mon, Feb 5, 2024 at 9:12 AM Alex Kim <alex@example.com> wrote:"],
+      ["quote", "> Forwarding the vendor's answer below."],
+      ["quote", ">"],
+      ["quote", "> -----Original Message-----"],
+      ["quote", "> From: Vendor Support <support@vendor.example>"],
+      ["quote", "> Sent: Friday, February 2, 2024 4:44 PM"],
+      ["quote", "> To: Alex Kim"],
+      ["quote", "> Subject: RE: Licence renewal"],
+      ["quote", ">"],
+      ["quote", "> The renewal price is unchanged for 2024."],
+      ["", ""],
+      ["reply", "Great, then let's renew for another year."],
+      ["", ""],
+      ["closing", "Thanks,"],
+      ["signature", "Jordan"]
+    ],
+    "contact": { "name": "Jordan" }
+  },
+  {
+    "name": "newsletter-footer",
+    "lines": [
+      ["reply", "This week: three new integrations, a faster dashboard, and our February webinar."],
+      ["", ""],
+      ["reply", "Read the full changelog at https://example.com/changelog"],
+      ["", ""],
+      ["disclaimer", "You're receiving this because you signed up at example.com."],
+      ["disclaimer", "Unsubscribe: https://example.com/unsubscribe?u=abc123"],
+      ["disclaimer", "Example Inc, 500 Market St, San Francisco, CA 94105"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "suite-address-fax",
+    "lines": [
+      ["reply", "The signed lease is in the mail."],
+      ["", ""],
+      ["closing", "Sincerely,"],
+      ["signature", "Patricia Moore"],
+      ["signature", "Property Manager"],
+      ["signature", "Crestview Realty"],
+      ["signature", "1200 Oak Street, Suite 310"],
+      ["signature", "Portland, OR 97205"],
+      ["signature", "Phone: (503) 555-0187"],
+      ["signature", "Fax: (503) 555-0188"]
+    ],
+    "contact": {
+      "name": "Patricia Moore",
+      "title": "Property Manager",
+      "company": "Crestview Realty",
+      "address": "1200 Oak Street, Suite 310, Portland, OR 97205",
+      "phone": ["(503) 555-0187", "(503) 555-0188"]
+    }
+  },
+  {
+    "name": "markdown-hr-before-signature",
+    "lines": [
+      ["reply", "Draft v3 is in the shared folder."],
+      ["", ""],
+      ["signature", "---"],
+      ["signature", "Liu Yang"],
+      ["signature", "Technical Writer, Quill Docs"]
+    ],
+    "contact": { "name": "Liu Yang", "title": "Technical Writer", "company": "Quill Docs" }
+  },
+  {
+    "name": "quoted-text-hidden",
+    "lines": [
+      ["reply", "+1, ship it."],
+      ["", ""],
+      ["attribution", "On Tue, 6 Feb 2024, 10:15 Sam O'Neil, <sam@example.com> wrote:"],
+      ["", ""],
+      ["quote", "> Ready to release 2.4?"],
+      ["quote", "> [Quoted text hidden]"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "outlook-ios-link",
+    "lines": [
+      ["reply", "Will call you in 10."],
+      ["", ""],
+      ["signature", "Get Outlook for iOS<https://aka.ms/o0ukef>"],
+      ["", ""],
+      ["attribution", "From: Rachel Green <rachel@example.com>"],
+      ["attribution", "Sent: Tuesday, February 6, 2024 10:15:03 AM"],
+      ["attribution", "To: Ross Geller"],
+      ["attribution", "Subject: Call?"],
+      ["", ""],
+      ["quote", "Do you have 5 minutes?"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "digest-style",
+    "lines": [
+      ["reply", "Replying to the digest below re: message 2."],
+      ["", ""],
+      ["reply", "We can host the meetup in March."],
+      ["", ""],
+      ["attribution", "Message: 2"],
+      ["attribution", "Date: Mon, 5 Feb 2024 09:12:00 +0000"],
+      ["attribution", "From: Organizer <organizer@lists.example.org>"],
+      ["attribution", "Subject: [meetup] Venue for March?"],
+      ["", ""],
+      ["quote", "Does anyone have a venue for the March meetup?"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "slack-paste",
+    "lines": [
+      ["reply", "Pasting the thread from Slack for context:"],
+      ["", ""],
+      ["reply", "alice  10:02 AM"],
+      ["reply", "the deploy failed on step 3"],
+      ["reply", "bob  10:04 AM"],
+      ["reply", "looking now"],
+      ["", ""],
+      ["reply", "So the root cause was the expired token."],
+      ["", ""],
+      ["closing", "Thanks,"],
+      ["signature", "Alice"]
+    ],
+    "contact": { "name": "Alice" }
+  },
+  {
+    "name": "french-thunderbird-wrapped",
+    "lines": [
+      ["greeting", "Bonjour Monsieur Petit,"],
+      ["", ""],
+      [
+        "reply",
+        "je vous confirme la réception du dossier. Nous reviendrons vers vous sous huit jours."
+      ],
+      ["", ""],
+      ["closing", "Bien cordialement,"],
+      ["", ""],
+      ["signature", "Camille Roux"],
+      ["signature", "Chargée de clientèle – Banque du Nord"],
+      ["signature", "Ligne directe : 01 23 45 67 89"],
+      ["", ""],
+      ["attribution", "Le 05/02/2024 à 09:12, Jean Petit a"],
+      ["attribution", "écrit :"],
+      ["quote", "> Bonjour,"],
+      ["quote", "> veuillez trouver ci-joint le dossier complet."]
+    ],
+    "contact": {
+      "name": "Camille Roux",
+      "title": "Chargée de clientèle",
+      "company": "Banque du Nord",
+      "phone": ["01 23 45 67 89"]
+    }
+  },
+  {
+    "name": "dutch-short",
+    "lines": [
+      ["greeting", "Hoi Sanne,"],
+      ["", ""],
+      ["reply", "Top, dan zie ik je donderdag."],
+      ["", ""],
+      ["closing", "Groetjes,"],
+      ["signature", "Daan"],
+      ["", ""],
+      ["attribution", "Op 5 feb 2024 om 09:12 schreef Sanne de Vries <sanne@example.nl>:"],
+      ["quote", "> Kun je donderdag?"]
+    ],
+    "contact": { "name": "Daan" }
+  },
+  {
+    "name": "swedish-with-mobile",
+    "lines": [
+      ["reply", "Låter bra, vi kör på det."],
+      ["", ""],
+      ["signature", "Skickat från min Samsung"],
+      ["", ""],
+      ["attribution", "Den 5 feb. 2024 09:12 skrev Erik Andersson <erik@example.se>:"],
+      ["", ""],
+      ["quote", "> Hej, kan vi flytta mötet till torsdag?"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "polish-signature",
+    "lines": [
+      ["greeting", "Dzień dobry,"],
+      ["", ""],
+      ["reply", "potwierdzam termin spotkania na piątek o 10:00."],
+      ["", ""],
+      ["closing", "Pozdrawiam,"],
+      ["signature", "Katarzyna Nowak"],
+      ["signature", "Specjalista ds. sprzedaży"],
+      ["signature", "Nowak Logistics Sp. z o.o."],
+      ["signature", "tel. +48 22 123 45 67"]
+    ],
+    "contact": {
+      "name": "Katarzyna Nowak",
+      "title": "Specjalista ds. sprzedaży",
+      "company": "Nowak Logistics Sp. z o.o.",
+      "phone": ["+48 22 123 45 67"]
+    }
+  },
+  {
+    "name": "portuguese-br-outlook",
+    "lines": [
+      ["greeting", "Olá Pedro,"],
+      ["", ""],
+      ["reply", "Segue em anexo o relatório atualizado."],
+      ["", ""],
+      ["closing", "Abraços,"],
+      ["signature", "Juliana Santos"],
+      ["signature", "Analista Financeira | Grupo Atlas"],
+      ["signature", "(11) 91234-5678"],
+      ["", ""],
+      ["attribution", "De: Pedro Alves <pedro@example.com.br>"],
+      ["attribution", "Enviada em: segunda-feira, 5 de fevereiro de 2024 09:12"],
+      ["attribution", "Para: Juliana Santos"],
+      ["attribution", "Assunto: Relatório"],
+      ["", ""],
+      ["quote", "Juliana, pode me enviar o relatório de janeiro?"]
+    ],
+    "contact": {
+      "name": "Juliana Santos",
+      "title": "Analista Financeira",
+      "company": "Grupo Atlas",
+      "phone": ["(11) 91234-5678"]
+    }
+  },
+  {
+    "name": "italian-wrapped-attribution",
+    "lines": [
+      ["reply", "Perfetto, grazie mille."],
+      ["", ""],
+      ["signature", "Inviato da iPhone"],
+      ["", ""],
+      ["attribution", "Il giorno lun 5 feb 2024 alle ore 09:12 Giulia Ferrari"],
+      ["attribution", "<giulia.ferrari@example.it> ha scritto:"],
+      ["", ""],
+      ["quote", "> Ti confermo l'appuntamento di giovedì."]
+    ],
+    "contact": null
+  },
+  {
+    "name": "gmail-wrapped-email-line",
+    "lines": [
+      ["reply", "Sounds good to me."],
+      ["", ""],
+      ["attribution", "On Wed, Feb 7, 2024 at 3:31 PM Christopher Alexander Montgomery <"],
+      ["attribution", "christopher.montgomery@example-corporation.com> wrote:"],
+      ["", ""],
+      ["quote", "> Shall we finalize the agenda?"],
+      ["quote", ">"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "two-signatures-quoted-and-own",
+    "lines": [
+      ["reply", "Thanks Ana, I'll take it from here."],
+      ["", ""],
+      ["closing", "Best,"],
+      ["signature", "Leo Fischer"],
+      ["signature", "Customer Success | Kestrel"],
+      ["signature", "leo@kestrel.example"],
+      ["", ""],
+      ["attribution", "On Mon, Feb 5, 2024 at 9:12 AM Ana Souza <ana@client.example> wrote:"],
+      ["quote", "> Hi Leo,"],
+      ["quote", "> the export still fails for large files."],
+      ["quote", ">"],
+      ["quote", "> Ana Souza"],
+      ["quote", "> Data Lead | Client Co"],
+      ["quote", "> +55 11 98765 4321"]
+    ],
+    "contact": {
+      "name": "Leo Fischer",
+      "title": "Customer Success",
+      "company": "Kestrel",
+      "email": ["leo@kestrel.example"]
+    }
+  },
+  {
+    "name": "legal-disclaimer-before-quote",
+    "lines": [
+      ["reply", "Please see my comments in the attached redline."],
+      ["", ""],
+      ["closing", "Regards,"],
+      ["signature", "Victoria Hale"],
+      ["signature", "Associate | Hale & Partners LLP"],
+      ["", ""],
+      [
+        "disclaimer",
+        "This communication is privileged and confidential. If you are not the intended recipient, please delete it and notify the sender."
+      ],
+      ["", ""],
+      ["attribution", "-----Original Message-----"],
+      ["attribution", "From: Mark Ellis <mark@client.example>"],
+      ["attribution", "Sent: 05 February 2024 09:12"],
+      ["attribution", "To: Victoria Hale"],
+      ["attribution", "Subject: Draft agreement"],
+      ["", ""],
+      ["quote", "Victoria, could you review the attached draft?"]
+    ],
+    "contact": { "name": "Victoria Hale", "title": "Associate", "company": "Hale & Partners LLP" }
+  },
+  {
+    "name": "crlf-outlook",
+    "newline": "\r\n",
+    "lines": [
+      ["reply", "Approved, thanks."],
+      ["", ""],
+      ["signature", "Karen"],
+      ["", ""],
+      ["attribution", "________________________________"],
+      ["attribution", "From: Finance <finance@example.com>"],
+      ["attribution", "Sent: 05 February 2024 09:12"],
+      ["attribution", "To: Karen Hill"],
+      ["attribution", "Subject: Expense report"],
+      ["", ""],
+      ["quote", "Please approve the attached expense report."]
+    ],
+    "contact": { "name": "Karen" }
+  },
+  {
+    "name": "quote-with-no-attribution",
+    "lines": [
+      ["quote", "> we could do it next week"],
+      ["quote", "> if that works"],
+      ["", ""],
+      ["reply", "next week is fine"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "no-trailing-newline-short",
+    "trailing_newline": false,
+    "lines": [
+      ["reply", "Received, thank you!"],
+      ["", ""],
+      ["signature", "Ivan Petrov"],
+      ["signature", "Ironclad Security"]
+    ],
+    "contact": { "name": "Ivan Petrov", "company": "Ironclad Security" }
+  },
+  {
+    "name": "greeting-only-reply",
+    "lines": [
+      ["greeting", "Hi all,"],
+      ["", ""],
+      ["reply", "Reminder: office is closed on Monday."],
+      ["", ""],
+      ["closing", "Have a good weekend!"]
+    ],
+    "contact": null
+  },
+  {
+    "name": "name-with-pronouns-and-quote-line",
+    "lines": [
+      ["reply", "Done, the invite is sent."],
+      ["", ""],
+      ["signature", "Sam Rivera (they/them)"],
+      ["signature", "Community Manager, Mosaic"],
+      ["signature", "\"Be kind, ship often.\""]
+    ],
+    "contact": { "name": "Sam Rivera", "title": "Community Manager", "company": "Mosaic" }
+  },
+  {
+    "name": "mailing-list-bottom-post",
+    "lines": [
+      ["attribution", "On 2024-02-05 09:12, Tomas Berg via dev wrote:"],
+      ["quote", "> Is anyone else seeing flaky tests on CI since the runner upgrade?"],
+      ["", ""],
+      ["reply", "Yes, same here. Pinning the runner image to 22.04 fixed it for us."],
+      ["", ""],
+      ["signature", "-- "],
+      ["signature", "Nils"],
+      ["", ""],
+      ["disclaimer", "_______________________________________________"],
+      ["disclaimer", "dev mailing list"],
+      ["disclaimer", "dev@lists.example.org"],
+      ["disclaimer", "https://lists.example.org/mailman/listinfo/dev"]
+    ],
+    "contact": { "name": "Nils" }
+  }
+]

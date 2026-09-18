@@ -233,7 +233,8 @@ class Gen:
             full = r.choice([f"Dr. {first} {last}", f"{first} {last}, PhD", f"{first} {last}, MD", f"Prof. {first} {last}", f"{first} {last}, CPA", f"{first} {last} Jr.", f"{first} {last}, Esq.", f"Mr. {first} {last}", f"Ms. {first} {last}", f"Dr {first} {last}"])
         elif x < 0.27:
             full = f"{first} {r.choice(V.FIRST_NAMES[pool])} {last}"
-        url_style = r.choice(["https://www.{d}", "https://{d}", "http://www.{d}", "www.{d}", "{d}", "https://{d}/", "https://www.linkedin.com/in/{fl}{ll}", "linkedin.com/in/{fl}-{ll}", "https://{d}/team/{fl}", "https://calendly.com/{fl}-{ll}/30min", "https://twitter.com/{fl}{ll}", "https://github.com/{fl}{ll}", "www.{d}/{fl}"])
+        # only forms the exact URL regex in the decoder can recover (http(s):// or www.)
+        url_style = r.choice(["https://www.{d}", "https://{d}", "http://www.{d}", "www.{d}", "https://{d}/", "https://www.linkedin.com/in/{fl}{ll}", "www.linkedin.com/in/{fl}-{ll}", "https://{d}/team/{fl}", "https://calendly.com/{fl}-{ll}/30min", "https://twitter.com/{fl}{ll}", "https://github.com/{fl}{ll}", "www.{d}/{fl}"])
         url = url_style.format(d=self.domain_for(company), fl=fl, ll=ll)
         return Person(
             locale=locale, first=first, last=last, full=full, email=email,

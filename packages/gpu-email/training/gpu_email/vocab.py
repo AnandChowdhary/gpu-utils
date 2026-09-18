@@ -481,7 +481,7 @@ BODY_SENTENCES: list[str] = [
     "The function returns null when the input is empty.", "Can you check the logs from {day}?",
     "Here is the config I'm using:", "    timeout: 30", "    retries: 3", "    host: 127.0.0.1",
     "$ npm run build", "$ git push origin main", "error: something went wrong (code {num})",
-    "> this is not a quote, it's a bash prompt example", "Right, makes sense.",
+    "Right, makes sense.",
     "Also, are we still on for lunch?", "PS: don't forget the {noun}.", "P.S. Say hi to {name}!",
     "PPS: the {noun} is in the shared drive.", "Warm regards to your family.",
     "Best not to mention the {noun} in the meeting.", "Thanks for nothing.", "Kind of a mess, honestly.",

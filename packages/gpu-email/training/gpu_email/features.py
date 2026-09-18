@@ -546,6 +546,8 @@ EDGES_HEADER_RUN = [0, 1, 2, 3]  # 5 buckets
 class LineInfo:
     start: int  # token index (inclusive)
     end: int  # token index (exclusive), includes the newline token if any
+    char_start: int  # UTF-16 offset of the line start
+    char_end: int  # UTF-16 offset of the end of the line text (before the newline)
     text: str  # line text without the newline, original case
     lower: str
     blank: bool
@@ -611,9 +613,12 @@ def _line_info(tokens: list[Token], start: int, end: int) -> LineInfo:
     is_header = _starts_with_any(body, KW_HEADER)
     is_attrib_marker = _contains_any(lower, KW_WROTE) or _contains_any(lower, KW_ORIGINAL)
     is_forward_marker = _contains_any(lower, KW_FORWARD)
+    char_start = tokens[start].start
     return LineInfo(
         start,
         end,
+        char_start,
+        char_start + len(text.encode("utf-16-le")) // 2,
         text,
         lower,
         blank,
@@ -650,6 +655,10 @@ def _last_char_class(text: str) -> int:
 
 def featurize(text: str) -> list[list[int]]:
     return featurize_tokens(tokenize(text))
+
+
+def line_infos(tokens: list[Token]) -> list[LineInfo]:
+    return [_line_info(tokens, s, e) for s, e in split_lines(tokens)]
 
 
 def featurize_tokens(tokens: list[Token]) -> list[list[int]]:  # noqa: C901

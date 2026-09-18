@@ -1,4 +1,11 @@
-import { CharClass, type FeatureRows, hashToken, Shape, type Token, tokenize } from "@gpu-utils/runtime";
+import {
+  CharClass,
+  type FeatureRows,
+  hashToken,
+  Shape,
+  type Token,
+  tokenize,
+} from "@gpu-utils/runtime";
 import {
   EDGES_DIGITS,
   EDGES_HEADER_RUN,
@@ -217,7 +224,8 @@ export function featurizeTokens(tokens: Token[]): EmailFeatures {
   for (let li = numLines - 1; li >= 0; li--) {
     const line = lines[li]!;
     if (nxt >= 0) untilQuoteish[li] = bucket(nxt - li, EDGES_UNTIL_QUOTEISH) + 1;
-    if (line.quotePrefixed || line.isAttribMarker || line.isForwardMarker || line.isHeader) nxt = li;
+    if (line.quotePrefixed || line.isAttribMarker || line.isForwardMarker || line.isHeader)
+      nxt = li;
   }
 
   let quoteAbove = false;
@@ -353,7 +361,10 @@ export function featurizeTokens(tokens: Token[]): EmailFeatures {
       row[4] = hashToken(suffix3(t.text), SUFFIX_BUCKETS);
       let pos: number;
       if (t.cls === CharClass.Newline) pos = 8;
-      else if (k === count - 1 || (k === count - 2 && tokens[line.end - 1]!.cls === CharClass.Newline))
+      else if (
+        k === count - 1 ||
+        (k === count - 2 && tokens[line.end - 1]!.cls === CharClass.Newline)
+      )
         pos = 7;
       else pos = bucket(k, [0, 1, 2, 3, 4, 7]);
       row[5] = pos;

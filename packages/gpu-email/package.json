@@ -35,7 +35,12 @@
     "wgsl",
     "browser",
     "on-device",
-    "tiny-model"
+    "tiny-model",
+    "email",
+    "reply-parser",
+    "signature",
+    "quote",
+    "email-signature"
   ],
   "scripts": {
     "build": "node --experimental-strip-types ../../tooling/build.ts",
@@ -50,6 +55,6 @@
     "@gpu-utils/runtime": "workspace:*"
   },
   "gpuUtils": {
-    "sizeBudget": 40000
+    "sizeBudget": 120000
   }
 }
