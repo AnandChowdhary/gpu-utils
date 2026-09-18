@@ -21,10 +21,24 @@ FIXTURES = Path(__file__).resolve().parents[3] / "packages/runtime/test/fixtures
 TOL = 1e-4
 
 
+def _close(a: object, b: object, tol: float = 1e-5) -> bool:
+    """Structural equality with a float tolerance: torch float32 sums differ across CPUs."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(_close(a[k], b[k], tol) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(_close(x, y, tol) for x, y in zip(a, b, strict=True))
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)) and not isinstance(a, bool):
+        return abs(float(a) - float(b)) <= tol * max(1.0, abs(float(a)), abs(float(b)))
+    return a == b
+
+
 def test_committed_fixtures_are_current() -> None:
     fresh = generate()
     for name, data in fresh.items():
-        assert json.loads((FIXTURES / name).read_text()) == json.loads(json.dumps(data)), f"{name} is stale: run `uv run python -m gpu_utils_training.fixtures`"
+        committed = json.loads((FIXTURES / name).read_text())
+        assert _close(committed, json.loads(json.dumps(data))), (
+            f"{name} is stale: run `uv run python -m gpu_utils_training.fixtures`"
+        )
 
 
 @pytest.mark.parametrize("family", ["scan", "conv"])
