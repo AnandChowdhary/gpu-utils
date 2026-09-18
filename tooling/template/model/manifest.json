@@ -1,9 +1,169 @@
 {
   "format": 1,
   "name": "__NAME__",
+  "family": "scan",
+  "featureRows": 1048,
+  "paddingId": 1048,
   "hidden": 32,
-  "labels": ["O"],
-  "tensors": [],
-  "parameters": 0,
-  "checkpoint": null
+  "head": 64,
+  "scanLayers": 1,
+  "convTaps": 5,
+  "tags": 3,
+  "pooled": 0,
+  "slots": 3,
+  "labels": [
+    "O",
+    "B-NAME",
+    "I-NAME"
+  ],
+  "checkpoint": {
+    "run": null,
+    "date": "2026-09-18"
+  },
+  "tensors": [
+    {
+      "name": "embed",
+      "offset": 0,
+      "length": 33536,
+      "shape": [
+        1048,
+        32
+      ],
+      "scale": 0.01401058223939711
+    },
+    {
+      "name": "scan0.f.wa",
+      "offset": 33536,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.018511203027540637
+    },
+    {
+      "name": "scan0.f.ba",
+      "offset": 34560,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.0967741935483871
+    },
+    {
+      "name": "scan0.f.wu",
+      "offset": 34592,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.019766021159387404
+    },
+    {
+      "name": "scan0.f.bu",
+      "offset": 35616,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "scan0.b.wa",
+      "offset": 35648,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.018374644940899264
+    },
+    {
+      "name": "scan0.b.ba",
+      "offset": 36672,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.0967741935483871
+    },
+    {
+      "name": "scan0.b.wu",
+      "offset": 36704,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.02601865222377162
+    },
+    {
+      "name": "scan0.b.bu",
+      "offset": 37728,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "conv0.w",
+      "offset": 37760,
+      "length": 320,
+      "shape": [
+        5,
+        64
+      ],
+      "scale": 0.00846651484889369
+    },
+    {
+      "name": "conv0.b",
+      "offset": 38080,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "head.w",
+      "offset": 38144,
+      "length": 8192,
+      "shape": [
+        128,
+        64
+      ],
+      "scale": 0.010207419433901388
+    },
+    {
+      "name": "head.b",
+      "offset": 46336,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "tags.w",
+      "offset": 46400,
+      "length": 192,
+      "shape": [
+        64,
+        3
+      ],
+      "scale": 0.01379752928210843
+    },
+    {
+      "name": "tags.b",
+      "offset": 46592,
+      "length": 3,
+      "shape": [
+        3
+      ],
+      "scale": 1.0
+    }
+  ],
+  "parameters": 46595
 }
