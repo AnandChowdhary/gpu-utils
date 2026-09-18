@@ -8,19 +8,24 @@ anonymous schema-membership features, and a deterministic compiler resolves ever
 
 ## Architecture
 - Tokenizer: character-class runs (`@gpu-utils/runtime`), whitespace dropped before the model
-- Features per token (639 rows, up to 28 active): shape, length bucket, word hash (128),
-  consonant-skeleton hash (64), closed task lexicon (365 words + none), 10 flags, and the
-  schema-membership rows: field kind / begin-inside / match quality (exact, stem, prefix, typo)
-  / alias, enum match / begin-inside / unique owner / owned by nearest preceding or following
-  field, kind of and distance to the nearest field match before and after, relative position
-- Embedding: 32 dims, summed over active rows
-- Sequence mixing: 5-tap depthwise convolution, sigmoid gate + tanh candidate, forward and
-  backward affine scans `h[t] = a[t]·h[t−1] + b[t]` (Hillis-Steele prefix scan in training,
-  per-channel walk in WGSL), combine, mean-pooled gated global context
-- Head: 16-unit gate, 64-unit tanh layer, 14 role logits + 1 clause-boundary logit; argmax decode
+- Features per token (__ROWS__ rows, up to 28 active): shape, length bucket, word hash (128),
+  consonant-skeleton hash (64), closed task lexicon (__KEYWORDS__ words + none), 12 flags
+  (digits, punctuation, casing, position, year-like, numeric suffix, comparative/superlative
+  endings), and the schema-membership rows: field kind / begin-inside / match quality (exact,
+  stem, inflection, prefix, typo) / alias, enum match / begin-inside / unique owner / owned by
+  nearest preceding or following field, kind of and distance to the nearest field match before
+  and after, relative position
+- Model: shared scan family `ScanTagger(feature_rows, 32, 15)` (`gpu_utils_training.models`):
+  32-dim summed embeddings → one bidirectional gated affine scan layer
+  `h[t] = a[t]·h[t−1] + (1−a[t])·tanh(u[t])` (masked Hillis-Steele prefix scan in training,
+  per-channel walk in the canonical WGSL `scan` pass) → residual 5-tap depthwise convolution →
+  mean-pooled context → head (64 relu) → 15 logits: 14 roles + 1 clause-boundary logit;
+  argmax decode per column group
 - Roles: `O FIELD OP VALUE TIME_VALUE CONJ NEG SORT_FIELD SORT_DIR GROUP_FIELD AGG_FN AGG_FIELD LIMIT CHART`
-- Parameters: 33,087 (20,448 embedding + 12,639 backbone/head)
-- Quantization: int6 symmetric per-tensor, quantization-aware training from epoch 2 (straight-through)
+- Parameters: __PARAMS__
+- Quantization: int6 symmetric per-tensor, quantization-aware training from epoch 1 (straight-through)
+- v1 (0.1) used a package-specific tagger (5-tap conv before the scan, gated global context,
+  33,087 params); v2 moves to the shared family with no package kernel
 
 ## Training data
 Entirely synthetic; no external datasets were used (there is no permissively licensed corpus
@@ -40,30 +45,37 @@ aliases and enum values share no content word with the training pools (`schema.a
 
 ## Evaluation
 Spec exact match compares filters, sort, groupBy, aggregate, limit, chart and granularity;
-spans included for the generated sets, ignored for the hand-written set (specs were written
+spans included for the generated sets, ignored for the hand-written sets (specs were written
 without offsets). Numbers are from the promoted checkpoint on the CPU path (`pnpm test`).
 
-| Set | Size | Metric | Score |
-|---|---|---|---|
-| in-domain (training domains, fresh seed) | 200 | spec exact match, with spans | 96.5% |
-| held-out (four unseen domains, disjoint vocabulary) | 400 | spec exact match, with spans | 91.0% |
-| held-out | 2,000 | token role accuracy / boundary accuracy | 99.27% / 99.45% |
-| unfamiliar (65 hand-written phrases, 4 schemas the generator never saw) | 65 | spec exact match | 55.4% (36/65) |
+| Set | Size | Metric | v1 (0.1) | v2 |
+|---|---|---|---|---|
+| in-domain (training domains, fresh seed) | 200 | spec exact match, with spans | 96.5% | __INDOMAIN__ |
+| held-out (four unseen domains, disjoint vocabulary) | 400 | spec exact match, with spans | 91.0% | __TRANSFER__ |
+| held-out | 2,000 | token role accuracy / boundary accuracy | 99.27% / 99.45% | __TOKACC__ / __BNDACC__ |
+| unfamiliar v1 (65 hand-written phrases, 4 schemas the generator never saw) | 65 | spec exact match | 55.4% | __UNFAMILIAR1__ |
+| unfamiliar v2 (67 hand-written phrases, 4 further schemas, written before v2 was evaluated) | 67 | spec exact match | — | __UNFAMILIAR2__ |
 
-The unfamiliar set (`eval/unfamiliar.json`: podcasts, wine cellar, repositories, greenhouse)
-was written before evaluation and was not used for tuning. Failure analysis:
+The v1 and v2 generated sets differ (the v2 generator covers more categories), so the
+generated-set columns are not a like-for-like comparison; the unfamiliar sets are.
+`eval/unfamiliar-v1.json` (podcasts, wine cellar, repositories, greenhouse) was analysed
+after v1 and drove the v2 coverage categories, so it is contaminated as a held-out set;
+`eval/unfamiliar-v2.json` (conference talks, workouts, art auction, restaurant
+reservations) was written after the v2 generator changes and before the v2 model was
+evaluated, and was not used for tuning.
 
-29 of 65 phrases miss. Grouped by cause (a phrase can have several):
+v2 coverage categories (each addressed in the generator, lexicon or compiler, not per phrase):
+comparative and superlative adjectives resolved through field aliases with a polarity lexicon
+(`cheapest first`, `taller than 50 cm`, `highest rated`); unit suffixes on numbers (`50 cm`,
+`2 kg`, `usd 50`); month-day-year dates and seasons (`september 10 2026`, `10th of sep`,
+`this spring`); year-like numeric fields (`vintage between 2015 and 2020`); `top N` stranded
+before its sort field; `count of X by Y` grouping; enum values overriding a carrier noun that
+matches a text field (`business or tech episodes`); entity nouns colliding with field aliases;
+`primary: true` date fields.
 
-- **Sort direction lost across a clause** (4): `top 5 true crime episodes by listens`, `top 20 python repos by stars`. The model opens a new clause at the filter between `top N` and `by field`, so the sort clause has no direction and defaults to `asc`; the dangling `top` is not carried over.
-- **Bare value assigned to the wrong text field** (5): `business or tech episodes`, `java repos pushed`, `wilting plants on the south bench` (the stray `on`). Enum values the model tags as text values land on a `contains`/`in` filter for a text field instead of the enum field.
-- **Words outside the lexicon or the matcher's reach** (9): `cheapest first`, `rated 95+`, `unopened`, `tallest plant`, `longer than 60 minutes` (the comparative is in the compiler, but the model tagged `longer 60` as values), `bottles to drink by next year` (`bottles` is also a field), `50 cm` (unit after the number), `september 10 2026`, `this spring`.
-- **Genuinely ambiguous numbers vs. years** (2): `between 2015 and 2020` and `not from 2018` resolve to the date field `drink_by` / are dropped instead of the numeric `vintage`.
-- **Group-by tagged as sort or dropped** (4): `number of bottles by vintage`, `sum of forks by language`, `count of plants per health status`, `wines with no drink by date` (the trailing `date` became a `day` group).
-- **Bare boolean/field mentions** (3): `opened bottles`, `unarchived repos`, `episodes without a host`: an entity noun that is also a field (`bottles`) becomes a spurious `not_empty` filter; `unarchived` does not resolve.
-- **Other segmentation errors** (2): `season 3 episodes sorted by publish date, oldest first` duplicates the sort and drops the `season = 3` filter.
+Failure analysis of the v2 unfamiliar set:
 
-Token-level behaviour on these phrases is mostly right (the schema-membership features carry over), and every miss is reported through a diagnostic or a visibly wrong clause rather than a silently invented field.
+__UNFAMILIAR_ANALYSIS__
 
 ## Size and latency
 | Measure | Value |

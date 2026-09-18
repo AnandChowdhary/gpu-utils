@@ -2,7 +2,7 @@
 
 Natural language to table view specs: filter, sort, group, aggregate, limit, chart.
 
-Tiny model (33K parameters, int6), trained from scratch, runs on WebGPU or the CPU in the
+Tiny model (__PARAMS__ parameters, int6), trained from scratch, runs on WebGPU or the CPU in the
 browser. Zero dependencies, 29.6 KiB Brotli including the weights. Part of
 [gpu-utils](https://github.com/AnandChowdhary/gpu-utils).
 
@@ -77,18 +77,23 @@ features that make the model schema-blind: matched a field (its kind, begin/insi
 nearest preceding or following field?), and the kind of and distance to the nearest field
 match on either side. The field words themselves never reach the model.
 
-A 33,087-parameter bidirectional gated affine-scan tagger (summed embeddings → 5-tap
-depthwise convolution → `h[t] = a[t]·h[t−1] + b[t]` forward and backward as a parallel
-prefix scan → mean-pooled gated global context → two-layer head) emits one of 14 roles per
+A __PARAMS__-parameter tagger from the shared scan family (`@gpu-utils/runtime`
+`scanTaggerForward`; summed embeddings → bidirectional gated affine scan
+`h[t] = a[t]·h[t−1] + (1−a[t])·tanh(u[t])` as a parallel prefix scan → residual 5-tap
+depthwise convolution → mean-pooled context → two-layer head) emits one of 14 roles per
 token (`FIELD OP VALUE TIME_VALUE CONJ NEG SORT_FIELD SORT_DIR GROUP_FIELD AGG_FN AGG_FIELD
-LIMIT CHART O`) plus a clause-boundary bit, so several filters in one phrase stay apart.
+LIMIT CHART O`) plus a clause-boundary logit, so several filters in one phrase stay apart.
 
 Deterministic TypeScript then compiles the roles: it resolves field spans back to your
 schema (aliases, plurals, prefixes, one-character typos), canonicalises enum values, parses
 numbers with `k`/`m` suffixes and currency symbols, resolves relative dates (`today`,
 `last 30 days`, `this quarter`, `q2 2025`, `march`, a bare year, ISO dates) against `now`,
 maps operator phrases and negation onto the op set, pairs aggregate functions with their
-fields, and reports diagnostics for anything left over.
+fields, and reports diagnostics for anything left over. Comparatives and superlatives
+resolve through aliases: list `cheap` or `tall` as an alias of a numeric field and
+`cheapest first` sorts ascending, `taller than 50 cm` becomes `gt 50`. Mark one date field
+`primary: true` so bare time phrases ("this quarter") attach to it when the schema has
+several.
 
 ## Size and speed
 

@@ -2,8 +2,8 @@
   "format": 1,
   "name": "gpu-view",
   "family": "scan",
-  "featureRows": 788,
-  "paddingId": 788,
+  "featureRows": 746,
+  "paddingId": 746,
   "hidden": 32,
   "head": 64,
   "scanLayers": 1,
@@ -52,81 +52,81 @@
     {
       "name": "keyword",
       "offset": 208,
-      "size": 512
+      "size": 470
     },
     {
       "name": "flags",
-      "offset": 720,
+      "offset": 678,
       "size": 12
     },
     {
       "name": "field_kind",
-      "offset": 732,
+      "offset": 690,
       "size": 6
     },
     {
       "name": "field_pos",
-      "offset": 738,
+      "offset": 696,
       "size": 3
     },
     {
       "name": "quality",
-      "offset": 741,
+      "offset": 699,
       "size": 6
     },
     {
       "name": "alias",
-      "offset": 747,
+      "offset": 705,
       "size": 2
     },
     {
       "name": "enum_any",
-      "offset": 749,
+      "offset": 707,
       "size": 2
     },
     {
       "name": "enum_pos",
-      "offset": 751,
+      "offset": 709,
       "size": 3
     },
     {
       "name": "enum_unique",
-      "offset": 754,
+      "offset": 712,
       "size": 2
     },
     {
       "name": "enum_prev",
-      "offset": 756,
+      "offset": 714,
       "size": 2
     },
     {
       "name": "enum_next",
-      "offset": 758,
+      "offset": 716,
       "size": 2
     },
     {
       "name": "prev_kind",
-      "offset": 760,
+      "offset": 718,
       "size": 6
     },
     {
       "name": "prev_dist",
-      "offset": 766,
+      "offset": 724,
       "size": 6
     },
     {
       "name": "next_kind",
-      "offset": 772,
+      "offset": 730,
       "size": 6
     },
     {
       "name": "next_dist",
-      "offset": 778,
+      "offset": 736,
       "size": 6
     },
     {
       "name": "position",
-      "offset": 784,
+      "offset": 742,
       "size": 4
     }
   ],
@@ -138,26 +138,26 @@
     {
       "name": "embed",
       "offset": 0,
-      "length": 25216,
+      "length": 23872,
       "shape": [
-        788,
+        746,
         32
       ],
       "scale": 0.01401058223939711
     },
     {
       "name": "scan0.f.wa",
-      "offset": 25216,
+      "offset": 23872,
       "length": 1024,
       "shape": [
         32,
         32
       ],
-      "scale": 0.019484717999735186
+      "scale": 0.01868895561464371
     },
     {
       "name": "scan0.f.ba",
-      "offset": 26240,
+      "offset": 24896,
       "length": 32,
       "shape": [
         32
@@ -166,17 +166,17 @@
     },
     {
       "name": "scan0.f.wu",
-      "offset": 26272,
+      "offset": 24928,
       "length": 1024,
       "shape": [
         32,
         32
       ],
-      "scale": 0.01726549094723117
+      "scale": 0.019484717999735186
     },
     {
       "name": "scan0.f.bu",
-      "offset": 27296,
+      "offset": 25952,
       "length": 32,
       "shape": [
         32
@@ -185,17 +185,17 @@
     },
     {
       "name": "scan0.b.wa",
-      "offset": 27328,
+      "offset": 25984,
       "length": 1024,
       "shape": [
         32,
         32
       ],
-      "scale": 0.017972100165582473
+      "scale": 0.01726549094723117
     },
     {
       "name": "scan0.b.ba",
-      "offset": 28352,
+      "offset": 27008,
       "length": 32,
       "shape": [
         32
@@ -204,17 +204,17 @@
     },
     {
       "name": "scan0.b.wu",
-      "offset": 28384,
+      "offset": 27040,
       "length": 1024,
       "shape": [
         32,
         32
       ],
-      "scale": 0.019889195119180986
+      "scale": 0.017972100165582473
     },
     {
       "name": "scan0.b.bu",
-      "offset": 29408,
+      "offset": 28064,
       "length": 32,
       "shape": [
         32
@@ -223,17 +223,17 @@
     },
     {
       "name": "conv0.w",
-      "offset": 29440,
+      "offset": 28096,
       "length": 320,
       "shape": [
         5,
         64
       ],
-      "scale": 0.012390301112205751
+      "scale": 0.009940139708980437
     },
     {
       "name": "conv0.b",
-      "offset": 29760,
+      "offset": 28416,
       "length": 64,
       "shape": [
         64
@@ -242,17 +242,17 @@
     },
     {
       "name": "head.w",
-      "offset": 29824,
+      "offset": 28480,
       "length": 8192,
       "shape": [
         128,
         64
       ],
-      "scale": 0.01300932611188581
+      "scale": 0.010951581501191663
     },
     {
       "name": "head.b",
-      "offset": 38016,
+      "offset": 36672,
       "length": 64,
       "shape": [
         64
@@ -261,17 +261,17 @@
     },
     {
       "name": "tags.w",
-      "offset": 38080,
+      "offset": 36736,
       "length": 960,
       "shape": [
         64,
         15
       ],
-      "scale": 0.012701433512472337
+      "scale": 0.018397965738850254
     },
     {
       "name": "tags.b",
-      "offset": 39040,
+      "offset": 37696,
       "length": 15,
       "shape": [
         15
@@ -279,5 +279,5 @@
       "scale": 1.0
     }
   ],
-  "parameters": 39055
+  "parameters": 37711
 }

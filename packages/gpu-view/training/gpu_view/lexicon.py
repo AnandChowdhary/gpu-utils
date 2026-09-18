@@ -65,20 +65,14 @@ KEYWORDS: list[str] = [
     "eur", "gbp", "mb", "gb", "ms", "kb", "x", "times", "people", "units", "pcs", "pieces",
     # seasons and date words
     "spring", "summer", "autumn", "fall", "winter", "of", "st", "nd", "rd", "th",
-    # polarity adjectives with comparative and superlative forms
-    "cheap", "cheaper", "cheapest", "expensive", "pricey", "pricier", "priciest", "costly",
-    "tall", "taller", "tallest", "short", "shorter", "shortest", "long", "longer", "longest",
-    "heavy", "heavier", "heaviest", "light", "lighter", "lightest", "big", "bigger", "biggest",
-    "small", "smaller", "smallest", "large", "larger", "old", "older", "oldest", "young",
-    "younger", "youngest", "new", "newer", "fast", "faster", "fastest", "slow", "slower",
-    "slowest", "popular", "good", "better", "best", "bad", "worse", "worst", "strong",
-    "stronger", "strongest", "weak", "weaker", "weakest", "hot", "hotter", "hottest", "cold",
-    "colder", "coldest", "rich", "richer", "richest", "poor", "poorer", "poorest", "wide",
-    "wider", "widest", "narrow", "narrower", "narrowest", "deep", "deeper", "deepest",
-    "shallow", "late", "early", "far", "farther", "farthest", "near", "nearer", "nearest",
-    "loud", "louder", "loudest", "quiet", "quieter", "quietest", "busy", "busier", "busiest",
-    "full", "fuller", "fullest", "rated", "rating", "priced", "sized", "aged", "fewest",
-    "greatest", "least", "most",
+    # polarity adjectives (base forms; comparative/superlative endings are flags + skeleton hash)
+    "cheap", "expensive", "pricey", "costly", "tall", "short", "long", "heavy", "light", "big",
+    "small", "large", "old", "young", "new", "fast", "slow", "popular", "good", "better", "best",
+    "bad", "worse", "worst", "strong", "weak", "hot", "cold", "rich", "poor", "wide", "narrow",
+    "deep", "shallow", "late", "early", "far", "near", "loud", "quiet", "busy", "full", "rated",
+    "rating", "priced", "sized", "aged", "fewest", "greatest", "least", "most", "cheapest",
+    "cheaper", "tallest", "taller", "longest", "longer", "shortest", "shorter", "biggest",
+    "bigger", "smallest", "smaller", "oldest", "older", "newest", "newer", "highest", "lowest",
 ]
 
 # Adjective polarity: "high" means the superlative picks the largest value ("tallest" → desc,
