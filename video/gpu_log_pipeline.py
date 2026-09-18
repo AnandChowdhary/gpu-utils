@@ -6,9 +6,9 @@ from style import ACCENT, MUTED, ExplainerScene, TokenCell, activation_strip, mo
 
 LINE = "2024-01-15 10:30:00,123 [main] INFO com.example.Foo - Started in 12ms"
 ROLE_COLORS = {"TS": "#22C55E", "LEVEL": "#F59E0B", "SOURCE": "#A855F7", "THREAD": "#06B6D4", "MSG": "#F43F5E"}
-PARAMS = "150,042 parameters"
-SIZE = "97.5 KB Brotli"
-SPEED = "0.43 MB/s on CPU, GPU-batched"
+PARAMS = "154,332 parameters"
+SIZE = "101.8 KB Brotli"
+SPEED = "0.36 MB/s on CPU, GPU-batched"
 
 
 def tokenize(text: str) -> list[str]:

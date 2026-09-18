@@ -144,6 +144,7 @@ describe("parse", () => {
     expect(a!.thread).toBe("main");
     expect(a!.message).toBe("Started server on port 8080");
     expect(b!.timestamp?.text).toBe("Jan 15 10:30:00");
+    expect(b!.host).toBe("myhost");
     expect(b!.source).toBe("sshd");
     expect(b!.thread).toBe("1234");
     expect(c!.timestamp?.iso).toBe("2024-01-15T10:30:00+00:00");
@@ -168,6 +169,19 @@ describe("parse", () => {
       line: 10,
       column: 15,
       language: "javascript",
+    });
+  });
+
+  it("labels the host of a cluster RAS line", async () => {
+    const { lines } = await parse(
+      "- 1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.675872 R02-M1-N0-C:J12-U11 RAS KERNEL INFO instruction cache parity error corrected",
+      { backend: "cpu" },
+    );
+    expect(lines[0]).toMatchObject({
+      host: "R02-M1-N0-C:J12-U11",
+      source: "KERNEL",
+      level: "info",
+      message: "instruction cache parity error corrected",
     });
   });
 

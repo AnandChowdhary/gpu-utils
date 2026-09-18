@@ -6,7 +6,7 @@
 - **Hook**: A log4j line, a syslog line and a Node stack frame look nothing alike, yet the same tiny model labels all three token by token.
 - **Target Audience**: Web developers; no ML or GPU background required.
 - **Estimated Length**: 45–60 seconds, silent, 16:9.
-- **Key Insight**: Logs are made of the same handful of roles in different orders. A character-class tokenizer plus hashed features gives a 150K-parameter dilated CNN enough context to tag every token; a deterministic compiler does the rest, and thousands of lines ride one GPU dispatch.
+- **Key Insight**: Logs are made of the same handful of roles in different orders. A character-class tokenizer plus hashed features gives a 154K-parameter dilated CNN (the shared conv family) enough context to tag every token; a deterministic compiler does the rest, and thousands of lines ride one GPU dispatch.
 
 ## Narrative Arc
 
@@ -72,7 +72,7 @@ lines to show the batch-per-dispatch design, and end on the record with the size
 
 - Caption: "5 dilated conv blocks, dilation 1 → 16"
 - Accent brackets widening around the `INFO` pill: ±1, ±3, ±7, ±15, ±31 tokens.
-- Footnote: "150K parameters, int6"
+- Footnote: "154,332 parameters, int6"
 
 ---
 
@@ -85,7 +85,7 @@ lines to show the batch-per-dispatch design, and end on the record with the size
 ### Visual Elements
 
 - Caption: "One role per token"
-- Pills recolour by role: TS, THREAD, LEVEL, SOURCE, MSG; spaces and separators stay muted.
+- Pills recolour by role: TS, THREAD, LEVEL, SOURCE, MSG (HOST, KEY, VALUE and frame roles exist too); spaces and separators stay muted.
 - Small label "entry" beside the line.
 
 ---
