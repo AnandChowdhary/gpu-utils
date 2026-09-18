@@ -29,3 +29,11 @@
 - Considered and not used: OpenAddresses (per-source licences, several share-alike),
   libpostal / gpu-postal training corpora (OSM-derived, ODbL), CoNLL-style NER corpora
   (research-only licences).
+- **email_reply_parser** (GitHub, MIT): `test/emails/*.txt` fixtures are downloaded at
+  evaluation time by `packages/gpu-email/training/gpu_email/data.py` and used only to
+  evaluate gpu-email (reply extraction). Not committed, not used for training.
+  https://github.com/github/email_reply_parser
+- **talon** (Mailgun, Apache License 2.0): `tests/fixtures/standard_replies/*.eml` and
+  `tests/fixtures/signature/emails/stripped/*` are downloaded at evaluation time by the
+  same script and used only to evaluate gpu-email (reply and signature extraction). Not
+  committed, not used for training. https://github.com/mailgun/talon

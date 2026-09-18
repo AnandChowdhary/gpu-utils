@@ -1,0 +1,202 @@
+{
+  "erp/correct_sig": {
+    "file": "email_reply_parser/correct_sig.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_1_1": {
+    "file": "email_reply_parser/email_1_1.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 4]]
+  },
+  "erp/email_1_2": {
+    "file": "email_reply_parser/email_1_2.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0], [8, 33]]
+  },
+  "erp/email_1_3": {
+    "file": "email_reply_parser/email_1_3.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 2]]
+  },
+  "erp/email_1_4": {
+    "file": "email_reply_parser/email_1_4.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_1_5": {
+    "file": "email_reply_parser/email_1_5.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 999]]
+  },
+  "erp/email_1_6": {
+    "file": "email_reply_parser/email_1_6.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_1_7": {
+    "file": "email_reply_parser/email_1_7.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_1_8": {
+    "file": "email_reply_parser/email_1_8.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[12, 12], [18, 18]]
+  },
+  "erp/email_2_1": {
+    "file": "email_reply_parser/email_2_1.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_2_2": {
+    "file": "email_reply_parser/email_2_2.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_2_3": {
+    "file": "email_reply_parser/email_2_3.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_BlackBerry": {
+    "file": "email_reply_parser/email_BlackBerry.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_bullets": {
+    "file": "email_reply_parser/email_bullets.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 8]]
+  },
+  "erp/email_iPhone": {
+    "file": "email_reply_parser/email_iPhone.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_long_quote": {
+    "file": "email_reply_parser/email_long_quote.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 3]]
+  },
+  "erp/email_multi_word_sent_from_my_mobile_device": {
+    "file": "email_reply_parser/email_multi_word_sent_from_my_mobile_device.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 0]]
+  },
+  "erp/email_one_is_not_on": {
+    "file": "email_reply_parser/email_one_is_not_on.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 4]]
+  },
+  "erp/email_sent_from_my_not_signature": {
+    "file": "email_reply_parser/email_sent_from_my_not_signature.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 999]]
+  },
+  "erp/email_sig_delimiter_in_middle_of_line": {
+    "file": "email_reply_parser/email_sig_delimiter_in_middle_of_line.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 999]]
+  },
+  "erp/greedy_on": {
+    "file": "email_reply_parser/greedy_on.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 5]]
+  },
+  "erp/pathological": {
+    "file": "email_reply_parser/pathological.txt",
+    "source": "github/email_reply_parser (MIT)",
+    "reply_line_ranges": [[0, 1]]
+  },
+  "talon/android": {
+    "file": "talon_replies/android.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/aol": {
+    "file": "talon_replies/aol.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/apple_mail": {
+    "file": "talon_replies/apple_mail.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/apple_mail_2": {
+    "file": "talon_replies/apple_mail_2.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/comcast": {
+    "file": "talon_replies/comcast.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/gmail": {
+    "file": "talon_replies/gmail.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/hotmail": {
+    "file": "talon_replies/hotmail.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/iphone": {
+    "file": "talon_replies/iphone.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/outlook": {
+    "file": "talon_replies/outlook.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/sparrow": {
+    "file": "talon_replies/sparrow.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/thunderbird": {
+    "file": "talon_replies/thunderbird.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon/yahoo": {
+    "file": "talon_replies/yahoo.eml",
+    "source": "mailgun/talon (Apache 2.0)",
+    "reply": "Hello"
+  },
+  "talon-sig/camel_case": {
+    "file": "talon_signature/camel_case_body",
+    "signature_file": "talon_signature/camel_case_signature",
+    "source": "mailgun/talon (Apache 2.0)"
+  },
+  "talon-sig/jeff": {
+    "file": "talon_signature/jeff_body",
+    "signature_file": "talon_signature/jeff_signature",
+    "source": "mailgun/talon (Apache 2.0)"
+  },
+  "talon-sig/johndoeexamplecom": {
+    "file": "talon_signature/johndoeexamplecom_body",
+    "signature_file": "talon_signature/johndoeexamplecom_signature",
+    "source": "mailgun/talon (Apache 2.0)"
+  },
+  "talon-sig/long": {
+    "file": "talon_signature/long_body",
+    "signature_file": "talon_signature/long_signature",
+    "source": "mailgun/talon (Apache 2.0)"
+  },
+  "talon-sig/short_url": {
+    "file": "talon_signature/short_url_body",
+    "signature_file": "talon_signature/short_url_signature",
+    "source": "mailgun/talon (Apache 2.0)"
+  },
+  "talon-sig/sparse": {
+    "file": "talon_signature/sparse_body",
+    "signature_file": "talon_signature/sparse_signature",
+    "source": "mailgun/talon (Apache 2.0)"
+  }
+}

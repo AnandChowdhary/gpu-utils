@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "packages/gpu-cite" },
+    { "path": "packages/gpu-email" },
     { "path": "packages/gpu-paste" },
     { "path": "packages/gpu-view" },
     { "path": "packages/runtime" },
