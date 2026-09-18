@@ -14,7 +14,7 @@ import { type Backend, hasWebGPU, type Token } from "@gpu-utils/runtime";
 import { forwardCpu, type Logits } from "./cpu.ts";
 import { decodeSpans, type ModelSpan, mergeSpans, softmax } from "./decode.ts";
 import { featurize } from "./features.ts";
-import { forwardGpu } from "./gpu.ts";
+import { forwardGpuBatch } from "./gpu.ts";
 import { MODEL } from "./model.ts";
 import { detectWhole, type RuleSpan } from "./rules.ts";
 
@@ -100,15 +100,19 @@ async function runModel(
   const K = MODEL.manifest.kinds.length;
   const kind = new Float32Array(K);
   const spans: ModelSpan[] = [];
-  let windows = 0;
-  for (let start = 0; start < rows.length; start += WINDOW) {
-    const rowSlice = rows.slice(start, start + WINDOW);
-    const tokenSlice = tokens.slice(start, start + WINDOW);
-    const logits: Logits = useGpu ? await forwardGpu(MODEL, rowSlice) : forwardCpu(MODEL, rowSlice);
-    for (let k = 0; k < K; k++) kind[k] = kind[k]! + logits.kind[k]!;
-    spans.push(...decodeSpans(MODEL, tokenSlice, logits.span));
-    windows++;
-  }
+  const starts: number[] = [];
+  for (let start = 0; start < rows.length; start += WINDOW) starts.push(start);
+  const slices = starts.map((start) => rows.slice(start, start + WINDOW));
+  // On the GPU every window is one sequence of a single batched dispatch (one readback).
+  const logits: Logits[] = useGpu
+    ? await forwardGpuBatch(MODEL, slices)
+    : slices.map((rowSlice) => forwardCpu(MODEL, rowSlice));
+  starts.forEach((start, w) => {
+    const out = logits[w]!;
+    for (let k = 0; k < K; k++) kind[k] = kind[k]! + out.kind[k]!;
+    spans.push(...decodeSpans(MODEL, tokens.slice(start, start + WINDOW), out.span));
+  });
+  const windows = starts.length;
   if (windows > 1) for (let k = 0; k < K; k++) kind[k] = kind[k]! / windows;
   return { spans, kind, windows };
 }

@@ -1,7 +1,9 @@
 """Evaluation: learned-kind accuracy + confusion matrix and per-span-kind F1.
 
-    uv run python -m gpu_paste.evaluate            # held-out generated set + unfamiliar set
+    uv run python -m gpu_paste.evaluate [--run default]   # held-out generated set + unfamiliar set
 
+Decoding uses the shared Viterbi/BIO tables (gpu_utils_training.decode, fixture-tested
+against runtime decode.ts) and the shared span metrics (gpu_utils_training.metrics).
 The unfamiliar set lives in ../test/unfamiliar.json and is shared with the TypeScript
 end-to-end test; here only the learned parts (kind head on learned kinds, model span kinds)
 are scored, the TypeScript test scores the whole rules+model pipeline.
@@ -9,109 +11,78 @@ are scored, the TypeScript test scores the whole rules+model pipeline.
 
 from __future__ import annotations
 
+import argparse
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
 import torch
+from torch import nn
 
 from gpu_paste.data import LABELS, LEARNED_KINDS, SPAN_KINDS, Example
-from gpu_paste.dataset import Encoded, batches, build, encode
-from gpu_paste.model import PasteModel
+from gpu_paste.dataset import RUNS, Batches, Encoded, build, encode
+from gpu_paste.model import build as build_model
+from gpu_utils_training.decode import bio_start_mask, bio_transitions, viterbi
+from gpu_utils_training.loop import load_checkpoint
+from gpu_utils_training.metrics import bio_to_spans, confusion, span_prf
 
 UNFAMILIAR = Path(__file__).resolve().parents[2] / "test" / "unfamiliar.json"
+TRANSITIONS = bio_transitions(LABELS)
+START = bio_start_mask(LABELS)
+EMPTY = {"precision": 0.0, "recall": 0.0, "f1": 0.0, "support": 0}
 
 
-def constrained_decode(logits: np.ndarray) -> list[int]:
-    """Viterbi with BIO constraints (O/B-x → I-y forbidden unless x == y). Mirrors src/decode.ts."""
-    n, k = logits.shape
-    trans = np.zeros((k, k), dtype=np.float64)
-    for to in range(1, k):
-        if LABELS[to].startswith("I-"):
-            kind = LABELS[to][2:]
-            for frm in range(k):
-                if LABELS[frm] in (f"B-{kind}", f"I-{kind}"):
-                    continue
-                trans[frm, to] = -np.inf
-    score = logits[0].astype(np.float64).copy()
-    for to in range(k):
-        if LABELS[to].startswith("I-"):
-            score[to] = -np.inf
-    back = np.zeros((n, k), dtype=np.int64)
-    for i in range(1, n):
-        cand = score[:, None] + trans
-        back[i] = cand.argmax(0)
-        score = cand.max(0) + logits[i]
-    path = [int(score.argmax())]
-    for i in range(n - 1, 0, -1):
-        path.append(int(back[i, path[-1]]))
-    return path[::-1]
-
-
-def spans_from_labels(path: list[int]) -> list[tuple[int, int, str]]:
-    """Token-index spans [start, end) with kind."""
-    out = []
-    start = -1
-    kind = ""
-    for i, lab in enumerate(path + [0]):
-        name = LABELS[lab] if lab < len(LABELS) else "O"
-        if name.startswith("B-") or name == "O" or (name.startswith("I-") and name[2:] != kind):
-            if start >= 0:
-                out.append((start, i, kind))
-                start = -1
-            if name.startswith("B-") or name.startswith("I-"):
-                start, kind = i, name[2:]
-    return out
-
-
-def gold_spans(labels: np.ndarray) -> list[tuple[int, int, str]]:
-    return spans_from_labels([int(x) for x in labels])
-
-
-def evaluate_model(model: PasteModel, encoded: list[Encoded], examples: list[Example] | None = None, batch_size: int = 128) -> dict:
+@torch.no_grad()
+def evaluate_model(model: nn.Module, encoded: list[Encoded], batch_size: int = 128) -> dict:
+    """Kind accuracy/confusion over examples with a learned kind, exact-span P/R/F1 over all."""
     model.eval()
-    k = len(LEARNED_KINDS)
-    confusion = np.zeros((k, k), dtype=np.int64)
-    tp = {s: 0 for s in SPAN_KINDS}
-    fp = {s: 0 for s in SPAN_KINDS}
-    fn = {s: 0 for s in SPAN_KINDS}
-    rng = np.random.default_rng(0)
-    with torch.no_grad():
-        for ids, mask, labels, kinds, idx in batches(encoded, batch_size, rng, shuffle=False):
-            span, kind = model(torch.from_numpy(ids), torch.from_numpy(mask))
-            span = span.numpy()
-            pred_kind = kind.argmax(-1).numpy()
-            for j, i in enumerate(idx):
-                if kinds[j] >= 0:
-                    confusion[kinds[j], pred_kind[j]] += 1
-                n = int(mask[j].sum())
-                pred = set(spans_from_labels(constrained_decode(span[j, :n])))
-                gold = set(gold_spans(labels[j, :n]))
-                for s in pred & gold:
-                    tp[s[2]] += 1
-                for s in pred - gold:
-                    fp[s[2]] += 1
-                for s in gold - pred:
-                    fn[s[2]] += 1
-    per_kind = {}
-    for s in SPAN_KINDS:
-        p = tp[s] / (tp[s] + fp[s]) if tp[s] + fp[s] else 0.0
-        r = tp[s] / (tp[s] + fn[s]) if tp[s] + fn[s] else 0.0
-        f1 = 2 * p * r / (p + r) if p + r else 0.0
-        per_kind[s] = {"precision": p, "recall": r, "f1": f1, "support": tp[s] + fn[s]}
-    ttp, tfp, tfn = sum(tp.values()), sum(fp.values()), sum(fn.values())
-    mp = ttp / (ttp + tfp) if ttp + tfp else 0.0
-    mr = ttp / (ttp + tfn) if ttp + tfn else 0.0
+    padding_id: int = model.padding_id  # type: ignore[attr-defined]
+    pred_spans, gold_spans = [], []
+    kind_pred: list[int] = []
+    kind_gold: list[int] = []
+    for rows, mask, labels, kinds, _ in Batches(encoded, batch_size, None, padding_id, shuffle=False):
+        out = model(rows, mask)
+        tags = out["tags"].numpy()
+        pooled = out["pooled"]
+        assert pooled is not None
+        best_kind = pooled.argmax(-1).numpy()
+        lengths = mask.sum(dim=1).numpy()
+        for j in range(rows.shape[0]):
+            if int(kinds[j]) >= 0:
+                kind_gold.append(int(kinds[j]))
+                kind_pred.append(int(best_kind[j]))
+            n = int(lengths[j])
+            em = tags[j, :n].astype(np.float64)
+            if n:
+                em[0] += START
+            path = viterbi(em, TRANSITIONS)
+            pred_spans.append(bio_to_spans([LABELS[i] for i in path]))
+            gold_spans.append(bio_to_spans([LABELS[int(i)] for i in labels[j, :n]]))
+    prf = span_prf(pred_spans, gold_spans)
+    per_label = prf["per_label"]
+    micro = prf["micro"]
+    assert isinstance(per_label, dict) and isinstance(micro, dict)
+    cm = confusion(np.asarray(kind_pred, dtype=np.int64), np.asarray(kind_gold, dtype=np.int64), len(LEARNED_KINDS))
     return {
-        "kind_accuracy": float(np.trace(confusion) / max(1, confusion.sum())),
-        "kind_support": int(confusion.sum()),
-        "confusion": confusion.tolist(),
+        "kind_accuracy": float(np.trace(cm) / max(1, cm.sum())),
+        "kind_support": int(cm.sum()),
+        "confusion": cm.tolist(),
         "kinds": LEARNED_KINDS,
-        "span_f1_micro": 2 * mp * mr / (mp + mr) if mp + mr else 0.0,
-        "span_precision_micro": mp,
-        "span_recall_micro": mr,
-        "spans": per_kind,
+        "span_f1_micro": float(micro["f1"]),
+        "span_precision_micro": float(micro["precision"]),
+        "span_recall_micro": float(micro["recall"]),
+        "spans": {s: dict(per_label.get(s, EMPTY)) for s in SPAN_KINDS},
+    }
+
+
+def summary(m: dict) -> dict[str, float]:
+    """The flat subset loop.train logs and selects on (score = kind accuracy + span F1)."""
+    return {
+        "score": m["kind_accuracy"] + m["span_f1_micro"],
+        "kind_accuracy": m["kind_accuracy"],
+        "span_f1_micro": m["span_f1_micro"],
+        "span_precision_micro": m["span_precision_micro"],
+        "span_recall_micro": m["span_recall_micro"],
     }
 
 
@@ -144,32 +115,31 @@ def format_confusion(m: dict) -> str:
     return "\n".join(lines)
 
 
-def main() -> None:
-    from gpu_paste.dataset import RUNS
-
-    ckpt = torch.load(RUNS / "best.pt", map_location="cpu")
-    model = PasteModel(n_span_labels=len(LABELS), n_kinds=len(LEARNED_KINDS))
-    model.load_state_dict(ckpt["state_dict"])
-    model.quantize = True
-    heldout, examples = build(8000, ckpt["seed"] + 1000)
-    m = evaluate_model(model, heldout, examples)
-    print("== held-out (generated) ==")
-    print(f"kind accuracy {m['kind_accuracy']:.4f} on {m['kind_support']}; span micro-F1 {m['span_f1_micro']:.4f}")
+def report(title: str, m: dict) -> None:
+    print(f"== {title} ==")
+    print(f"kind accuracy {m['kind_accuracy']:.4f} on {m['kind_support']}; span micro-F1 {m['span_f1_micro']:.4f} (P {m['span_precision_micro']:.3f} R {m['span_recall_micro']:.3f})")
     print(format_confusion(m))
     for s, v in m["spans"].items():
         print(f"  {s:<8} P {v['precision']:.3f} R {v['recall']:.3f} F1 {v['f1']:.3f} (n={v['support']})")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--run", default="default")
+    ap.add_argument("--heldout", type=int, default=8_000)
+    args = ap.parse_args()
+    torch.set_num_threads(2)
+    model = build_model()
+    ckpt = load_checkpoint(model, RUNS / args.run / "best.pt")
+    model.quant = True
+    heldout, _ = build(args.heldout, int(ckpt["seed"]) + 1000)
+    results = {"heldout": evaluate_model(model, heldout)}
+    report("held-out (generated)", results["heldout"])
     if UNFAMILIAR.exists():
         unf = load_unfamiliar()
-        enc = [encode(e) for e in unf]
-        u = evaluate_model(model, enc, unf)
-        print("== unfamiliar (hand-written, model heads only) ==")
-        print(f"kind accuracy {u['kind_accuracy']:.4f} on {u['kind_support']}; span micro-F1 {u['span_f1_micro']:.4f}")
-        print(format_confusion(u))
-        for s, v in u["spans"].items():
-            print(f"  {s:<8} P {v['precision']:.3f} R {v['recall']:.3f} F1 {v['f1']:.3f} (n={v['support']})")
-        json.dump({"heldout": m, "unfamiliar": u}, open(RUNS / "eval.json", "w"), indent=2)
-    else:
-        json.dump({"heldout": m}, open(RUNS / "eval.json", "w"), indent=2)
+        results["unfamiliar"] = evaluate_model(model, [encode(e) for e in unf])
+        report("unfamiliar (hand-written, model heads only)", results["unfamiliar"])
+    (RUNS / args.run / "eval.json").write_text(json.dumps(results, indent=2) + "\n")
 
 
 if __name__ == "__main__":

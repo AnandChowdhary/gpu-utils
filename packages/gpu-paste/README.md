@@ -57,11 +57,15 @@ No result is ever empty because WebGPU is missing.
    character-class runs. Each token gets 10 hashed ids (word, consonant skeleton, shape,
    two-char prefix/suffix, length bucket, column in line, line from start, line from end,
    bias) that index one 1,575-row × 32-dim embedding table. No vocabulary is learned.
-3. **Model.** Summed embeddings → two gated affine scans (`h = a·h₋₁ + (1−a)·u`, forward
-   and backward, run as a parallel prefix scan in WGSL) → pointwise mix (96→48) → mean-pooled
-   context. A BIO head tags `person` / `company` / `address` / `date` / `money` / `phone`
-   per token; a kind head on the pooled vector picks `address` / `contact` / `prose` /
-   `list` / `code` / `markdown`. 66,339 parameters, int6.
+3. **Model.** The shared *scan* family from `@gpu-utils/runtime`
+   (`ScanTagger(hidden = 32, one layer, pooled_out = 6)`): summed embeddings → one
+   bidirectional gated affine scan (`h = a·h₋₁ + (1−a)·tanh(u)`) → residual 5-tap depthwise
+   conv → mean-pooled context. The family's per-token head tags `person` / `company` /
+   `address` / `date` / `money` / `phone` (BIO); its pooled head picks the kind `address` /
+   `contact` / `prose` / `list` / `code` / `markdown`. 68,659 parameters, int6. The CPU
+   forward pass (`scanTaggerForward`) and the WGSL kernel (`runScanTagger` on
+   `scan_tagger.wgsl`) are the runtime's canonical, parity-tested ones; this package owns
+   only the featurizer, the rules, the data generator and the decoder.
 4. **Decode.** Constrained Viterbi over the BIO tags → character spans, merged with the
    regex spans (rules win on overlap). If the model says `prose` but a single learned span
    covers ≥ 90 % of the paste, the kind is promoted deterministically (`date` → `datetime`,
@@ -74,7 +78,7 @@ No result is ever empty because WebGPU is missing.
 |---|---|---|
 | `empty`, `json`, `csv`, `tsv`, `html`, `url`, `email`, `uuid`, `jwt`, `ip`, `color`, `path`, `number` | deterministic, validated | `rules.ts` `detectWhole()` |
 | `phone`, `datetime`, `money` as a whole paste | deterministic regex + parser (confidence < 1) | `rules.ts` |
-| `address`, `contact`, `prose`, `list`, `code`, `markdown` | learned kind head (6-way softmax) | `cpu.ts` / `shader.wgsl` |
+| `address`, `contact`, `prose`, `list`, `code`, `markdown` | learned kind head (6-way softmax, the family's pooled output) | `cpu.ts` / `gpu.ts` (runtime scan family) |
 | spans `email`, `url`, `uuid`, `ip`, `color`, ISO `date`, `hashtag`, `mention`, `issue_ref`, `commit` | deterministic regex | `rules.ts` `ruleSpans()` |
 | spans `person`, `company`, `address`, `date` phrases, `money` in any locale, `phone` in any format | learned BIO head + Viterbi | `decode.ts` |
 | span `value` normalisation (E.164-ish phones, ISO dates, `amount currency`) | deterministic parsers | `rules.ts` |
@@ -87,13 +91,18 @@ contacts is still `csv`; its e-mails come from the regex and its names from the 
 
 | Measure | Value |
 |---|---|
-| Package (min + Brotli, incl. int6 weights and WGSL) | 51.0 KiB (52,224 B); budget 60,000 B |
-| Weights alone (66,339 int6 params, Brotli) | ~38 KB |
-| Parameters | 66,339 |
-| CPU path, short contact (12 tokens), Node 24 | 0.5 ms warm |
-| CPU path, 1 KB paste (425 tokens), Node 24 | 13–14 ms warm (≈ 30 µs / token) |
+| Package (min + Brotli, incl. int6 weights and the scan kernel) | 53.7 KiB (54,974 B); budget 60,000 B |
+| Weights alone (68,659 int6 params, Brotli) | 39,195 B |
+| Parameters | 68,659 |
+| CPU path, short contact (23 tokens), Node 24 | 0.95 ms warm |
+| CPU path, 1 KB paste (411 tokens), Node 24 | 15 ms warm (≈ 37 µs / token) |
 | WebGPU cold start (device + 7 pipelines + weight upload) | ≈ 50–100 ms (estimate, no GPU on the build box) |
-| WebGPU warm call, 1 KB paste | ≈ 1–3 ms, dominated by readback (estimate) |
+| WebGPU warm call, 1 KB paste | ≈ 1–3 ms, dominated by readback (estimate); every 512-token window of a paste is one batched dispatch |
+
+Moving onto the shared family cost 2,320 parameters, 2.8 KiB of Brotli and ~45 % of the CPU
+forward pass (the runtime's generic per-token head is wider and is not specialised the way
+the deleted hand-written one was); it gained a little accuracy and deleted ~700 lines of
+model and kernel code. MODEL_CARD.md has the before/after table.
 
 The budget is 60 KB rather than the default 40 KB because the package also ships ~14 KB
 (Brotli) of deterministic parsers: 148 CSS color names, ~40 currencies, date grammars in
@@ -130,8 +139,8 @@ See [MODEL_CARD.md](./MODEL_CARD.md) for evaluation numbers and data sources.
 cd packages/gpu-paste/training
 uv sync
 uv run python -m gpu_paste.data 20     # print 20 generated examples
-uv run python -m gpu_paste.train       # 160K synthetic examples, 8 epochs, int6 QAT (~8 min, 2 threads)
-uv run python -m gpu_paste.export      # write ../model/{manifest.json,weights.txt,fixtures.json}
+uv run python -m gpu_paste.train       # 160K synthetic examples, 8 epochs, int6 QAT (~9 min, 2 threads) → runs/default/
+uv run python -m gpu_paste.export      # write ../model/{manifest.json,weights.txt,fixtures.json} (canonical fixtures)
 uv run python -m gpu_paste.evaluate    # held-out confusion matrix + per-span F1, unfamiliar set
-uv run pytest                          # includes running shader.wgsl on lavapipe vs. the fixtures
+uv run pytest                          # features, fixtures, the runtime's scan_tagger.wgsl on lavapipe vs. the fixtures
 ```

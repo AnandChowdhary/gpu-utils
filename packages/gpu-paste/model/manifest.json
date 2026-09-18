@@ -1,143 +1,239 @@
 {
-	"format": 1,
-	"name": "gpu-paste",
-	"dim": 32,
-	"mix": 48,
-	"kindHidden": 32,
-	"featureCount": 10,
-	"rows": 1575,
-	"labels": [
-		"O",
-		"B-person",
-		"I-person",
-		"B-company",
-		"I-company",
-		"B-address",
-		"I-address",
-		"B-date",
-		"I-date",
-		"B-money",
-		"I-money",
-		"B-phone",
-		"I-phone"
-	],
-	"kinds": ["address", "contact", "prose", "list", "code", "markdown"],
-	"spanKinds": ["person", "company", "address", "date", "money", "phone"],
-	"checkpoint": {
-		"seed": 1,
-		"epoch": 7,
-		"date": "2026-09-17",
-		"heldout": {
-			"kind_accuracy": 0.9925864909390445,
-			"span_f1_micro": 0.9831858407079647
-		}
-	},
-	"tensors": [
-		{
-			"name": "embed",
-			"offset": 0,
-			"length": 50400,
-			"shape": [1575, 32],
-			"scale": 0.05513870716094971
-		},
-		{
-			"name": "gate_f.w",
-			"offset": 50400,
-			"length": 2048,
-			"shape": [64, 32],
-			"scale": 0.053102570195351875
-		},
-		{
-			"name": "gate_f.b",
-			"offset": 52448,
-			"length": 64,
-			"shape": [64],
-			"scale": 0.043244788723607215
-		},
-		{
-			"name": "gate_b.w",
-			"offset": 52512,
-			"length": 2048,
-			"shape": [64, 32],
-			"scale": 0.050657118520429055
-		},
-		{
-			"name": "gate_b.b",
-			"offset": 54560,
-			"length": 64,
-			"shape": [64],
-			"scale": 0.04112878922493227
-		},
-		{
-			"name": "mix.w",
-			"offset": 54624,
-			"length": 4608,
-			"shape": [48, 96],
-			"scale": 0.08373801938949092
-		},
-		{
-			"name": "mix.b",
-			"offset": 59232,
-			"length": 48,
-			"shape": [48],
-			"scale": 0.0124648924796812
-		},
-		{
-			"name": "head.w",
-			"offset": 59280,
-			"length": 4608,
-			"shape": [48, 96],
-			"scale": 0.05377600269932901
-		},
-		{
-			"name": "head.b",
-			"offset": 63888,
-			"length": 48,
-			"shape": [48],
-			"scale": 0.010202839489906065
-		},
-		{
-			"name": "out.w",
-			"offset": 63936,
-			"length": 624,
-			"shape": [13, 48],
-			"scale": 0.050159858119103215
-		},
-		{
-			"name": "out.b",
-			"offset": 64560,
-			"length": 13,
-			"shape": [13],
-			"scale": 0.011467775990886072
-		},
-		{
-			"name": "kind1.w",
-			"offset": 64573,
-			"length": 1536,
-			"shape": [32, 48],
-			"scale": 0.06296357800883631
-		},
-		{
-			"name": "kind1.b",
-			"offset": 66109,
-			"length": 32,
-			"shape": [32],
-			"scale": 0.012258517165337839
-		},
-		{
-			"name": "kind2.w",
-			"offset": 66141,
-			"length": 192,
-			"shape": [6, 32],
-			"scale": 0.05646097660064697
-		},
-		{
-			"name": "kind2.b",
-			"offset": 66333,
-			"length": 6,
-			"shape": [6],
-			"scale": 0.01037577179170424
-		}
-	],
-	"parameters": 66339
+  "format": 1,
+  "name": "gpu-paste",
+  "family": "scan",
+  "featureRows": 1575,
+  "paddingId": 1575,
+  "hidden": 32,
+  "head": 64,
+  "scanLayers": 1,
+  "convTaps": 5,
+  "tags": 13,
+  "pooled": 6,
+  "slots": 10,
+  "labels": [
+    "O",
+    "B-person",
+    "I-person",
+    "B-company",
+    "I-company",
+    "B-address",
+    "I-address",
+    "B-date",
+    "I-date",
+    "B-money",
+    "I-money",
+    "B-phone",
+    "I-phone"
+  ],
+  "kinds": [
+    "address",
+    "contact",
+    "prose",
+    "list",
+    "code",
+    "markdown"
+  ],
+  "spanKinds": [
+    "person",
+    "company",
+    "address",
+    "date",
+    "money",
+    "phone"
+  ],
+  "checkpoint": {
+    "run": "default",
+    "seed": 1,
+    "epoch": 7,
+    "date": "2026-09-18",
+    "heldout": {
+      "kind_accuracy": 0.9930050747496914,
+      "span_f1_micro": 0.9864035474113881
+    }
+  },
+  "tensors": [
+    {
+      "name": "embed",
+      "offset": 0,
+      "length": 50400,
+      "shape": [
+        1575,
+        32
+      ],
+      "scale": 0.055740064190280054
+    },
+    {
+      "name": "scan0.f.wa",
+      "offset": 50400,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.05099704188685263
+    },
+    {
+      "name": "scan0.f.ba",
+      "offset": 51424,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.11515948080247448
+    },
+    {
+      "name": "scan0.f.wu",
+      "offset": 51456,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.034490046962614984
+    },
+    {
+      "name": "scan0.f.bu",
+      "offset": 52480,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.007052579714405921
+    },
+    {
+      "name": "scan0.b.wa",
+      "offset": 52512,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.046478059984022574
+    },
+    {
+      "name": "scan0.b.ba",
+      "offset": 53536,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.10130041645419213
+    },
+    {
+      "name": "scan0.b.wu",
+      "offset": 53568,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.04452561178515034
+    },
+    {
+      "name": "scan0.b.bu",
+      "offset": 54592,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.012997885865549888
+    },
+    {
+      "name": "conv0.w",
+      "offset": 54624,
+      "length": 320,
+      "shape": [
+        5,
+        64
+      ],
+      "scale": 0.05380374385464576
+    },
+    {
+      "name": "conv0.b",
+      "offset": 54944,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.020841831161129858
+    },
+    {
+      "name": "head.w",
+      "offset": 55008,
+      "length": 8192,
+      "shape": [
+        128,
+        64
+      ],
+      "scale": 0.07287308477586316
+    },
+    {
+      "name": "head.b",
+      "offset": 63200,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.015271227205953291
+    },
+    {
+      "name": "tags.w",
+      "offset": 63264,
+      "length": 832,
+      "shape": [
+        64,
+        13
+      ],
+      "scale": 0.0624356000654159
+    },
+    {
+      "name": "tags.b",
+      "offset": 64096,
+      "length": 13,
+      "shape": [
+        13
+      ],
+      "scale": 0.008379558401723062
+    },
+    {
+      "name": "pool.w1",
+      "offset": 64109,
+      "length": 4096,
+      "shape": [
+        64,
+        64
+      ],
+      "scale": 0.04750010275071667
+    },
+    {
+      "name": "pool.b1",
+      "offset": 68205,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.006757976547364266
+    },
+    {
+      "name": "pool.w2",
+      "offset": 68269,
+      "length": 384,
+      "shape": [
+        64,
+        6
+      ],
+      "scale": 0.03822443177623133
+    },
+    {
+      "name": "pool.b2",
+      "offset": 68653,
+      "length": 6,
+      "shape": [
+        6
+      ],
+      "scale": 0.005146959616291908
+    }
+  ],
+  "parameters": 68659
 }

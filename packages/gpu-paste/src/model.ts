@@ -1,31 +1,26 @@
-import { decodeInt6, type ModelManifest, tensor } from "@gpu-utils/runtime";
+import { decodeInt6, type TaggerManifest, type TaggerModel } from "@gpu-utils/runtime";
 import manifest from "../model/manifest.json" with { type: "json" };
 import encoded from "../model/weights.txt";
 
-export interface PasteManifest extends ModelManifest {
-  dim: number;
-  mix: number;
-  kindHidden: number;
-  featureCount: number;
-  rows: number;
+/**
+ * The shared scan-family manifest (gpu_utils_training.export.export_package) plus the
+ * two label lists gpu-paste needs to split the family's outputs: `labels` names the BIO
+ * span head (`tags`), `kinds` names the pooled kind head (`pooled`).
+ */
+export interface PasteManifest extends TaggerManifest {
   /** BIO labels for the span head: "O", "B-person", "I-person", ... */
   labels: string[];
-  /** Learned kinds, in kind-head order. */
+  /** Learned kinds, in pooled-head order. */
   kinds: string[];
   spanKinds: string[];
 }
 
-export interface Model {
+export interface Model extends TaggerModel {
   manifest: PasteManifest;
-  /** Flat float32 weights; `tensor(weights, manifest, name)` gives a named view. */
-  weights: Float32Array;
 }
 
 /** Trained weights, decoded once at import time. Written by training/gpu_paste/export.py. */
 export const MODEL: Model = {
-  manifest: manifest as PasteManifest,
-  weights: decodeInt6(encoded, (manifest as PasteManifest).tensors),
+  manifest: manifest as unknown as PasteManifest,
+  weights: decodeInt6(encoded, (manifest as unknown as PasteManifest).tensors),
 };
-
-export const view = (model: Model, name: string): Float32Array =>
-  tensor(model.weights, model.manifest, name);

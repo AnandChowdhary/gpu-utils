@@ -1,4 +1,4 @@
-import { type Token, viterbi } from "@gpu-utils/runtime";
+import { bioStartMask, bioTransitions, type Token, viterbi } from "@gpu-utils/runtime";
 import type { Logits } from "./cpu.ts";
 import type { Model } from "./model.ts";
 import { parseDate, parseMoney, parsePhone, type RuleSpan, ruleSpans } from "./rules.ts";
@@ -7,25 +7,19 @@ export interface ModelSpan extends RuleSpan {
   confidence: number;
 }
 
-let transitionCache: { model: Model; t: Float32Array } | undefined;
+let tableCache: { model: Model; transitions: Float32Array; start: Float32Array } | undefined;
 
-/** BIO constraints: I-x may only follow B-x or I-x. Everything else is free (no learned CRF). */
-function transitions(model: Model): Float32Array {
-  if (transitionCache?.model === model) return transitionCache.t;
-  const labels = model.manifest.labels;
-  const k = labels.length;
-  const t = new Float32Array(k * k);
-  for (let to = 0; to < k; to++) {
-    const name = labels[to]!;
-    if (!name.startsWith("I-")) continue;
-    const kind = name.slice(2);
-    for (let from = 0; from < k; from++) {
-      const f = labels[from]!;
-      if (f !== `B-${kind}` && f !== `I-${kind}`) t[from * k + to] = -Infinity;
-    }
+/** BIO constraints from the runtime: I-x may only follow B-x or I-x, and no sequence starts inside a span. */
+function tables(model: Model): { transitions: Float32Array; start: Float32Array } {
+  if (tableCache?.model !== model) {
+    const labels = model.manifest.labels;
+    tableCache = {
+      model,
+      transitions: bioTransitions(labels),
+      start: bioStartMask(labels),
+    };
   }
-  transitionCache = { model, t };
-  return t;
+  return tableCache;
 }
 
 function softmaxMax(row: Float32Array): number {
@@ -42,10 +36,10 @@ export function decodeSpans(model: Model, tokens: Token[], span: Float32Array): 
   const k = labels.length;
   const n = tokens.length;
   if (n === 0) return [];
-  // Forbid starting inside a span.
+  const { transitions, start: startMask } = tables(model);
   const emissions = Float32Array.from(span);
-  for (let l = 0; l < k; l++) if (labels[l]!.startsWith("I-")) emissions[l] = -Infinity;
-  const path = viterbi(emissions, n, k, transitions(model));
+  for (let l = 0; l < k; l++) emissions[l] = emissions[l]! + startMask[l]!;
+  const path = viterbi(emissions, n, k, transitions);
   const out: ModelSpan[] = [];
   let start = -1;
   let kind = "";

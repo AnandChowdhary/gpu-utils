@@ -20,8 +20,8 @@ COMPANY = "#10B981"
 PHONE = "#EC4899"
 
 # Real numbers from MODEL_CARD.md.
-PARAMS = "66,339 parameters"
-SIZE = "52 KB Brotli"
+PARAMS = "68,659 parameters"
+SIZE = "55 KB Brotli"
 
 LINES = [
     ["Jane", " ", "Doe"],
