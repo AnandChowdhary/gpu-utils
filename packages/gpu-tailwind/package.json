@@ -1,6 +1,6 @@
 {
   "name": "gpu-tailwind",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Natural language to Tailwind CSS utility classes",
   "author": "Anand Chowdhary (https://anandchowdhary.com)",
   "license": "MIT",
