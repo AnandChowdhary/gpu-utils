@@ -46,7 +46,7 @@ KIND_COLOR = {
 }
 PARAMS = "155,207"
 SIZE = "93 KiB"
-LATENCY = "36 ms (CPU)"
+LATENCY = "36 ms"
 
 
 def email_block(tinted: bool = False) -> VGroup:
@@ -141,8 +141,8 @@ class GpuEmailPipeline(ExplainerScene):
             mono('contact: { name: "John Doe", title: "CEO",', 15, KIND_COLOR["signature"]),
             mono('           phone: ["+1 (555) 123-4567"],', 15, KIND_COLOR["signature"]),
             mono('           email: ["john@acme.com"] }', 15, KIND_COLOR["signature"]),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.16).move_to(RIGHT * 3.1)
-        self.play(tinted.animate.shift(LEFT * 1.0), run_time=0.6)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.16).move_to(RIGHT * 3.3)
+        self.play(tinted.animate.scale(0.78).move_to(LEFT * 3.6), run_time=0.6)
         self.play(LaggedStart(*[FadeIn(o, shift=RIGHT * 0.1) for o in out], lag_ratio=0.15), run_time=1.6)
         foot = note(f"{SIZE} Brotli · warm CPU call {LATENCY} on a 1 KB email · probabilistic tagger + exact rules")
         self.play(FadeIn(foot), run_time=0.6)
