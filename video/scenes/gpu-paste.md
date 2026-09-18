@@ -6,7 +6,7 @@
 - **Hook**: A pasted signature block turns into typed fields with no server involved.
 - **Target Audience**: Web developers; no ML or GPU background required.
 - **Estimated Length**: 50–60 seconds, silent, 16:9.
-- **Key Insight**: Rules decide everything that can be validated; a 66K-parameter model
+- **Key Insight**: Rules decide everything that can be validated; a 69K-parameter shared-family model
   only does the two things rules cannot: pick the ambiguous kind and tag entities.
 
 ## Narrative Arc
