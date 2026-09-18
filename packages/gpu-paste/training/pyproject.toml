@@ -4,12 +4,12 @@ version = "0.0.0"
 description = "Training pipeline for gpu-paste"
 requires-python = ">=3.12"
 dependencies = [
-  "torch>=2.6,<3",
-  "numpy>=2",
   "gpu-utils-training",
   "faker>=30",
 ]
 
+# gpu-utils-training pulls in torch (CPU wheels on Linux), numpy and wgpu; the index below
+# keeps torch on the CPU index when uv resolves it for this project.
 [[tool.uv.index]]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
@@ -27,7 +27,7 @@ build-backend = "hatchling.build"
 packages = ["gpu_paste"]
 
 [dependency-groups]
-dev = ["pytest>=8", "wgpu>=0.19"]
+dev = ["pytest>=8"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

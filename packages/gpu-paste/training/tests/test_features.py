@@ -23,8 +23,8 @@ def test_line_and_column_features() -> None:
 
 
 def test_fixtures_roundtrip() -> None:
-    """The exported fixtures must reproduce from the current featurizer."""
+    """The exported canonical fixtures must reproduce from the current featurizer."""
     if not FIXTURES.exists():
         return
-    for case in json.loads(FIXTURES.read_text()):
-        assert featurize(case["text"]) == case["features"], case["text"]
+    for case in json.loads(FIXTURES.read_text())["cases"]:
+        assert featurize(case["input"]) == case["rows"], case["input"]

@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
 from multiprocessing import Pool
 from pathlib import Path
 
 import numpy as np
+import torch
+from torch import Tensor
 
 from gpu_paste.data import LABELS, LEARNED_KINDS, Example, generate, to_json
 from gpu_paste.features import FEATURE_COUNT, featurize_tokens
@@ -18,6 +21,9 @@ RUNS = Path(__file__).resolve().parents[1] / "runs"
 LABEL_ID = {label: i for i, label in enumerate(LABELS)}
 KIND_ID = {kind: i for i, kind in enumerate(LEARNED_KINDS)}
 MAX_TOKENS = 384
+
+Batch = tuple[Tensor, Tensor, Tensor, Tensor, np.ndarray]
+"""``(rows [B,T,F] int64, mask [B,T] bool, labels [B,T] int64 (-100 = pad), kinds [B] int64 (-1 = masked), indices)``."""
 
 
 @dataclass
@@ -88,24 +94,45 @@ def build(n: int, seed: int, workers: int = 3, offline: bool = False) -> tuple[l
     return encoded, examples
 
 
-def batches(encoded: list[Encoded], batch_size: int, rng: np.random.Generator, shuffle: bool = True):
-    """Length-bucketed batches: (ids [B,T,F], mask [B,T], labels [B,T], kinds [B])."""
-    order = np.argsort([len(e.labels) for e in encoded], kind="stable")
-    groups = [order[i : i + batch_size] for i in range(0, len(order), batch_size)]
-    if shuffle:
-        rng.shuffle(groups)
-    for g in groups:
-        t = max(len(encoded[i].labels) for i in g)
-        t = max(t, 1)
-        ids = np.zeros((len(g), t, FEATURE_COUNT), dtype=np.int64)
+class Batches:
+    """Length-bucketed batches in the ``[B, T, slots]`` layout the model families expect.
+
+    Padded token slots hold ``padding_id`` (exactly what batch.py/batch.ts pack for the
+    kernels); padded labels are ``-100`` and masked kinds ``-1`` for ``cross_entropy``.
+    Sized (``__len__``) so ``loop.train`` knows the total step count for its cosine schedule.
+    """
+
+    def __init__(self, encoded: list[Encoded], batch_size: int, rng: np.random.Generator | None, padding_id: int, shuffle: bool = True) -> None:
+        self.encoded = encoded
+        self.padding_id = padding_id
+        jitter = rng.integers(0, 3, size=len(encoded)) if (shuffle and rng is not None) else np.zeros(len(encoded), dtype=np.int64)
+        order = np.argsort([len(e.labels) + int(j) for e, j in zip(encoded, jitter, strict=True)], kind="stable")
+        self.groups = [order[i : i + batch_size] for i in range(0, len(order), batch_size)]
+        if shuffle and rng is not None:
+            rng.shuffle(self.groups)  # type: ignore[arg-type]
+
+    def __len__(self) -> int:
+        return len(self.groups)
+
+    def pack(self, g: np.ndarray) -> Batch:
+        t = max(1, max(len(self.encoded[i].labels) for i in g))
+        rows = np.full((len(g), t, FEATURE_COUNT), self.padding_id, dtype=np.int64)
         mask = np.zeros((len(g), t), dtype=bool)
         labels = np.full((len(g), t), -100, dtype=np.int64)
         kinds = np.zeros(len(g), dtype=np.int64)
         for j, i in enumerate(g):
-            e = encoded[i]
+            e = self.encoded[i]
             n = len(e.labels)
-            ids[j, :n] = e.ids
+            rows[j, :n] = e.ids
             mask[j, :n] = True
             labels[j, :n] = e.labels
             kinds[j] = e.kind
-        yield ids, mask, labels, kinds, g
+        return torch.from_numpy(rows), torch.from_numpy(mask), torch.from_numpy(labels), torch.from_numpy(kinds), g
+
+    def __iter__(self) -> Iterator[Batch]:
+        for g in self.groups:
+            yield self.pack(g)
+
+
+def batches(encoded: list[Encoded], batch_size: int, rng: np.random.Generator | None, padding_id: int, shuffle: bool = True) -> Batches:
+    return Batches(encoded, batch_size, rng, padding_id, shuffle)
