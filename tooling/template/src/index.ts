@@ -15,22 +15,26 @@ import { MODEL } from "./model.ts";
 export type { __PASCAL__Result } from "./decode.ts";
 
 export interface __PASCAL__Options {
-  /** "auto" uses WebGPU for large inputs when available and the CPU reference otherwise. */
-  backend?: Backend;
+	/** "auto" uses WebGPU for large inputs when available and the CPU reference otherwise. */
+	backend?: Backend;
 }
 
 /** Inputs shorter than this run on the CPU under "auto": GPU readback latency dominates. */
 const GPU_MIN_TOKENS = 256;
 
 export async function parse(
-  text: string,
-  options: __PASCAL__Options = {},
+	text: string,
+	options: __PASCAL__Options = {},
 ): Promise<__PASCAL__Result> {
-  const features = featurize(text);
-  const backend = options.backend ?? "auto";
-  const useGpu =
-    backend === "webgpu" ||
-    (backend === "auto" && hasWebGPU() && features.tokens.length >= GPU_MIN_TOKENS);
-  const logits = useGpu ? await forwardGpu(MODEL, features) : forwardCpu(MODEL, features);
-  return decode(MODEL, features, logits);
+	const features = featurize(text);
+	const backend = options.backend ?? "auto";
+	const useGpu =
+		backend === "webgpu" ||
+		(backend === "auto" &&
+			hasWebGPU() &&
+			features.tokens.length >= GPU_MIN_TOKENS);
+	const logits = useGpu
+		? await forwardGpu(MODEL, features)
+		: forwardCpu(MODEL, features);
+	return decode(MODEL, features, logits);
 }

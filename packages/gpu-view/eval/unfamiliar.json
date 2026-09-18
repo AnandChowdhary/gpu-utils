@@ -1,1489 +1,1496 @@
 {
-  "note": "Hand-written phrases over four schemas the generator never saw (podcasts, wine, repositories, greenhouse). Written before evaluation; never used for tuning. Spans are not asserted here.",
-  "now": "2026-09-17T12:00:00Z",
-  "schemas": {
-    "podcasts": {
-      "fields": [
-        {
-          "name": "title",
-          "kind": "text",
-          "aliases": ["episode", "episode title"]
-        },
-        {
-          "name": "host",
-          "kind": "text",
-          "aliases": ["presenter", "hosted by"]
-        },
-        {
-          "name": "duration_minutes",
-          "kind": "number",
-          "aliases": ["duration", "length", "minutes", "runtime"]
-        },
-        {
-          "name": "downloads",
-          "kind": "number",
-          "aliases": ["listens", "plays"]
-        },
-        {
-          "name": "published",
-          "kind": "date",
-          "aliases": ["aired", "release date", "publish date"]
-        },
-        {
-          "name": "topic",
-          "kind": "enum",
-          "values": ["tech", "science", "comedy", "true crime", "business"]
-        },
-        {
-          "name": "explicit",
-          "kind": "boolean"
-        },
-        {
-          "name": "season",
-          "kind": "number"
-        }
-      ]
-    },
-    "wine": {
-      "fields": [
-        {
-          "name": "producer",
-          "kind": "text",
-          "aliases": ["winery", "maker"]
-        },
-        {
-          "name": "grape",
-          "kind": "enum",
-          "aliases": ["varietal"],
-          "values": ["pinot noir", "chardonnay", "riesling", "cabernet", "syrah", "merlot"]
-        },
-        {
-          "name": "vintage",
-          "kind": "number",
-          "aliases": ["year"]
-        },
-        {
-          "name": "bottles",
-          "kind": "number",
-          "aliases": ["stock", "quantity"]
-        },
-        {
-          "name": "price",
-          "kind": "number",
-          "aliases": ["cost", "paid", "spend"]
-        },
-        {
-          "name": "score",
-          "kind": "number",
-          "aliases": ["points", "rating"]
-        },
-        {
-          "name": "region",
-          "kind": "enum",
-          "values": ["burgundy", "napa", "mosel", "barossa", "rioja"]
-        },
-        {
-          "name": "drink_by",
-          "kind": "date",
-          "aliases": ["drink window", "drink before"]
-        },
-        {
-          "name": "opened",
-          "kind": "boolean"
-        }
-      ]
-    },
-    "repos": {
-      "fields": [
-        {
-          "name": "name",
-          "kind": "text",
-          "aliases": ["repo", "repository"]
-        },
-        {
-          "name": "language",
-          "kind": "enum",
-          "aliases": ["lang"],
-          "values": ["typescript", "python", "rust", "go", "java"]
-        },
-        {
-          "name": "stars",
-          "kind": "number",
-          "aliases": ["stargazers"]
-        },
-        {
-          "name": "forks",
-          "kind": "number"
-        },
-        {
-          "name": "open_issues",
-          "kind": "number",
-          "aliases": ["issues", "issue count"]
-        },
-        {
-          "name": "last_commit",
-          "kind": "date",
-          "aliases": ["last updated", "updated", "last push"]
-        },
-        {
-          "name": "archived",
-          "kind": "boolean"
-        },
-        {
-          "name": "license",
-          "kind": "enum",
-          "values": ["mit", "apache", "gpl", "bsd"]
-        },
-        {
-          "name": "maintainer",
-          "kind": "text",
-          "aliases": ["owner", "maintained by"]
-        }
-      ]
-    },
-    "greenhouse": {
-      "fields": [
-        {
-          "name": "species",
-          "kind": "text",
-          "aliases": ["plant", "variety"]
-        },
-        {
-          "name": "bench",
-          "kind": "enum",
-          "values": ["north", "south", "east", "west"]
-        },
-        {
-          "name": "height_cm",
-          "kind": "number",
-          "aliases": ["height", "tall"]
-        },
-        {
-          "name": "watered",
-          "kind": "date",
-          "aliases": ["last watered", "watering"]
-        },
-        {
-          "name": "planted",
-          "kind": "date",
-          "aliases": ["sown", "planting date"]
-        },
-        {
-          "name": "flowering",
-          "kind": "boolean",
-          "aliases": ["in bloom", "blooming"]
-        },
-        {
-          "name": "health",
-          "kind": "enum",
-          "values": ["thriving", "ok", "wilting", "dead"]
-        },
-        {
-          "name": "pots",
-          "kind": "number",
-          "aliases": ["pot count"]
-        }
-      ]
-    }
-  },
-  "cases": [
-    {
-      "text": "comedy episodes longer than 60 minutes",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "topic",
-            "op": "eq",
-            "value": "comedy"
-          },
-          {
-            "field": "duration_minutes",
-            "op": "gt",
-            "value": 60
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "episodes hosted by Priya with over 10k downloads, most downloaded first",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "host",
-            "op": "contains",
-            "value": "Priya"
-          },
-          {
-            "field": "downloads",
-            "op": "gt",
-            "value": 10000
-          }
-        ],
-        "sort": [
-          {
-            "field": "downloads",
-            "dir": "desc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "how many science episodes aired in 2025",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "topic",
-            "op": "eq",
-            "value": "science"
-          },
-          {
-            "field": "published",
-            "op": "between",
-            "value": ["2025-01-01", "2025-12-31"]
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": [
-          {
-            "fn": "count"
-          }
-        ]
-      }
-    },
-    {
-      "text": "average runtime per topic as a bar chart",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "topic"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "avg",
-            "field": "duration_minutes"
-          }
-        ],
-        "chart": "bar"
-      }
-    },
-    {
-      "text": "non explicit tech episodes from the last 90 days",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "explicit",
-            "op": "is_false"
-          },
-          {
-            "field": "topic",
-            "op": "eq",
-            "value": "tech"
-          },
-          {
-            "field": "published",
-            "op": "gte",
-            "value": "2026-06-20"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "season 3 episodes sorted by publish date, oldest first",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "season",
-            "op": "eq",
-            "value": 3
-          }
-        ],
-        "sort": [
-          {
-            "field": "published",
-            "dir": "asc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "total downloads by month this year, line chart",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "published",
-            "op": "between",
-            "value": ["2026-01-01", "2026-12-31"]
-          }
-        ],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "published"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "sum",
-            "field": "downloads"
-          }
-        ],
-        "chart": "line",
-        "granularity": "month"
-      }
-    },
-    {
-      "text": "top 5 true crime episodes by listens",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "topic",
-            "op": "eq",
-            "value": "true crime"
-          }
-        ],
-        "sort": [
-          {
-            "field": "downloads",
-            "dir": "desc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": [],
-        "limit": 5
-      }
-    },
-    {
-      "text": "episodes without a host",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "host",
-            "op": "is_empty"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "business or tech episodes under 20 minutes",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "topic",
-            "op": "in",
-            "value": ["business", "tech"]
-          },
-          {
-            "field": "duration_minutes",
-            "op": "lt",
-            "value": 20
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "episode titles containing interview published before march 2026",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "title",
-            "op": "contains",
-            "value": "interview"
-          },
-          {
-            "field": "published",
-            "op": "lt",
-            "value": "2026-03-01"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "count of episodes per season",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "season"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "count"
-          }
-        ]
-      }
-    },
-    {
-      "text": "explicit episodes, newest first, limit 25",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "explicit",
-            "op": "is_true"
-          }
-        ],
-        "sort": [
-          {
-            "field": "published",
-            "dir": "desc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": [],
-        "limit": 25
-      }
-    },
-    {
-      "text": "max downloads per host",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "host"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "max",
-            "field": "downloads"
-          }
-        ]
-      }
-    },
-    {
-      "text": "episodes that aired yesterday",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "published",
-            "op": "eq",
-            "value": "2026-09-16"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "duration between 30 and 45 minutes, topic is not comedy",
-      "schema": "podcasts",
-      "spec": {
-        "filters": [
-          {
-            "field": "duration_minutes",
-            "op": "between",
-            "value": [30, 45]
-          },
-          {
-            "field": "topic",
-            "op": "neq",
-            "value": "comedy"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "pinot noir from burgundy with a score of at least 92",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "grape",
-            "op": "eq",
-            "value": "pinot noir"
-          },
-          {
-            "field": "region",
-            "op": "eq",
-            "value": "burgundy"
-          },
-          {
-            "field": "score",
-            "op": "gte",
-            "value": 92
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "bottles to drink by next year",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "drink_by",
-            "op": "lte",
-            "value": "2027-12-31"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "how many bottles per grape",
-      "schema": "wine",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "grape"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "count",
-            "field": "bottles"
-          }
-        ]
-      }
-    },
-    {
-      "text": "unopened riesling vintage 2019 or older",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "opened",
-            "op": "is_false"
-          },
-          {
-            "field": "grape",
-            "op": "eq",
-            "value": "riesling"
-          },
-          {
-            "field": "vintage",
-            "op": "lte",
-            "value": 2019
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "wines that cost more than $100, cheapest first",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "price",
-            "op": "gt",
-            "value": 100
-          }
-        ],
-        "sort": [
-          {
-            "field": "price",
-            "dir": "asc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "average price by region, pie chart",
-      "schema": "wine",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "region"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "avg",
-            "field": "price"
-          }
-        ],
-        "chart": "pie"
-      }
-    },
-    {
-      "text": "napa cabernet rated 95+",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "region",
-            "op": "eq",
-            "value": "napa"
-          },
-          {
-            "field": "grape",
-            "op": "eq",
-            "value": "cabernet"
-          },
-          {
-            "field": "score",
-            "op": "gte",
-            "value": 95
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "everything from the winery Château Margaux",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "producer",
-            "op": "contains",
-            "value": "Château Margaux"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "total spend on chardonnay",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "grape",
-            "op": "eq",
-            "value": "chardonnay"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": [
-          {
-            "fn": "sum",
-            "field": "price"
-          }
-        ]
-      }
-    },
-    {
-      "text": "stock under 3 bottles sorted by drink window",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "bottles",
-            "op": "lt",
-            "value": 3
-          }
-        ],
-        "sort": [
-          {
-            "field": "drink_by",
-            "dir": "asc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "opened bottles",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "opened",
-            "op": "is_true"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "syrah or merlot between 2015 and 2020",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "grape",
-            "op": "in",
-            "value": ["syrah", "merlot"]
-          },
-          {
-            "field": "vintage",
-            "op": "between",
-            "value": [2015, 2020]
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "highest score per producer, top 10",
-      "schema": "wine",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "producer"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "max",
-            "field": "score"
-          }
-        ],
-        "limit": 10
-      }
-    },
-    {
-      "text": "wines with no drink by date",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "drink_by",
-            "op": "is_empty"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "number of bottles by vintage as a table",
-      "schema": "wine",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "vintage"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "count",
-            "field": "bottles"
-          }
-        ],
-        "chart": "table"
-      }
-    },
-    {
-      "text": "mosel wines not from 2018",
-      "schema": "wine",
-      "spec": {
-        "filters": [
-          {
-            "field": "region",
-            "op": "eq",
-            "value": "mosel"
-          },
-          {
-            "field": "vintage",
-            "op": "neq",
-            "value": 2018
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "typescript repos with more than 1000 stars",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "language",
-            "op": "eq",
-            "value": "typescript"
-          },
-          {
-            "field": "stars",
-            "op": "gt",
-            "value": 1000
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "repos not updated since 2024",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "last_commit",
-            "op": "lt",
-            "value": "2024-01-01"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "archived rust or go projects",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "archived",
-            "op": "is_true"
-          },
-          {
-            "field": "language",
-            "op": "in",
-            "value": ["rust", "go"]
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "sum of forks by language, descending",
-      "schema": "repos",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "language"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "sum",
-            "field": "forks"
-          }
-        ]
-      }
-    },
-    {
-      "text": "mit licensed repos maintained by me",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "license",
-            "op": "eq",
-            "value": "mit"
-          },
-          {
-            "field": "maintainer",
-            "op": "eq",
-            "value": "me"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "top 20 python repos by stars",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "language",
-            "op": "eq",
-            "value": "python"
-          }
-        ],
-        "sort": [
-          {
-            "field": "stars",
-            "dir": "desc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": [],
-        "limit": 20
-      }
-    },
-    {
-      "text": "repos with at least 50 open issues and fewer than 10 forks",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "open_issues",
-            "op": "gte",
-            "value": 50
-          },
-          {
-            "field": "forks",
-            "op": "lt",
-            "value": 10
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "count repos per license",
-      "schema": "repos",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "license"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "count"
-          }
-        ]
-      }
-    },
-    {
-      "text": "repositories named react",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "name",
-            "op": "eq",
-            "value": "react"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "java repos pushed in the last 2 weeks, most stars first",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "language",
-            "op": "eq",
-            "value": "java"
-          },
-          {
-            "field": "last_commit",
-            "op": "between",
-            "value": ["2026-09-04", "2026-09-17"]
-          }
-        ],
-        "sort": [
-          {
-            "field": "stars",
-            "dir": "desc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "average stars of apache licensed repos",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "license",
-            "op": "eq",
-            "value": "apache"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": [
-          {
-            "fn": "avg",
-            "field": "stars"
-          }
-        ]
-      }
-    },
-    {
-      "text": "unarchived repos with no maintainer",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "archived",
-            "op": "is_false"
-          },
-          {
-            "field": "maintainer",
-            "op": "is_empty"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "repos whose last commit was this month",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "last_commit",
-            "op": "between",
-            "value": ["2026-09-01", "2026-09-30"]
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "number of open issues by language as a bar chart",
-      "schema": "repos",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "language"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "count",
-            "field": "open_issues"
-          }
-        ],
-        "chart": "bar"
-      }
-    },
-    {
-      "text": "stars >= 500 and language != java",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "stars",
-            "op": "gte",
-            "value": 500
-          },
-          {
-            "field": "language",
-            "op": "neq",
-            "value": "java"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "first 10 repos alphabetically by name",
-      "schema": "repos",
-      "spec": {
-        "filters": [],
-        "sort": [
-          {
-            "field": "name",
-            "dir": "asc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": [],
-        "limit": 10
-      }
-    },
-    {
-      "text": "gpl repos updated after 2025-06-30",
-      "schema": "repos",
-      "spec": {
-        "filters": [
-          {
-            "field": "license",
-            "op": "eq",
-            "value": "gpl"
-          },
-          {
-            "field": "last_commit",
-            "op": "gt",
-            "value": "2025-06-30"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "wilting plants on the south bench",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "health",
-            "op": "eq",
-            "value": "wilting"
-          },
-          {
-            "field": "bench",
-            "op": "eq",
-            "value": "south"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "plants not watered in the last 7 days",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "watered",
-            "op": "lt",
-            "value": "2026-09-11"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "flowering plants taller than 50 cm",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "flowering",
-            "op": "is_true"
-          },
-          {
-            "field": "height_cm",
-            "op": "gt",
-            "value": 50
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "tomato varieties sown this spring",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "species",
-            "op": "contains",
-            "value": "tomato"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "average height by bench",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "bench"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "avg",
-            "field": "height_cm"
-          }
-        ]
-      }
-    },
-    {
-      "text": "how many plants are thriving vs dead",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "health",
-            "op": "in",
-            "value": ["thriving", "dead"]
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": [
-          {
-            "fn": "count"
-          }
-        ]
-      }
-    },
-    {
-      "text": "plants planted in 2025 that are in bloom",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "planted",
-            "op": "between",
-            "value": ["2025-01-01", "2025-12-31"]
-          },
-          {
-            "field": "flowering",
-            "op": "is_true"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "north and east bench plants sorted by height, tallest first",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "bench",
-            "op": "in",
-            "value": ["north", "east"]
-          }
-        ],
-        "sort": [
-          {
-            "field": "height_cm",
-            "dir": "desc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "plants with more than 3 pots",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "pots",
-            "op": "gt",
-            "value": 3
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "count of plants per health status as a pie chart",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "health"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "count"
-          }
-        ],
-        "chart": "pie"
-      }
-    },
-    {
-      "text": "last watered before september 10 2026",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "watered",
-            "op": "lt",
-            "value": "2026-09-10"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "dead plants, oldest planted first, 5 rows",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "health",
-            "op": "eq",
-            "value": "dead"
-          }
-        ],
-        "sort": [
-          {
-            "field": "planted",
-            "dir": "asc"
-          }
-        ],
-        "groupBy": [],
-        "aggregate": [],
-        "limit": 5
-      }
-    },
-    {
-      "text": "not blooming and height under 10",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "flowering",
-            "op": "is_false"
-          },
-          {
-            "field": "height_cm",
-            "op": "lt",
-            "value": 10
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "tallest plant per bench",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [],
-        "sort": [],
-        "groupBy": [
-          {
-            "field": "bench"
-          }
-        ],
-        "aggregate": [
-          {
-            "fn": "max",
-            "field": "height_cm"
-          }
-        ]
-      }
-    },
-    {
-      "text": "species is empty",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "species",
-            "op": "is_empty"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": []
-      }
-    },
-    {
-      "text": "plants watered today on the west bench, show as a table",
-      "schema": "greenhouse",
-      "spec": {
-        "filters": [
-          {
-            "field": "watered",
-            "op": "eq",
-            "value": "2026-09-17"
-          },
-          {
-            "field": "bench",
-            "op": "eq",
-            "value": "west"
-          }
-        ],
-        "sort": [],
-        "groupBy": [],
-        "aggregate": [],
-        "chart": "table"
-      }
-    }
-  ]
+	"note": "Hand-written phrases over four schemas the generator never saw (podcasts, wine, repositories, greenhouse). Written before evaluation; never used for tuning. Spans are not asserted here.",
+	"now": "2026-09-17T12:00:00Z",
+	"schemas": {
+		"podcasts": {
+			"fields": [
+				{
+					"name": "title",
+					"kind": "text",
+					"aliases": ["episode", "episode title"]
+				},
+				{
+					"name": "host",
+					"kind": "text",
+					"aliases": ["presenter", "hosted by"]
+				},
+				{
+					"name": "duration_minutes",
+					"kind": "number",
+					"aliases": ["duration", "length", "minutes", "runtime"]
+				},
+				{
+					"name": "downloads",
+					"kind": "number",
+					"aliases": ["listens", "plays"]
+				},
+				{
+					"name": "published",
+					"kind": "date",
+					"aliases": ["aired", "release date", "publish date"]
+				},
+				{
+					"name": "topic",
+					"kind": "enum",
+					"values": ["tech", "science", "comedy", "true crime", "business"]
+				},
+				{
+					"name": "explicit",
+					"kind": "boolean"
+				},
+				{
+					"name": "season",
+					"kind": "number"
+				}
+			]
+		},
+		"wine": {
+			"fields": [
+				{
+					"name": "producer",
+					"kind": "text",
+					"aliases": ["winery", "maker"]
+				},
+				{
+					"name": "grape",
+					"kind": "enum",
+					"aliases": ["varietal"],
+					"values": [
+						"pinot noir",
+						"chardonnay",
+						"riesling",
+						"cabernet",
+						"syrah",
+						"merlot"
+					]
+				},
+				{
+					"name": "vintage",
+					"kind": "number",
+					"aliases": ["year"]
+				},
+				{
+					"name": "bottles",
+					"kind": "number",
+					"aliases": ["stock", "quantity"]
+				},
+				{
+					"name": "price",
+					"kind": "number",
+					"aliases": ["cost", "paid", "spend"]
+				},
+				{
+					"name": "score",
+					"kind": "number",
+					"aliases": ["points", "rating"]
+				},
+				{
+					"name": "region",
+					"kind": "enum",
+					"values": ["burgundy", "napa", "mosel", "barossa", "rioja"]
+				},
+				{
+					"name": "drink_by",
+					"kind": "date",
+					"aliases": ["drink window", "drink before"]
+				},
+				{
+					"name": "opened",
+					"kind": "boolean"
+				}
+			]
+		},
+		"repos": {
+			"fields": [
+				{
+					"name": "name",
+					"kind": "text",
+					"aliases": ["repo", "repository"]
+				},
+				{
+					"name": "language",
+					"kind": "enum",
+					"aliases": ["lang"],
+					"values": ["typescript", "python", "rust", "go", "java"]
+				},
+				{
+					"name": "stars",
+					"kind": "number",
+					"aliases": ["stargazers"]
+				},
+				{
+					"name": "forks",
+					"kind": "number"
+				},
+				{
+					"name": "open_issues",
+					"kind": "number",
+					"aliases": ["issues", "issue count"]
+				},
+				{
+					"name": "last_commit",
+					"kind": "date",
+					"aliases": ["last updated", "updated", "last push"]
+				},
+				{
+					"name": "archived",
+					"kind": "boolean"
+				},
+				{
+					"name": "license",
+					"kind": "enum",
+					"values": ["mit", "apache", "gpl", "bsd"]
+				},
+				{
+					"name": "maintainer",
+					"kind": "text",
+					"aliases": ["owner", "maintained by"]
+				}
+			]
+		},
+		"greenhouse": {
+			"fields": [
+				{
+					"name": "species",
+					"kind": "text",
+					"aliases": ["plant", "variety"]
+				},
+				{
+					"name": "bench",
+					"kind": "enum",
+					"values": ["north", "south", "east", "west"]
+				},
+				{
+					"name": "height_cm",
+					"kind": "number",
+					"aliases": ["height", "tall"]
+				},
+				{
+					"name": "watered",
+					"kind": "date",
+					"aliases": ["last watered", "watering"]
+				},
+				{
+					"name": "planted",
+					"kind": "date",
+					"aliases": ["sown", "planting date"]
+				},
+				{
+					"name": "flowering",
+					"kind": "boolean",
+					"aliases": ["in bloom", "blooming"]
+				},
+				{
+					"name": "health",
+					"kind": "enum",
+					"values": ["thriving", "ok", "wilting", "dead"]
+				},
+				{
+					"name": "pots",
+					"kind": "number",
+					"aliases": ["pot count"]
+				}
+			]
+		}
+	},
+	"cases": [
+		{
+			"text": "comedy episodes longer than 60 minutes",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "topic",
+						"op": "eq",
+						"value": "comedy"
+					},
+					{
+						"field": "duration_minutes",
+						"op": "gt",
+						"value": 60
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "episodes hosted by Priya with over 10k downloads, most downloaded first",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "host",
+						"op": "contains",
+						"value": "Priya"
+					},
+					{
+						"field": "downloads",
+						"op": "gt",
+						"value": 10000
+					}
+				],
+				"sort": [
+					{
+						"field": "downloads",
+						"dir": "desc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "how many science episodes aired in 2025",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "topic",
+						"op": "eq",
+						"value": "science"
+					},
+					{
+						"field": "published",
+						"op": "between",
+						"value": ["2025-01-01", "2025-12-31"]
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": [
+					{
+						"fn": "count"
+					}
+				]
+			}
+		},
+		{
+			"text": "average runtime per topic as a bar chart",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "topic"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "avg",
+						"field": "duration_minutes"
+					}
+				],
+				"chart": "bar"
+			}
+		},
+		{
+			"text": "non explicit tech episodes from the last 90 days",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "explicit",
+						"op": "is_false"
+					},
+					{
+						"field": "topic",
+						"op": "eq",
+						"value": "tech"
+					},
+					{
+						"field": "published",
+						"op": "gte",
+						"value": "2026-06-20"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "season 3 episodes sorted by publish date, oldest first",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "season",
+						"op": "eq",
+						"value": 3
+					}
+				],
+				"sort": [
+					{
+						"field": "published",
+						"dir": "asc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "total downloads by month this year, line chart",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "published",
+						"op": "between",
+						"value": ["2026-01-01", "2026-12-31"]
+					}
+				],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "published"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "sum",
+						"field": "downloads"
+					}
+				],
+				"chart": "line",
+				"granularity": "month"
+			}
+		},
+		{
+			"text": "top 5 true crime episodes by listens",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "topic",
+						"op": "eq",
+						"value": "true crime"
+					}
+				],
+				"sort": [
+					{
+						"field": "downloads",
+						"dir": "desc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": [],
+				"limit": 5
+			}
+		},
+		{
+			"text": "episodes without a host",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "host",
+						"op": "is_empty"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "business or tech episodes under 20 minutes",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "topic",
+						"op": "in",
+						"value": ["business", "tech"]
+					},
+					{
+						"field": "duration_minutes",
+						"op": "lt",
+						"value": 20
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "episode titles containing interview published before march 2026",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "title",
+						"op": "contains",
+						"value": "interview"
+					},
+					{
+						"field": "published",
+						"op": "lt",
+						"value": "2026-03-01"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "count of episodes per season",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "season"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "count"
+					}
+				]
+			}
+		},
+		{
+			"text": "explicit episodes, newest first, limit 25",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "explicit",
+						"op": "is_true"
+					}
+				],
+				"sort": [
+					{
+						"field": "published",
+						"dir": "desc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": [],
+				"limit": 25
+			}
+		},
+		{
+			"text": "max downloads per host",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "host"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "max",
+						"field": "downloads"
+					}
+				]
+			}
+		},
+		{
+			"text": "episodes that aired yesterday",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "published",
+						"op": "eq",
+						"value": "2026-09-16"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "duration between 30 and 45 minutes, topic is not comedy",
+			"schema": "podcasts",
+			"spec": {
+				"filters": [
+					{
+						"field": "duration_minutes",
+						"op": "between",
+						"value": [30, 45]
+					},
+					{
+						"field": "topic",
+						"op": "neq",
+						"value": "comedy"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "pinot noir from burgundy with a score of at least 92",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "grape",
+						"op": "eq",
+						"value": "pinot noir"
+					},
+					{
+						"field": "region",
+						"op": "eq",
+						"value": "burgundy"
+					},
+					{
+						"field": "score",
+						"op": "gte",
+						"value": 92
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "bottles to drink by next year",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "drink_by",
+						"op": "lte",
+						"value": "2027-12-31"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "how many bottles per grape",
+			"schema": "wine",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "grape"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "count",
+						"field": "bottles"
+					}
+				]
+			}
+		},
+		{
+			"text": "unopened riesling vintage 2019 or older",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "opened",
+						"op": "is_false"
+					},
+					{
+						"field": "grape",
+						"op": "eq",
+						"value": "riesling"
+					},
+					{
+						"field": "vintage",
+						"op": "lte",
+						"value": 2019
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "wines that cost more than $100, cheapest first",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "price",
+						"op": "gt",
+						"value": 100
+					}
+				],
+				"sort": [
+					{
+						"field": "price",
+						"dir": "asc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "average price by region, pie chart",
+			"schema": "wine",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "region"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "avg",
+						"field": "price"
+					}
+				],
+				"chart": "pie"
+			}
+		},
+		{
+			"text": "napa cabernet rated 95+",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "region",
+						"op": "eq",
+						"value": "napa"
+					},
+					{
+						"field": "grape",
+						"op": "eq",
+						"value": "cabernet"
+					},
+					{
+						"field": "score",
+						"op": "gte",
+						"value": 95
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "everything from the winery Château Margaux",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "producer",
+						"op": "contains",
+						"value": "Château Margaux"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "total spend on chardonnay",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "grape",
+						"op": "eq",
+						"value": "chardonnay"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": [
+					{
+						"fn": "sum",
+						"field": "price"
+					}
+				]
+			}
+		},
+		{
+			"text": "stock under 3 bottles sorted by drink window",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "bottles",
+						"op": "lt",
+						"value": 3
+					}
+				],
+				"sort": [
+					{
+						"field": "drink_by",
+						"dir": "asc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "opened bottles",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "opened",
+						"op": "is_true"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "syrah or merlot between 2015 and 2020",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "grape",
+						"op": "in",
+						"value": ["syrah", "merlot"]
+					},
+					{
+						"field": "vintage",
+						"op": "between",
+						"value": [2015, 2020]
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "highest score per producer, top 10",
+			"schema": "wine",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "producer"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "max",
+						"field": "score"
+					}
+				],
+				"limit": 10
+			}
+		},
+		{
+			"text": "wines with no drink by date",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "drink_by",
+						"op": "is_empty"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "number of bottles by vintage as a table",
+			"schema": "wine",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "vintage"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "count",
+						"field": "bottles"
+					}
+				],
+				"chart": "table"
+			}
+		},
+		{
+			"text": "mosel wines not from 2018",
+			"schema": "wine",
+			"spec": {
+				"filters": [
+					{
+						"field": "region",
+						"op": "eq",
+						"value": "mosel"
+					},
+					{
+						"field": "vintage",
+						"op": "neq",
+						"value": 2018
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "typescript repos with more than 1000 stars",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "language",
+						"op": "eq",
+						"value": "typescript"
+					},
+					{
+						"field": "stars",
+						"op": "gt",
+						"value": 1000
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "repos not updated since 2024",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "last_commit",
+						"op": "lt",
+						"value": "2024-01-01"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "archived rust or go projects",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "archived",
+						"op": "is_true"
+					},
+					{
+						"field": "language",
+						"op": "in",
+						"value": ["rust", "go"]
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "sum of forks by language, descending",
+			"schema": "repos",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "language"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "sum",
+						"field": "forks"
+					}
+				]
+			}
+		},
+		{
+			"text": "mit licensed repos maintained by me",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "license",
+						"op": "eq",
+						"value": "mit"
+					},
+					{
+						"field": "maintainer",
+						"op": "eq",
+						"value": "me"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "top 20 python repos by stars",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "language",
+						"op": "eq",
+						"value": "python"
+					}
+				],
+				"sort": [
+					{
+						"field": "stars",
+						"dir": "desc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": [],
+				"limit": 20
+			}
+		},
+		{
+			"text": "repos with at least 50 open issues and fewer than 10 forks",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "open_issues",
+						"op": "gte",
+						"value": 50
+					},
+					{
+						"field": "forks",
+						"op": "lt",
+						"value": 10
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "count repos per license",
+			"schema": "repos",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "license"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "count"
+					}
+				]
+			}
+		},
+		{
+			"text": "repositories named react",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "name",
+						"op": "eq",
+						"value": "react"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "java repos pushed in the last 2 weeks, most stars first",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "language",
+						"op": "eq",
+						"value": "java"
+					},
+					{
+						"field": "last_commit",
+						"op": "between",
+						"value": ["2026-09-04", "2026-09-17"]
+					}
+				],
+				"sort": [
+					{
+						"field": "stars",
+						"dir": "desc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "average stars of apache licensed repos",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "license",
+						"op": "eq",
+						"value": "apache"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": [
+					{
+						"fn": "avg",
+						"field": "stars"
+					}
+				]
+			}
+		},
+		{
+			"text": "unarchived repos with no maintainer",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "archived",
+						"op": "is_false"
+					},
+					{
+						"field": "maintainer",
+						"op": "is_empty"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "repos whose last commit was this month",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "last_commit",
+						"op": "between",
+						"value": ["2026-09-01", "2026-09-30"]
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "number of open issues by language as a bar chart",
+			"schema": "repos",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "language"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "count",
+						"field": "open_issues"
+					}
+				],
+				"chart": "bar"
+			}
+		},
+		{
+			"text": "stars >= 500 and language != java",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "stars",
+						"op": "gte",
+						"value": 500
+					},
+					{
+						"field": "language",
+						"op": "neq",
+						"value": "java"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "first 10 repos alphabetically by name",
+			"schema": "repos",
+			"spec": {
+				"filters": [],
+				"sort": [
+					{
+						"field": "name",
+						"dir": "asc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": [],
+				"limit": 10
+			}
+		},
+		{
+			"text": "gpl repos updated after 2025-06-30",
+			"schema": "repos",
+			"spec": {
+				"filters": [
+					{
+						"field": "license",
+						"op": "eq",
+						"value": "gpl"
+					},
+					{
+						"field": "last_commit",
+						"op": "gt",
+						"value": "2025-06-30"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "wilting plants on the south bench",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "health",
+						"op": "eq",
+						"value": "wilting"
+					},
+					{
+						"field": "bench",
+						"op": "eq",
+						"value": "south"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "plants not watered in the last 7 days",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "watered",
+						"op": "lt",
+						"value": "2026-09-11"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "flowering plants taller than 50 cm",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "flowering",
+						"op": "is_true"
+					},
+					{
+						"field": "height_cm",
+						"op": "gt",
+						"value": 50
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "tomato varieties sown this spring",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "species",
+						"op": "contains",
+						"value": "tomato"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "average height by bench",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "bench"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "avg",
+						"field": "height_cm"
+					}
+				]
+			}
+		},
+		{
+			"text": "how many plants are thriving vs dead",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "health",
+						"op": "in",
+						"value": ["thriving", "dead"]
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": [
+					{
+						"fn": "count"
+					}
+				]
+			}
+		},
+		{
+			"text": "plants planted in 2025 that are in bloom",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "planted",
+						"op": "between",
+						"value": ["2025-01-01", "2025-12-31"]
+					},
+					{
+						"field": "flowering",
+						"op": "is_true"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "north and east bench plants sorted by height, tallest first",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "bench",
+						"op": "in",
+						"value": ["north", "east"]
+					}
+				],
+				"sort": [
+					{
+						"field": "height_cm",
+						"dir": "desc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "plants with more than 3 pots",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "pots",
+						"op": "gt",
+						"value": 3
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "count of plants per health status as a pie chart",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "health"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "count"
+					}
+				],
+				"chart": "pie"
+			}
+		},
+		{
+			"text": "last watered before september 10 2026",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "watered",
+						"op": "lt",
+						"value": "2026-09-10"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "dead plants, oldest planted first, 5 rows",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "health",
+						"op": "eq",
+						"value": "dead"
+					}
+				],
+				"sort": [
+					{
+						"field": "planted",
+						"dir": "asc"
+					}
+				],
+				"groupBy": [],
+				"aggregate": [],
+				"limit": 5
+			}
+		},
+		{
+			"text": "not blooming and height under 10",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "flowering",
+						"op": "is_false"
+					},
+					{
+						"field": "height_cm",
+						"op": "lt",
+						"value": 10
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "tallest plant per bench",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [],
+				"sort": [],
+				"groupBy": [
+					{
+						"field": "bench"
+					}
+				],
+				"aggregate": [
+					{
+						"fn": "max",
+						"field": "height_cm"
+					}
+				]
+			}
+		},
+		{
+			"text": "species is empty",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "species",
+						"op": "is_empty"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": []
+			}
+		},
+		{
+			"text": "plants watered today on the west bench, show as a table",
+			"schema": "greenhouse",
+			"spec": {
+				"filters": [
+					{
+						"field": "watered",
+						"op": "eq",
+						"value": "2026-09-17"
+					},
+					{
+						"field": "bench",
+						"op": "eq",
+						"value": "west"
+					}
+				],
+				"sort": [],
+				"groupBy": [],
+				"aggregate": [],
+				"chart": "table"
+			}
+		}
+	]
 }

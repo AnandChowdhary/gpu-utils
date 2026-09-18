@@ -7,9 +7,9 @@ import type { Model } from "./model.ts";
  * fallback for small inputs and for environments without WebGPU.
  */
 export function forwardCpu(model: Model, features: FeatureRows): Float32Array {
-  const n = features.tokens.length;
-  const k = model.manifest.labels.length;
-  const logits = new Float32Array(n * k);
-  // TODO: embed → sequence mixing → head, mirroring training/__SNAKE__/model.py.
-  return logits;
+	const n = features.tokens.length;
+	const k = model.manifest.labels.length;
+	const logits = new Float32Array(n * k);
+	// TODO: embed → sequence mixing → head, mirroring training/__SNAKE__/model.py.
+	return logits;
 }
