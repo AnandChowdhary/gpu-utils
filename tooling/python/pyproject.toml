@@ -1,9 +1,17 @@
 [project]
 name = "gpu-utils-training"
 version = "0.0.0"
-description = "Shared training helpers for gpu-utils: tokenizer/featurizer parity, int6 export"
+description = "Shared training helpers for gpu-utils: tokenizer/featurizer parity, model families, QAT, int6 export, WGSL harness"
 requires-python = ">=3.12"
-dependencies = ["numpy>=2"]
+dependencies = ["numpy>=2", "torch>=2.6,<3", "wgpu>=0.19"]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu", marker = "sys_platform == 'linux'" }
 
 [dependency-groups]
 dev = ["pytest>=8"]
