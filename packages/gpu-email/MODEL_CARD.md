@@ -10,21 +10,34 @@ URL and ADDRESS inside the author's signature. Exact rules run first where they 
 `>`-prefixed lines are quotes, `-- ` is the signature delimiter, email/URL come from regexes.
 
 ## Architecture
+The shared gpu-utils **conv family**, `ConvTagger(feature_rows=2267, embed=48, hidden=48,
+blocks=6, dilations=[1,2,4,8,16,32], tags=23)` from `gpu_utils_training.models`. The package
+ships no model code of its own: the CPU reference is the runtime's `convTaggerForward`, the
+WebGPU path is `runConvTagger` on the canonical `packages/runtime/src/wgsl/conv_tagger.wgsl`.
+Release 0.0.1 used a hand-written two-head `nn.Module` with its own `src/cpu.ts` loop and
+`src/shader.wgsl`; the numbers of both are side by side under "Evaluation".
+
 - Tokenizer: character-class runs (`@gpu-utils/runtime` `tokenize()`); 37 sparse hashed
   feature ids per token, one fixed-width row (token, line and document-level features; see
   `training/gpu_email/features.py`), no learned vocabulary
 - Embedding: 2,267 rows × 48 dims, summed per token (108,816 parameters)
-- Sequence mixing: 6 residual dilated 1-D convolutions, kernel 3, dilations 1, 2, 4, 8,
-  16, 32, ReLU, zero padding (41,760 parameters; 127-token receptive field)
-- Head: shared 48 → 64 ReLU layer, then 64 → 8 line kinds and 64 → 15 BIO labels
-  (4,631 parameters)
-- Parameters: 155,207 total
+- Projection: 48 → 48 (2,352 parameters; the family always projects embeddings to `hidden`)
+- Sequence mixing: 6 residual dilated blocks `x + relu(conv3_dilated(x)) @ W2 + b2`, kernel
+  3, dilations 1, 2, 4, 8, 16, 32, zero padding (55,872 parameters; 127-token receptive
+  field). The v1 model had no pointwise `W2` inside a block (41,760 parameters).
+- Head: one shared 48 → 48 ReLU layer, then 48 → 23 tag logits (3,479 parameters). The
+  first 8 columns are the line-kind classifier, the remaining 15 are the BIO contact
+  tagger; `decode.ts` / `decode.py` split them. `pooled_out` is 0 — both heads are
+  per-token, so nothing needs the pooled output.
+- Parameters: 170,519 total (v1: 155,207; +9.9%, entirely the per-block `W2` and the
+  projection, partly offset by a narrower head)
 - Quantization: int6 symmetric per-tensor (the runtime's text encoding), quantization-aware
-  training with a straight-through estimator from 40% of the steps; fixtures and all
-  numbers below use the dequantized int6 weights the package ships
+  training with a straight-through estimator from epoch 1 (`gpu_utils_training.qat`);
+  fixtures and all numbers below use the dequantized int6 weights the package ships
 - Decoder: per-line mean log-softmax → exact rules → Viterbi with a hand-set 8 × 8
-  transition table → segments; BIO Viterbi (O → I forbidden) over the signature block →
-  regex override for EMAIL/URL → contact fields
+  transition table → segments; BIO Viterbi over `bioTransitions` (O → I-X and I-X → I-Y
+  forbidden) over the signature block → regex override for EMAIL/URL → contact fields.
+  Unchanged from v1 apart from using the runtime's shared Viterbi and BIO transitions.
 
 ## Training data
 - Synthetic, `training/gpu_email/data.py` + `vocab.py`: 60,000 training emails
