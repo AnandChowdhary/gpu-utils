@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "../src/index.ts";
@@ -107,7 +107,9 @@ class Metrics {
         `contact ${key} F1: ${f1.toFixed(3)} (P ${p.toFixed(3)} R ${r.toFixed(3)}, n=${f.tp + f.fn})`,
       );
     }
-    console.log(`${rows.join("\n")}\n${this.failures.slice(0, 20).join("\n")}`);
+    const text = `${rows.join("\n")}\n${this.failures.slice(0, 40).join("\n")}\n`;
+    console.log(text);
+    if (process.env.GPU_EMAIL_EVAL_OUT) appendFileSync(process.env.GPU_EMAIL_EVAL_OUT, text);
   }
 }
 

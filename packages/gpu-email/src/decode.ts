@@ -259,7 +259,7 @@ export function extractContact(
   for (const m of segText.matchAll(new RegExp(EMAIL_RE.source, "g"))) {
     exact.push({ field: "EMAIL", start: span[0] + m.index, end: span[0] + m.index + m[0].length });
   }
-  for (const m of segText.matchAll(new RegExp(URL_RE.source, "g"))) {
+  for (const m of segText.matchAll(new RegExp(URL_RE.source, "gi"))) {
     let s = m[0];
     while (s.length > 0 && ".,;:!?".includes(s[s.length - 1]!)) s = s.slice(0, -1);
     const start = span[0] + m.index;

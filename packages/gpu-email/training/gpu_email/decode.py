@@ -153,7 +153,7 @@ def extract_contact(tokens: list[Token], logits: np.ndarray, text: str, span: tu
     exact: list[list] = []
     for m in EMAIL_RE.finditer(seg):
         exact.append(["EMAIL", span[0] + _u16(seg[: m.start()]), span[0] + _u16(seg[: m.end()])])
-    for m in URL_RE.finditer(seg):
+    for m in re.finditer(URL_RE.pattern, seg, re.I):
         s = m.group(0)
         while s and s[-1] in ".,;:!?":
             s = s[:-1]
