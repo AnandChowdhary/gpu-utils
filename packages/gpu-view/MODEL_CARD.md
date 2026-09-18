@@ -8,8 +8,8 @@ anonymous schema-membership features, and a deterministic compiler resolves ever
 
 ## Architecture
 - Tokenizer: character-class runs (`@gpu-utils/runtime`), whitespace dropped before the model
-- Features per token (__ROWS__ rows, up to 28 active): shape, length bucket, word hash (128),
-  consonant-skeleton hash (64), closed task lexicon (__KEYWORDS__ words + none), 12 flags
+- Features per token (746 rows, up to 28 active): shape, length bucket, word hash (128),
+  consonant-skeleton hash (64), closed task lexicon (469 words + none), 12 flags
   (digits, punctuation, casing, position, year-like, numeric suffix, comparative/superlative
   endings), and the schema-membership rows: field kind / begin-inside / match quality (exact,
   stem, inflection, prefix, typo) / alias, enum match / begin-inside / unique owner / owned by
@@ -22,7 +22,7 @@ anonymous schema-membership features, and a deterministic compiler resolves ever
   mean-pooled context → head (64 relu) → 15 logits: 14 roles + 1 clause-boundary logit;
   argmax decode per column group
 - Roles: `O FIELD OP VALUE TIME_VALUE CONJ NEG SORT_FIELD SORT_DIR GROUP_FIELD AGG_FN AGG_FIELD LIMIT CHART`
-- Parameters: __PARAMS__
+- Parameters: 37,711 (23,872 embedding + 13,839 scan/conv/head)
 - Quantization: int6 symmetric per-tensor, quantization-aware training from epoch 1 (straight-through)
 - v1 (0.1) used a package-specific tagger (5-tap conv before the scan, gated global context,
   33,087 params); v2 moves to the shared family with no package kernel

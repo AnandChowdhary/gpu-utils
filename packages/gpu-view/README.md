@@ -2,7 +2,7 @@
 
 Natural language to table view specs: filter, sort, group, aggregate, limit, chart.
 
-Tiny model (__PARAMS__ parameters, int6), trained from scratch, runs on WebGPU or the CPU in the
+Tiny model (37,711 parameters, int6), trained from scratch, runs on WebGPU or the CPU in the
 browser. Zero dependencies, 29.6 KiB Brotli including the weights. Part of
 [gpu-utils](https://github.com/AnandChowdhary/gpu-utils).
 
@@ -77,7 +77,7 @@ features that make the model schema-blind: matched a field (its kind, begin/insi
 nearest preceding or following field?), and the kind of and distance to the nearest field
 match on either side. The field words themselves never reach the model.
 
-A __PARAMS__-parameter tagger from the shared scan family (`@gpu-utils/runtime`
+A 37,711-parameter tagger from the shared scan family (`@gpu-utils/runtime`
 `scanTaggerForward`; summed embeddings → bidirectional gated affine scan
 `h[t] = a[t]·h[t−1] + (1−a[t])·tanh(u[t])` as a parallel prefix scan → residual 5-tap
 depthwise convolution → mean-pooled context → two-layer head) emits one of 14 roles per
