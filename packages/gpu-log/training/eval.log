@@ -1,0 +1,47 @@
+
+== held-out (generated, seed 2): 12000 lines
+token acc 0.9461 | span F1 0.9955 | kind acc 0.9979 | line exact 0.9786
+  TS      P 1.000 R 1.000 F1 1.000 (n=6308)
+  LEVEL   P 0.999 R 0.999 F1 0.999 (n=4892)
+  SOURCE  P 0.997 R 0.998 F1 0.998 (n=4670)
+  THREAD  P 0.998 R 0.998 F1 0.998 (n=3408)
+  KEY     P 1.000 R 1.000 F1 1.000 (n=8760)
+  VALUE   P 0.996 R 0.997 F1 0.997 (n=10070)
+  MSG     P 0.974 R 0.977 F1 0.976 (n=7489)
+  FN      P 1.000 R 1.000 F1 1.000 (n=2215)
+  FILE    P 1.000 R 1.000 F1 1.000 (n=2549)
+  LINE    P 1.000 R 1.000 F1 1.000 (n=2623)
+  COL     P 1.000 R 1.000 F1 1.000 (n=740)
+
+== unfamiliar (hand-written): 104 lines
+token acc 0.6986 | span F1 0.4855 | kind acc 0.7885 | line exact 0.1250
+  TS      P 0.646 R 0.869 F1 0.741 (n=61)
+  LEVEL   P 0.566 R 0.732 F1 0.638 (n=41)
+  SOURCE  P 0.358 R 0.352 F1 0.355 (n=54)
+  THREAD  P 0.556 R 0.556 F1 0.556 (n=36)
+  KEY     P 0.351 R 0.361 F1 0.356 (n=36)
+  VALUE   P 0.289 R 0.297 F1 0.293 (n=37)
+  MSG     P 0.233 R 0.431 F1 0.302 (n=72)
+  FN      P 0.545 R 0.375 F1 0.444 (n=16)
+  FILE    P 0.600 R 0.500 F1 0.545 (n=24)
+  LINE    P 0.900 R 0.750 F1 0.818 (n=24)
+  COL     P 0.800 R 0.800 F1 0.800 (n=5)
+  kind confusion: {('entry', 'entry'): 69, ('continuation', 'entry'): 8, ('continuation', 'continuation'): 4, ('entry', 'continuation'): 3, ('frame', 'frame'): 9, ('entry', 'frame'): 1, ('frame', 'continuation'): 7, ('continuation', 'frame'): 1, ('frame', 'entry'): 2}
+
+== Loghub 2k samples (weak labels from *_structured.csv; first 300 lines each)
+  HDFS         level 300/300 (100%)  source 300/300 (100%)  message 262/300 (87%)
+  Hadoop       level 300/300 (100%)  source 299/300 (100%)  message 217/300 (72%)
+  Spark        level 300/300 (100%)  source 277/300 (92%)  message 291/300 (97%)
+  Zookeeper    level 300/300 (100%)  source 300/300 (100%)  message 300/300 (100%)
+  OpenSSH      source 0/300 (0%)  message 136/300 (45%)
+  Linux        level 0/300 (0%)  source 290/300 (97%)  message 288/300 (96%)
+  Mac          source 293/300 (98%)  message 110/300 (37%)
+  Apache       level 300/300 (100%)  message 181/300 (60%)
+  Android      level 300/300 (100%)  source 280/300 (93%)  message 206/300 (69%)
+  BGL          level 2/300 (1%)  source 297/300 (99%)  message 258/300 (86%)
+  HPC          source 66/300 (22%)  message 19/300 (6%)
+  Thunderbird  source 154/300 (51%)  message 104/300 (35%)
+  Windows      level 175/300 (58%)  source 0/300 (0%)  message 116/300 (39%)
+  HealthApp    source 300/300 (100%)  message 48/300 (16%)
+  Proxifier    message 0/300 (0%)
+  OpenStack    level 300/300 (100%)  source 207/300 (69%)  message 111/300 (37%)

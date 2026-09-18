@@ -13,7 +13,7 @@ turns tags into typed output.
 
 | Package | Task | Size | Status |
 |---|---|---|---|
-| _coming soon_ | | | |
+| [gpu-cite](./packages/gpu-cite) | Parse citation and reference strings into structured bibliographic fields | 54.1 KiB | beta |
 
 ## Development
 
@@ -33,7 +33,8 @@ for the full recipe and definition of done.
 ## Releasing
 
 Add a changeset (`pnpm changeset`). Merging to `main` opens a "Version Packages" pull
-request; merging that publishes to npm with provenance. Requires the `NPM_TOKEN` secret.
+request; merging that publishes to npm with provenance via npm Trusted Publishing (OIDC), so no
+npm token is stored in the repo.
 
 ## License
 

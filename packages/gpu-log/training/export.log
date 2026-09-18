@@ -1,0 +1,2 @@
+exported 150,042 parameters to /home/vercel-sandbox/gpu-utils-wt/gpu-log/packages/gpu-log/model
+torch vs numpy max abs diff: 1.34e-05; fixtures: 27

@@ -17,8 +17,8 @@
     "check:package": "pnpm -r --filter './packages/*' --if-present check:package",
     "new": "node --experimental-strip-types tooling/new-package.ts",
     "changeset": "changeset",
-    "version": "changeset version && pnpm install --lockfile-only",
-    "release": "pnpm build && changeset publish"
+    "changeset:version": "changeset version && pnpm install --lockfile-only",
+    "changeset:publish": "pnpm build && changeset publish"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",

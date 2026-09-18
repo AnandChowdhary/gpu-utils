@@ -2,7 +2,13 @@
   "files": [],
   "references": [
     {
+      "path": "packages/gpu-cite"
+    },
+    {
       "path": "packages/gpu-log"
+    },
+    {
+      "path": "packages/gpu-paste"
     },
     {
       "path": "packages/runtime"

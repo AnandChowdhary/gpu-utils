@@ -1,0 +1,370 @@
+{
+  "format": 1,
+  "name": "gpu-cite",
+  "embed": 32,
+  "hidden": 32,
+  "head": 48,
+  "tableRows": 1479,
+  "featureWidth": 12,
+  "labels": [
+    "O",
+    "B-AUTHOR",
+    "B-TITLE",
+    "B-CONTAINER",
+    "B-YEAR",
+    "B-VOLUME",
+    "B-ISSUE",
+    "B-PAGES",
+    "B-PUBLISHER",
+    "B-LOCATION",
+    "B-EDITION",
+    "B-DOI",
+    "B-ARXIV",
+    "B-URL",
+    "B-ACCESSED",
+    "B-EDITOR",
+    "I-AUTHOR",
+    "I-TITLE",
+    "I-CONTAINER",
+    "I-YEAR",
+    "I-VOLUME",
+    "I-ISSUE",
+    "I-PAGES",
+    "I-PUBLISHER",
+    "I-LOCATION",
+    "I-EDITION",
+    "I-DOI",
+    "I-ARXIV",
+    "I-URL",
+    "I-ACCESSED",
+    "I-EDITOR"
+  ],
+  "roles": [
+    "AUTHOR",
+    "TITLE",
+    "CONTAINER",
+    "YEAR",
+    "VOLUME",
+    "ISSUE",
+    "PAGES",
+    "PUBLISHER",
+    "LOCATION",
+    "EDITION",
+    "DOI",
+    "ARXIV",
+    "URL",
+    "ACCESSED",
+    "EDITOR"
+  ],
+  "types": [
+    "article",
+    "book",
+    "chapter",
+    "conference",
+    "thesis",
+    "report",
+    "web",
+    "preprint"
+  ],
+  "nameparts": [
+    "O",
+    "GIVEN",
+    "FAMILY"
+  ],
+  "checkpoint": {
+    "run": "default",
+    "epoch": 3,
+    "seed": 0,
+    "heldout_exact_match": 0.7017,
+    "heldout_micro_f1": 0.9896
+  },
+  "tensors": [
+    {
+      "name": "emb",
+      "offset": 0,
+      "length": 47328,
+      "shape": [
+        1479,
+        32
+      ],
+      "scale": 0.06391695622474916
+    },
+    {
+      "name": "s1f_wa",
+      "offset": 47328,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.031143444199715892
+    },
+    {
+      "name": "s1f_ba",
+      "offset": 48352,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.021410976686785297
+    },
+    {
+      "name": "s1f_wb",
+      "offset": 48384,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.02402995478722357
+    },
+    {
+      "name": "s1f_bb",
+      "offset": 49408,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.006867983648853917
+    },
+    {
+      "name": "s1b_wa",
+      "offset": 49440,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.03109278025165681
+    },
+    {
+      "name": "s1b_ba",
+      "offset": 50464,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.020030504272830103
+    },
+    {
+      "name": "s1b_wb",
+      "offset": 50496,
+      "length": 1024,
+      "shape": [
+        32,
+        32
+      ],
+      "scale": 0.02397147878523796
+    },
+    {
+      "name": "s1b_bb",
+      "offset": 51520,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.007346062890944942
+    },
+    {
+      "name": "conv_w",
+      "offset": 51552,
+      "length": 192,
+      "shape": [
+        3,
+        64
+      ],
+      "scale": 0.03772188386609478
+    },
+    {
+      "name": "conv_b",
+      "offset": 51744,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.02312577347601614
+    },
+    {
+      "name": "s2f_wa",
+      "offset": 51808,
+      "length": 2048,
+      "shape": [
+        64,
+        32
+      ],
+      "scale": 0.03777548574632214
+    },
+    {
+      "name": "s2f_ba",
+      "offset": 53856,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.018149995034740816
+    },
+    {
+      "name": "s2f_wb",
+      "offset": 53888,
+      "length": 2048,
+      "shape": [
+        64,
+        32
+      ],
+      "scale": 0.03632436644646429
+    },
+    {
+      "name": "s2f_bb",
+      "offset": 55936,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.007009606688253341
+    },
+    {
+      "name": "s2b_wa",
+      "offset": 55968,
+      "length": 2048,
+      "shape": [
+        64,
+        32
+      ],
+      "scale": 0.03169965551745507
+    },
+    {
+      "name": "s2b_ba",
+      "offset": 58016,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.011945460111864151
+    },
+    {
+      "name": "s2b_wb",
+      "offset": 58048,
+      "length": 2048,
+      "shape": [
+        64,
+        32
+      ],
+      "scale": 0.025530032573207732
+    },
+    {
+      "name": "s2b_bb",
+      "offset": 60096,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.004968417267645559
+    },
+    {
+      "name": "w1",
+      "offset": 60128,
+      "length": 9216,
+      "shape": [
+        192,
+        48
+      ],
+      "scale": 0.03203116886077389
+    },
+    {
+      "name": "b1",
+      "offset": 69344,
+      "length": 48,
+      "shape": [
+        48
+      ],
+      "scale": 0.007913047748227273
+    },
+    {
+      "name": "wt",
+      "offset": 69392,
+      "length": 1488,
+      "shape": [
+        48,
+        31
+      ],
+      "scale": 0.03826083290961481
+    },
+    {
+      "name": "bt",
+      "offset": 70880,
+      "length": 31,
+      "shape": [
+        31
+      ],
+      "scale": 0.005895169511918099
+    },
+    {
+      "name": "wp",
+      "offset": 70911,
+      "length": 144,
+      "shape": [
+        48,
+        3
+      ],
+      "scale": 0.022409416014148344
+    },
+    {
+      "name": "bp",
+      "offset": 71055,
+      "length": 3,
+      "shape": [
+        3
+      ],
+      "scale": 0.004932061799110905
+    },
+    {
+      "name": "wc",
+      "offset": 71058,
+      "length": 4096,
+      "shape": [
+        128,
+        32
+      ],
+      "scale": 0.036998487287952055
+    },
+    {
+      "name": "bc",
+      "offset": 75154,
+      "length": 32,
+      "shape": [
+        32
+      ],
+      "scale": 0.005526692155868777
+    },
+    {
+      "name": "wd",
+      "offset": 75186,
+      "length": 256,
+      "shape": [
+        32,
+        8
+      ],
+      "scale": 0.023931209118135514
+    },
+    {
+      "name": "bd",
+      "offset": 75442,
+      "length": 8,
+      "shape": [
+        8
+      ],
+      "scale": 0.011201896975117346
+    },
+    {
+      "name": "trans",
+      "offset": 75450,
+      "length": 961,
+      "shape": [
+        31,
+        31
+      ],
+      "scale": 0.12474662257779029
+    }
+  ],
+  "parameters": 76411
+}
