@@ -94,16 +94,17 @@ code of its own beyond the featurizer and the decoder.
 | Measure | Value |
 |---|---|
 | Parameters | 170,519 (int6, per-tensor scales) |
-| Package (min + Brotli, incl. weights) | SIZE_TBD KiB / budget 117.2 KiB (120,000 B) |
-| Featurize + CPU forward + decode, 1 KB email (≈530 tokens), Node 24 | ≈ LAT1_TBD ms |
-| Same, 10 KB email (≈5,300 tokens) | ≈ LAT10_TBD ms |
+| Package (min + Brotli, incl. weights) | 108.9 KiB / budget 117.2 KiB (120,000 B) |
+| Featurize + CPU forward + decode, 1 KB email (459 tokens), Node 24 | ≈ 39 ms |
+| Same, 10 KB email (4,116 tokens) | ≈ 355 ms |
 | WebGPU, 10 KB email (estimate; not measured in CI) | ≈ 5–10 ms warm, 100–300 ms cold |
 
 The budget is 120,000 bytes rather than the 40 KB default because this is a whole-document
 conv-family model, not a short-query scan-family tagger: line and document features need a
 2,267-row embedding table and six 48-channel residual blocks to cover Gmail, Outlook, Apple
 Mail, Thunderbird, mobile and non-English conventions in one model. Most of the size is the
-embedding table (109K of the 171K parameters).
+embedding table (109K of the 171K parameters); the previous custom model was 155K
+parameters and 93.0 KiB.
 
 ## Limitations
 
@@ -122,8 +123,13 @@ embedding table (109K of the 171K parameters).
   Polish, Japanese and Chinese; see MODEL_CARD.md for the unfamiliar-set numbers on Korean,
   Czech, Finnish, Danish, Turkish, Greek and Traditional Chinese.
 
-EVAL_SUMMARY_TBD See [MODEL_CARD.md](./MODEL_CARD.md) for the full tables, including the
-numbers of the previous custom-model release side by side.
+Held-out generated set: 99.3% line-kind accuracy, 98.7% reply exact match, contact F1
+0.96–0.997. Hand-written unfamiliar set (71 emails, styles the generator cannot produce):
+90.7% line-kind accuracy, 76.1% reply exact match, contact F1 0.57–1.0. Real fixtures from
+email_reply_parser and talon: 29/34 replies exact. Moving to the shared family cost 0.17 pt
+of reply exact match on the generated set and 16 KiB of bundle, and gained 1.7 pt line-kind
+accuracy and 3 replies on the unfamiliar set and 1 reply on the real fixtures. See
+[MODEL_CARD.md](./MODEL_CARD.md) for the full tables, with both releases side by side.
 
 ## Training
 
@@ -131,7 +137,7 @@ numbers of the previous custom-model release side by side.
 cd packages/gpu-email/training
 uv sync
 uv run python -m gpu_email.data       # 60K synthetic emails + downloads the eval fixtures
-uv run python -m gpu_email.train      # 2 epochs, int6 QAT from epoch 1, 18 min budget on 2 CPU threads
+uv run python -m gpu_email.train      # 3 epochs, int6 QAT from epoch 1, ~16 min on 2 CPU threads
 uv run python -m gpu_email.export     # ../model/{manifest.json,weights.txt,fixtures.json} + row hashes
 uv run python -m gpu_email.evaluate   # held-out, unfamiliar and external sets (--exported for ../model)
 uv run pytest                         # featurizer, decoder, model fixtures, and WGSL (needs a WebGPU adapter)

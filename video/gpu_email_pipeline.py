@@ -44,9 +44,9 @@ KIND_COLOR = {
     "attribution": "#F59E0B",
     "quote": "#6B7280",
 }
-PARAMS = "155,207"
-SIZE = "93 KiB"
-LATENCY = "36 ms"
+PARAMS = "170,519"
+SIZE = "109 KiB"
+LATENCY = "39 ms"
 
 
 def email_block(tinted: bool = False) -> VGroup:
