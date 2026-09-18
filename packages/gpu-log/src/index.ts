@@ -10,7 +10,7 @@ import { type Backend, hasWebGPU, type Token, tokenize } from "@gpu-utils/runtim
 import { forwardCpu } from "./cpu.ts";
 import { decodeLine, makeDecoder, mergeTwoLineFrames } from "./decode.ts";
 import { fastPath } from "./fastpath.ts";
-import { featurizeTokens } from "./features.ts";
+import { FEATURE_COUNT, featurizeFlat, toRows } from "./features.ts";
 import { forwardGpuBatch } from "./gpu.ts";
 import { MODEL, type Model } from "./model.ts";
 import type { LogLine, LogParseResult } from "./types.ts";
@@ -48,21 +48,20 @@ interface PendingLine {
   index: number;
   text: string;
   tokens: Token[];
-  rows: number[][];
+  /** Flat feature ids; `toRows` is deferred to the lines that reach the model. */
+  features: Uint32Array;
   key?: string;
 }
 
 /** Two independent FNV-1a hashes over the feature ids: a 64-bit memo key. */
-function featureKey(rows: number[][]): string {
+function featureKey(features: Uint32Array): string {
   let a = 0x811c9dc5;
   let b = 0x01000193;
-  for (const row of rows) {
-    for (const v of row) {
-      a = Math.imul(a ^ v, 0x01000193) >>> 0;
-      b = Math.imul(b ^ (v + 0x9e3779b9), 0x85ebca6b) >>> 0;
-    }
+  for (const v of features) {
+    a = Math.imul(a ^ v, 0x01000193) >>> 0;
+    b = Math.imul(b ^ (v + 0x9e3779b9), 0x85ebca6b) >>> 0;
   }
-  return `${rows.length}:${a}:${b}`;
+  return `${features.length / FEATURE_COUNT}:${a}:${b}`;
 }
 
 const DECODER = makeDecoder(MODEL);
@@ -139,7 +138,7 @@ export async function parse(text: string, options: LogParseOptions = {}): Promis
       }
     }
     const tokens = tokenize(lineText);
-    pending.push({ index: i, text: lineText, tokens, rows: featurizeTokens(tokens) });
+    pending.push({ index: i, text: lineText, tokens, features: featurizeFlat(tokens) });
   }
   stats.model = pending.length;
 
@@ -149,7 +148,7 @@ export async function parse(text: string, options: LogParseOptions = {}): Promis
   if (options.memoize ?? true) {
     unique = [];
     for (const line of pending) {
-      line.key = featureKey(line.rows);
+      line.key = featureKey(line.features);
       const others = waiting.get(line.key);
       if (others) others.push(line);
       else {
@@ -187,13 +186,13 @@ export async function parse(text: string, options: LogParseOptions = {}): Promis
       for (const group of packBatches(unique, options.batchTokens ?? DEFAULT_BATCH_TOKENS)) {
         const out = await forwardGpuBatch(
           model,
-          group.map((l) => l.rows),
+          group.map((l) => toRows(l.features)),
         );
         for (const [i, line] of group.entries()) emit(line, out.tags[i]!, out.pooled?.[i] ?? []);
       }
     } else {
       for (const line of unique) {
-        const out = forwardCpu(model, line.rows);
+        const out = forwardCpu(model, toRows(line.features));
         emit(line, out.tags, out.pooled ?? []);
       }
     }
