@@ -1,0 +1,366 @@
+{
+  "format": 1,
+  "name": "gpu-log",
+  "hidden": 64,
+  "embedDim": 32,
+  "blocks": 5,
+  "featureCount": 9,
+  "featureSizes": [
+    [
+      "word",
+      1024
+    ],
+    [
+      "prefix",
+      512
+    ],
+    [
+      "shape",
+      8
+    ],
+    [
+      "first",
+      129
+    ],
+    [
+      "last",
+      129
+    ],
+    [
+      "len",
+      16
+    ],
+    [
+      "pos",
+      20
+    ],
+    [
+      "rpos",
+      12
+    ],
+    [
+      "col",
+      10
+    ]
+  ],
+  "embedRows": 1860,
+  "labels": [
+    "O",
+    "B-TS",
+    "I-TS",
+    "B-LEVEL",
+    "I-LEVEL",
+    "B-SOURCE",
+    "I-SOURCE",
+    "B-THREAD",
+    "I-THREAD",
+    "B-KEY",
+    "I-KEY",
+    "B-VALUE",
+    "I-VALUE",
+    "B-MSG",
+    "I-MSG",
+    "B-FN",
+    "I-FN",
+    "B-FILE",
+    "I-FILE",
+    "B-LINE",
+    "I-LINE",
+    "B-COL",
+    "I-COL"
+  ],
+  "kinds": [
+    "entry",
+    "continuation",
+    "frame"
+  ],
+  "checkpoint": {
+    "seed": 1,
+    "epochs": 5,
+    "lines": 160000
+  },
+  "tensors": [
+    {
+      "name": "embed",
+      "offset": 0,
+      "length": 59520,
+      "shape": [
+        1860,
+        32
+      ],
+      "scale": 0.05804071887846916
+    },
+    {
+      "name": "proj_w",
+      "offset": 59520,
+      "length": 2048,
+      "shape": [
+        32,
+        64
+      ],
+      "scale": 0.028796324806828654
+    },
+    {
+      "name": "proj_b",
+      "offset": 61568,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.00752421252189144
+    },
+    {
+      "name": "block0_w1",
+      "offset": 61632,
+      "length": 12288,
+      "shape": [
+        3,
+        64,
+        64
+      ],
+      "scale": 0.015741831833316434
+    },
+    {
+      "name": "block0_b1",
+      "offset": 73920,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.010507842225413169
+    },
+    {
+      "name": "block0_w2",
+      "offset": 73984,
+      "length": 4096,
+      "shape": [
+        64,
+        64
+      ],
+      "scale": 0.01507978573922188
+    },
+    {
+      "name": "block0_b2",
+      "offset": 78080,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.004088109058718528
+    },
+    {
+      "name": "block1_w1",
+      "offset": 78144,
+      "length": 12288,
+      "shape": [
+        3,
+        64,
+        64
+      ],
+      "scale": 0.019268326220973846
+    },
+    {
+      "name": "block1_b1",
+      "offset": 90432,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.0080374623498609
+    },
+    {
+      "name": "block1_w2",
+      "offset": 90496,
+      "length": 4096,
+      "shape": [
+        64,
+        64
+      ],
+      "scale": 0.015233979109794862
+    },
+    {
+      "name": "block1_b2",
+      "offset": 94592,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.004499094140145087
+    },
+    {
+      "name": "block2_w1",
+      "offset": 94656,
+      "length": 12288,
+      "shape": [
+        3,
+        64,
+        64
+      ],
+      "scale": 0.015885656879794215
+    },
+    {
+      "name": "block2_b1",
+      "offset": 106944,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.008856982954086797
+    },
+    {
+      "name": "block2_w2",
+      "offset": 107008,
+      "length": 4096,
+      "shape": [
+        64,
+        64
+      ],
+      "scale": 0.014324074791323754
+    },
+    {
+      "name": "block2_b2",
+      "offset": 111104,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.006300147983335679
+    },
+    {
+      "name": "block3_w1",
+      "offset": 111168,
+      "length": 12288,
+      "shape": [
+        3,
+        64,
+        64
+      ],
+      "scale": 0.0187524595568257
+    },
+    {
+      "name": "block3_b1",
+      "offset": 123456,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.007238868263459975
+    },
+    {
+      "name": "block3_w2",
+      "offset": 123520,
+      "length": 4096,
+      "shape": [
+        64,
+        64
+      ],
+      "scale": 0.013684309297992338
+    },
+    {
+      "name": "block3_b2",
+      "offset": 127616,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.005773623624155598
+    },
+    {
+      "name": "block4_w1",
+      "offset": 127680,
+      "length": 12288,
+      "shape": [
+        3,
+        64,
+        64
+      ],
+      "scale": 0.01990891464294926
+    },
+    {
+      "name": "block4_b1",
+      "offset": 139968,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.009095393842266451
+    },
+    {
+      "name": "block4_w2",
+      "offset": 140032,
+      "length": 4096,
+      "shape": [
+        64,
+        64
+      ],
+      "scale": 0.015572943033710603
+    },
+    {
+      "name": "block4_b2",
+      "offset": 144128,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.006375693986492772
+    },
+    {
+      "name": "head_h_w",
+      "offset": 144192,
+      "length": 4096,
+      "shape": [
+        64,
+        64
+      ],
+      "scale": 0.020637492979726484
+    },
+    {
+      "name": "head_h_b",
+      "offset": 148288,
+      "length": 64,
+      "shape": [
+        64
+      ],
+      "scale": 0.012557241224473523
+    },
+    {
+      "name": "head_tag_w",
+      "offset": 148352,
+      "length": 1472,
+      "shape": [
+        64,
+        23
+      ],
+      "scale": 0.02055079706253544
+    },
+    {
+      "name": "head_tag_b",
+      "offset": 149824,
+      "length": 23,
+      "shape": [
+        23
+      ],
+      "scale": 0.011478729786411408
+    },
+    {
+      "name": "head_kind_w",
+      "offset": 149847,
+      "length": 192,
+      "shape": [
+        64,
+        3
+      ],
+      "scale": 0.023059410433615406
+    },
+    {
+      "name": "head_kind_b",
+      "offset": 150039,
+      "length": 3,
+      "shape": [
+        3
+      ],
+      "scale": 0.0023730673616932283
+    }
+  ],
+  "parameters": 150042
+}

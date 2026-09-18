@@ -1,0 +1,256 @@
+{
+	"format": 1,
+	"name": "gpu-view",
+	"hidden": 32,
+	"headGate": 16,
+	"conv": 5,
+	"labels": [
+		"O",
+		"FIELD",
+		"OP",
+		"VALUE",
+		"TIME_VALUE",
+		"CONJ",
+		"NEG",
+		"SORT_FIELD",
+		"SORT_DIR",
+		"GROUP_FIELD",
+		"AGG_FN",
+		"AGG_FIELD",
+		"LIMIT",
+		"CHART"
+	],
+	"featureRows": 639,
+	"slots": 28,
+	"blocks": [
+		{
+			"name": "shape",
+			"offset": 0,
+			"size": 8
+		},
+		{
+			"name": "length",
+			"offset": 8,
+			"size": 8
+		},
+		{
+			"name": "word",
+			"offset": 16,
+			"size": 128
+		},
+		{
+			"name": "skeleton",
+			"offset": 144,
+			"size": 64
+		},
+		{
+			"name": "keyword",
+			"offset": 208,
+			"size": 366
+		},
+		{
+			"name": "flags",
+			"offset": 574,
+			"size": 10
+		},
+		{
+			"name": "field_kind",
+			"offset": 584,
+			"size": 6
+		},
+		{
+			"name": "field_pos",
+			"offset": 590,
+			"size": 3
+		},
+		{
+			"name": "quality",
+			"offset": 593,
+			"size": 5
+		},
+		{
+			"name": "alias",
+			"offset": 598,
+			"size": 2
+		},
+		{
+			"name": "enum_any",
+			"offset": 600,
+			"size": 2
+		},
+		{
+			"name": "enum_pos",
+			"offset": 602,
+			"size": 3
+		},
+		{
+			"name": "enum_unique",
+			"offset": 605,
+			"size": 2
+		},
+		{
+			"name": "enum_prev",
+			"offset": 607,
+			"size": 2
+		},
+		{
+			"name": "enum_next",
+			"offset": 609,
+			"size": 2
+		},
+		{
+			"name": "prev_kind",
+			"offset": 611,
+			"size": 6
+		},
+		{
+			"name": "prev_dist",
+			"offset": 617,
+			"size": 6
+		},
+		{
+			"name": "next_kind",
+			"offset": 623,
+			"size": 6
+		},
+		{
+			"name": "next_dist",
+			"offset": 629,
+			"size": 6
+		},
+		{
+			"name": "position",
+			"offset": 635,
+			"size": 4
+		}
+	],
+	"checkpoint": {
+		"run": "default",
+		"seed": 0,
+		"epochs": 14,
+		"samples": 160000,
+		"date": "2026-09-18"
+	},
+	"tensors": [
+		{
+			"name": "embedding",
+			"offset": 0,
+			"length": 20448,
+			"shape": [639, 32],
+			"scale": 0.09947749876206921
+		},
+		{
+			"name": "encoder_bias",
+			"offset": 20448,
+			"length": 32,
+			"shape": [32],
+			"scale": 0.005921552738835735
+		},
+		{
+			"name": "convolution",
+			"offset": 20480,
+			"length": 160,
+			"shape": [5, 32],
+			"scale": 0.03485483507956228
+		},
+		{
+			"name": "gate_weight",
+			"offset": 20640,
+			"length": 1024,
+			"shape": [32, 32],
+			"scale": 0.059531158016574
+		},
+		{
+			"name": "gate_bias",
+			"offset": 21664,
+			"length": 32,
+			"shape": [32],
+			"scale": 0.11894774436950684
+		},
+		{
+			"name": "candidate_weight",
+			"offset": 21696,
+			"length": 1024,
+			"shape": [32, 32],
+			"scale": 0.04011564100942304
+		},
+		{
+			"name": "candidate_bias",
+			"offset": 22720,
+			"length": 32,
+			"shape": [32],
+			"scale": 0.00689178224532835
+		},
+		{
+			"name": "combine_weight",
+			"offset": 22752,
+			"length": 2048,
+			"shape": [32, 64],
+			"scale": 0.041445916698824976
+		},
+		{
+			"name": "combine_bias",
+			"offset": 24800,
+			"length": 32,
+			"shape": [32],
+			"scale": 0.009894992074658793
+		},
+		{
+			"name": "global_weight",
+			"offset": 24832,
+			"length": 1024,
+			"shape": [32, 32],
+			"scale": 0.04358465056265554
+		},
+		{
+			"name": "global_bias",
+			"offset": 25856,
+			"length": 32,
+			"shape": [32],
+			"scale": 0.019163423968899633
+		},
+		{
+			"name": "head_gate_weight",
+			"offset": 25888,
+			"length": 1024,
+			"shape": [16, 64],
+			"scale": 0.03552052282517956
+		},
+		{
+			"name": "head_gate_bias",
+			"offset": 26912,
+			"length": 16,
+			"shape": [16],
+			"scale": 0.004977248849407319
+		},
+		{
+			"name": "head_hidden_weight",
+			"offset": 26928,
+			"length": 5120,
+			"shape": [64, 80],
+			"scale": 0.04044722741649997
+		},
+		{
+			"name": "head_hidden_bias",
+			"offset": 32048,
+			"length": 64,
+			"shape": [64],
+			"scale": 0.0059089146314128755
+		},
+		{
+			"name": "output_weight",
+			"offset": 32112,
+			"length": 960,
+			"shape": [15, 64],
+			"scale": 0.05268732578523697
+		},
+		{
+			"name": "output_bias",
+			"offset": 33072,
+			"length": 15,
+			"shape": [15],
+			"scale": 0.006059685541737464
+		}
+	],
+	"parameters": 33087
+}

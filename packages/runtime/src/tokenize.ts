@@ -3,7 +3,13 @@
  * tooling/python/gpu_utils_training/features.py exactly; parity is enforced by
  * test/fixtures/tokenize.json on both sides.
  */
-export const CharClass = { Letter: 0, Digit: 1, Space: 2, Newline: 3, Other: 4 } as const;
+export const CharClass = {
+  Letter: 0,
+  Digit: 1,
+  Space: 2,
+  Newline: 3,
+  Other: 4,
+} as const;
 export const Shape = {
   Lower: 0,
   Upper: 1,

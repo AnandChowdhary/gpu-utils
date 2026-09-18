@@ -28,7 +28,10 @@ export async function createProgram(shader: string, entries: string[]): Promise<
   for (const entryPoint of entries) {
     pipelines.set(
       entryPoint,
-      device.createComputePipeline({ layout: "auto", compute: { module, entryPoint } }),
+      device.createComputePipeline({
+        layout: "auto",
+        compute: { module, entryPoint },
+      }),
     );
   }
   const err = await device.popErrorScope();
@@ -53,7 +56,10 @@ export async function createProgram(shader: string, entries: string[]): Promise<
       // "auto" layouts are exclusive to the pipeline they came from (WebGPU spec), so each
       // pass needs a bind group built from its own pipeline. Every entry point must therefore
       // statically reference every binding.
-      const entriesList = bindings.map((buffer, binding) => ({ binding, resource: { buffer } }));
+      const entriesList = bindings.map((buffer, binding) => ({
+        binding,
+        resource: { buffer },
+      }));
       const bindGroups = new Map<string, GPUBindGroup>();
       for (const p of passes) {
         if (bindGroups.has(p.entry)) continue;
