@@ -123,7 +123,7 @@ v4 table and prefixes variants.
 
 - Caption: "gpu-tailwind"
 - The class cells slide together into one line; sentence above, classes below.
-- Footnote: "~56 KB Brotli · runs in the browser on WebGPU"
+- Footnote: "52.3 KiB Brotli · runs in the browser on WebGPU"
 
 ---
 

@@ -12,8 +12,8 @@ The brief allowed two designs. Both were built and evaluated on the same data:
 
 | Design | Params | Held-out exact-set match | Notes |
 |---|---|---|---|
-| Role tagger + deterministic compiler (shipped) | {{PARAMS}} | {{HELDOUT_EXACT}} | composes colour × shade × property, arbitrary values (`p-[13px]`), stacked variants; all semantics in code |
-| Mean-pooled multi-label head over the class vocabulary (`baseline_multilabel.py`) | {{ML_PARAMS}} | {{ML_EXACT}} | vocabulary capped at classes seen ≥20× ({{ML_VOCAB}} classes); {{ML_UNREACH}} of held-out classes are unreachable by construction; cannot bind a variant to one segment |
+| Role tagger + deterministic compiler (shipped) | 45,218 | 90.3% | composes colour × shade × property, arbitrary values (`p-[13px]`), stacked variants; all semantics in code |
+| Mean-pooled multi-label head over the class vocabulary (`baseline_multilabel.py`) | 174,391 | 8.6% | vocabulary capped at classes seen ≥20× (1,479 classes); 34.1% of held-out classes are unreachable by construction; cannot bind a variant to one segment |
 
 The multi-label head is structurally unable to express the long tail (any number × any
 unit, 286 colour tokens × 12 colour properties × 37 variants) and its head alone would
@@ -30,7 +30,7 @@ every semantic decision inspectable in `src/compile.ts`.
   depthwise conv (kernel 3) plus a mean-pooled global context vector projected into the head.
 - Head: ReLU(72 → 32) → 10 logits: 9 BIO role labels (`O`, `B/I-PROP`, `B/I-VAL`,
   `B/I-VAR`, `SEP`, `NEG`) decoded with a constrained Viterbi, plus one segment-boundary logit.
-- Parameters: {{PARAMS}}.
+- Parameters: 45,218.
 - Quantization: int6 symmetric per-tensor, quantization-aware training (fake-quant with a
   straight-through estimator from epoch 1 onward). Fixtures are computed from the
   dequantized weights, so TypeScript (CPU) and WGSL match PyTorch at 1e-4.
@@ -54,45 +54,70 @@ every semantic decision inspectable in `src/compile.ts`.
   compiler on the clean pieces, so generator and runtime agree by construction
   (`test/oracle.test.ts`, 400/400).
 - Held-out: 6,000 phrases from the same generator with seed 2 (3,000 used for metrics).
-- Unfamiliar: 64 hand-written phrases (`training/data/unfamiliar.json`) with sentence
+- Unfamiliar: 66 hand-written phrases (`training/data/unfamiliar.json`) with sentence
   shapes and vocabulary the generator does not produce ("three column grid on desktop, one
   column on phones", "when the mouse is over it, lift the shadow to large", "zebra striped
   rows with a slate 50 background"). Written before training and never used for tuning.
 
 ## Evaluation
 
-Tag level (held-out, 3,000 phrases, `uv run python -m gpu_tailwind.evaluate`):
+Tag level (held-out, 6,000 phrases, `uv run python -m gpu_tailwind.evaluate`):
 
 | Metric | Score |
 |---|---|
-| Token accuracy | {{TOKEN_ACC}} |
-| Whole-sequence tag accuracy | {{SEQ_ACC}} |
-| Boundary accuracy | {{BOUNDARY_ACC}} |
-| PROP span F1 | {{PROP_F1}} |
-| VAL span F1 | {{VAL_F1}} |
-| VAR span F1 | {{VAR_F1}} |
+| Token accuracy | 98.8% |
+| Whole-sequence tag accuracy | 82.8% |
+| Boundary accuracy | 99.96% |
+| PROP span F1 | 97.3% |
+| VAL span F1 | 95.2% |
+| VAR span F1 | 95.9% |
 
 Class level (full pipeline, `pnpm eval`, `training/runs/eval.json`):
 
 | Set | Size | Exact-set match | Class precision | Class recall | Class F1 |
 |---|---|---|---|---|---|
-| Held-out (generated, seed 2) | 3,000 | {{HELDOUT_EXACT}} | {{HELDOUT_P}} | {{HELDOUT_R}} | {{HELDOUT_F1}} |
-| Unfamiliar (hand-written) | 64 | {{UNF_EXACT}} | {{UNF_P}} | {{UNF_R}} | {{UNF_F1}} |
+| Held-out (generated, seed 2) | 3,000 | 90.3% | 97.6% | 96.6% | 97.1% |
+| Unfamiliar (hand-written) | 66 | 37.9% | 77.6% | 71.1% | 74.2% |
 
 Per-class precision/recall are micro-averaged over every emitted/expected class string;
-macro averages over distinct classes: held-out P {{HELDOUT_MP}} / R {{HELDOUT_MR}},
-unfamiliar P {{UNF_MP}} / R {{UNF_MR}}.
+macro averages over distinct classes: held-out P 94.9% / R 94.7%,
+unfamiliar P 60.4% / R 60.4%.
 
-{{UNFAMILIAR_NOTES}}
+What the unfamiliar set shows (all 41 misses are in `training/runs/unfamiliar_misses.txt`;
+nothing below was fixed or tuned after seeing them):
+
+- **Variant scope errors dominate.** On phrasings the generator never produced, the tagger
+  attaches a variant to the wrong segment or invents one from a lone keyword: "overlay
+  covering the parent" becomes `group-hover:` because of *parent*; "heading: 4xl" becomes
+  `first:` because of *heading*; "when the mouse is over it, lift the shadow" loses `hover:`
+  entirely; "zebra striped rows with a slate 50 background" drops `even:`. 13 of 41 misses.
+- **Value/property confusions on rare pairings.** "white text on a gray 900 background"
+  → `dark:bg-white` (the colour binds to the nearer *background*); "text emerald 600" →
+  `bg-emerald-600` (the standalone-colour default is a background); "scale up 5%" →
+  `scale-5`. The compiler's nearest-property rule is right for the generator's
+  distribution and wrong for some natural English word orders. 11 misses.
+- **Missing vocabulary.** "hairline", "translucent ... backdrop" (`bg-black/50` is not a
+  form the compiler emits), "spin animation" phrasing, "lift the shadow", "hide it when
+  printing" ("hide it" is not a value phrase). 9 misses.
+- **Spurious extra classes** from over-eager tagging of glue words ("so it sits above" →
+  `transition-all`, "all round" → `rounded-full`, "gap of 6" also emitting `grid-cols-2`).
+  8 misses.
+
+Per-class precision (77.6%) is well above exact-set match (37.9%): most outputs contain
+the right classes plus one wrong or missing one. The held-out generated set is therefore
+an optimistic number; the unfamiliar set is the one to quote. The obvious next step is a
+generator pass over exactly these sentence shapes (variant phrase first + imperative verb,
+"X on a Y background", noun-phrase descriptions), which we deliberately did not do before
+reporting.
 
 ## Size and latency
 | Measure | Value |
 |---|---|
-| Package (min + Brotli, incl. weights and table) | {{SIZE}} |
-| Weights (int6 text) | {{WEIGHTS_SIZE}} raw |
-| Cold start (device + pipelines + upload), estimate | {{GPU_COLD}} |
-| Warm WebGPU call, 300 tokens, estimate | {{GPU_WARM}} |
-| CPU path, 15-token phrase (Node 24) | {{CPU_LATENCY}} |
+| Package (min + Brotli, incl. weights and table) | 52.3 KiB |
+| Weights (int6 text) | 44.2 KiB raw |
+| Cold start (device + pipelines + upload), estimate | ~40-80 ms |
+| Warm WebGPU call, 300 tokens, estimate | ~1-2 ms compute + ~1-3 ms readback |
+| CPU path, 15-token phrase (Node 24) | 0.38 ms |
 
 WebGPU numbers are estimates from the runtime's readback-bound behaviour on this class of
 model (no GPU browser on the training box); the WGSL kernels are verified against the
@@ -116,6 +141,6 @@ fixtures on a lavapipe adapter (`training/tests/test_wgsl.py`).
   Review the classes before shipping them.
 
 ## Checkpoint
-- Promoted: {{CHECKPOINT}}
+- Promoted: seed 0, epoch 28 of 30, step 29,464, 2026-09-18 (13.4 min on 2 CPU threads)
 - Training command: `pnpm train` (`uv run python -m gpu_tailwind.train --minutes 16 --epochs 30`,
   seed 0, batch 128, AdamW 4e-3 cosine, QAT from epoch 1, 2 CPU threads).

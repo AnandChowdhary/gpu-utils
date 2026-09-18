@@ -56,7 +56,7 @@ batches calls.
    3-char prefix and suffix, shape, length, class) into one 1,565-row embedding table; there is
    no learned vocabulary, so typos and British/American spellings still land near their
    neighbours.
-2. **Tag (GPU or CPU).** A {{PARAMS}}-parameter bidirectional gated affine-scan tagger
+2. **Tag (GPU or CPU).** A 45,218-parameter bidirectional gated affine-scan tagger
    (`h = a·h_prev + b` as a parallel prefix scan, a depthwise conv, mean-pooled context and a
    two-layer head) labels every token `PROPERTY`, `VALUE`, `VARIANT`, `SEP`, `NEG` or `O`
    (BIO scheme, Viterbi-decoded) and emits a segment-boundary score. Weights are int6.
@@ -81,14 +81,14 @@ synthetic generator's gold labels and the runtime agree (`test/oracle.test.ts`).
 
 | Measure | Value |
 |---|---|
-| Package (min + Brotli, weights and table included) | {{SIZE}} (budget 60 KB) |
-| Parameters | {{PARAMS}} (int6) |
-| CPU path, 15-token phrase (Node 24, one core) | {{CPU_LATENCY}} |
-| WebGPU cold start (device + 6 pipelines + weight upload) | {{GPU_COLD}} |
-| WebGPU warm call, 300-token input | {{GPU_WARM}} |
+| Package (min + Brotli, weights and table included) | 52.3 KiB (budget 60 KB) |
+| Parameters | 45,218 (int6) |
+| CPU path, 15-token phrase (Node 24, one core) | 0.38 ms |
+| WebGPU cold start (device + 6 pipelines + weight upload) | ~40-80 ms |
+| WebGPU warm call, 300-token input | ~1-2 ms compute + ~1-3 ms readback |
 
 The budget is above the 40 KB default because the compiled theme + synonym table
-(`src/table.json`, ~{{TABLE_SIZE}} Brotli) ships alongside the weights.
+(`src/table.json`, ~13.1 KiB Brotli) ships alongside the weights.
 
 ## Limitations
 
