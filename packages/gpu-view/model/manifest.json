@@ -2,15 +2,15 @@
   "format": 1,
   "name": "gpu-view",
   "family": "scan",
-  "featureRows": 746,
-  "paddingId": 746,
+  "featureRows": 748,
+  "paddingId": 748,
   "hidden": 32,
   "head": 64,
   "scanLayers": 1,
   "convTaps": 5,
   "tags": 15,
   "pooled": 0,
-  "slots": 28,
+  "slots": 29,
   "labels": [
     "O",
     "FIELD",
@@ -80,67 +80,72 @@
       "size": 2
     },
     {
-      "name": "enum_any",
+      "name": "field_neg",
       "offset": 707,
       "size": 2
     },
     {
-      "name": "enum_pos",
+      "name": "enum_any",
       "offset": 709,
+      "size": 2
+    },
+    {
+      "name": "enum_pos",
+      "offset": 711,
       "size": 3
     },
     {
       "name": "enum_unique",
-      "offset": 712,
-      "size": 2
-    },
-    {
-      "name": "enum_prev",
       "offset": 714,
       "size": 2
     },
     {
-      "name": "enum_next",
+      "name": "enum_prev",
       "offset": 716,
       "size": 2
     },
     {
-      "name": "prev_kind",
+      "name": "enum_next",
       "offset": 718,
+      "size": 2
+    },
+    {
+      "name": "prev_kind",
+      "offset": 720,
       "size": 6
     },
     {
       "name": "prev_dist",
-      "offset": 724,
+      "offset": 726,
       "size": 6
     },
     {
       "name": "next_kind",
-      "offset": 730,
+      "offset": 732,
       "size": 6
     },
     {
       "name": "next_dist",
-      "offset": 736,
+      "offset": 738,
       "size": 6
     },
     {
       "name": "position",
-      "offset": 742,
+      "offset": 744,
       "size": 4
     }
   ],
   "checkpoint": {
     "run": "default",
-    "epoch": 12,
+    "epoch": 13,
     "seed": 0,
     "metrics": {
-      "dev_token_accuracy": 0.9980831735977999,
-      "dev_boundary_accuracy": 0.9982498541545128,
-      "dev_sequence_exact": 0.951,
-      "transfer_token_accuracy": 0.9918591128094368,
-      "transfer_boundary_accuracy": 0.9929390264163482,
-      "transfer_sequence_exact": 0.8405
+      "dev_token_accuracy": 0.9980824544582934,
+      "dev_boundary_accuracy": 0.9978359128886454,
+      "dev_sequence_exact": 0.9495,
+      "transfer_token_accuracy": 0.9930214597009985,
+      "transfer_boundary_accuracy": 0.9942627020466707,
+      "transfer_sequence_exact": 0.858
     },
     "date": "2026-09-18"
   },
@@ -148,146 +153,146 @@
     {
       "name": "embed",
       "offset": 0,
-      "length": 23872,
+      "length": 23936,
       "shape": [
-        746,
+        748,
         32
       ],
-      "scale": 0.07540755118093183
+      "scale": 0.08061807386336788
     },
     {
       "name": "scan0.f.wa",
-      "offset": 23872,
+      "offset": 23936,
       "length": 1024,
       "shape": [
         32,
         32
       ],
-      "scale": 0.045642026009098176
+      "scale": 0.057165557338345434
     },
     {
       "name": "scan0.f.ba",
-      "offset": 24896,
+      "offset": 24960,
       "length": 32,
       "shape": [
         32
       ],
-      "scale": 0.0935383842837426
+      "scale": 0.102681944447179
     },
     {
       "name": "scan0.f.wu",
-      "offset": 24928,
+      "offset": 24992,
       "length": 1024,
       "shape": [
         32,
         32
       ],
-      "scale": 0.035126105431587465
+      "scale": 0.04076377807124969
     },
     {
       "name": "scan0.f.bu",
-      "offset": 25952,
+      "offset": 26016,
       "length": 32,
       "shape": [
         32
       ],
-      "scale": 0.005361533453387599
+      "scale": 0.008123661241223734
     },
     {
       "name": "scan0.b.wa",
-      "offset": 25984,
+      "offset": 26048,
       "length": 1024,
       "shape": [
         32,
         32
       ],
-      "scale": 0.051114355364153465
+      "scale": 0.05166612517449164
     },
     {
       "name": "scan0.b.ba",
-      "offset": 27008,
+      "offset": 27072,
       "length": 32,
       "shape": [
         32
       ],
-      "scale": 0.08950328826904297
+      "scale": 0.09510805529932823
     },
     {
       "name": "scan0.b.wu",
-      "offset": 27040,
+      "offset": 27104,
       "length": 1024,
       "shape": [
         32,
         32
       ],
-      "scale": 0.04366158285448628
+      "scale": 0.03274113132107642
     },
     {
       "name": "scan0.b.bu",
-      "offset": 28064,
+      "offset": 28128,
       "length": 32,
       "shape": [
         32
       ],
-      "scale": 0.0062507621703609345
+      "scale": 0.005680976375456779
     },
     {
       "name": "conv0.w",
-      "offset": 28096,
+      "offset": 28160,
       "length": 320,
       "shape": [
         5,
         64
       ],
-      "scale": 0.0626731611067249
+      "scale": 0.06129632457610099
     },
     {
       "name": "conv0.b",
-      "offset": 28416,
+      "offset": 28480,
       "length": 64,
       "shape": [
         64
       ],
-      "scale": 0.026797079270885836
+      "scale": 0.025885193578658566
     },
     {
       "name": "head.w",
-      "offset": 28480,
+      "offset": 28544,
       "length": 8192,
       "shape": [
         128,
         64
       ],
-      "scale": 0.04575665535465363
+      "scale": 0.044821919933442145
     },
     {
       "name": "head.b",
-      "offset": 36672,
+      "offset": 36736,
       "length": 64,
       "shape": [
         64
       ],
-      "scale": 0.0072186786320901685
+      "scale": 0.005408149092428146
     },
     {
       "name": "tags.w",
-      "offset": 36736,
+      "offset": 36800,
       "length": 960,
       "shape": [
         64,
         15
       ],
-      "scale": 0.07312446255837718
+      "scale": 0.06875990283104681
     },
     {
       "name": "tags.b",
-      "offset": 37696,
+      "offset": 37760,
       "length": 15,
       "shape": [
         15
       ],
-      "scale": 0.003847221213002359
+      "scale": 0.003349494068853317
     }
   ],
-  "parameters": 37711
+  "parameters": 37775
 }
