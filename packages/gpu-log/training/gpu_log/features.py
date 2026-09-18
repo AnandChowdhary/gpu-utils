@@ -26,12 +26,14 @@ FEATURE_SIZES: list[tuple[str, int]] = [
     ("col", 10),
 ]
 FEATURE_COUNT = len(FEATURE_SIZES)
+SLOTS = FEATURE_COUNT
 FEATURE_OFFSETS: list[int] = []
 _acc = 0
 for _name, _size in FEATURE_SIZES:
     FEATURE_OFFSETS.append(_acc)
     _acc += _size
 EMBED_ROWS = _acc
+FEATURE_ROWS = EMBED_ROWS
 
 
 def _char_bucket(ch: str) -> int:
@@ -106,7 +108,11 @@ def token_features(tokens: list[Token], i: int) -> list[int]:
     return [FEATURE_OFFSETS[k] + v for k, v in enumerate(raw)]
 
 
+def featurize_tokens(tokens: list[Token]) -> list[list[int]]:
+    return [token_features(tokens, i) for i in range(len(tokens))]
+
+
 def featurize(line: str) -> tuple[list[Token], list[list[int]]]:
     """Tokenize one line (no newlines) and return (tokens, rows)."""
     tokens = tokenize(line)
-    return tokens, [token_features(tokens, i) for i in range(len(tokens))]
+    return tokens, featurize_tokens(tokens)

@@ -1,17 +1,17 @@
 /**
- * gpu-log: universal log line parser. Timestamps, levels, sources, threads, key=value pairs,
- * messages and stack frames from any text log format, on WebGPU or the CPU.
+ * gpu-log: universal log line parser. Timestamps, levels, sources, hosts, threads, key=value
+ * pairs, messages and stack frames from any text log format, on WebGPU or the CPU.
  *
  * Pipeline per line: blank check → JSON / logfmt fast paths → (everything else) character-class
- * tokens → sparse hashed features → dilated-CNN tagger (batched across lines per dispatch) →
+ * tokens → sparse hashed features → shared conv-family tagger (many lines per dispatch) →
  * Viterbi over BIO tags → deterministic compiler (decode.ts).
  */
 import { type Backend, hasWebGPU, type Token, tokenize } from "@gpu-utils/runtime";
-import { type Batch, forwardCpu } from "./cpu.ts";
-import { bioTransitions, decodeLine, mergeTwoLineFrames } from "./decode.ts";
+import { forwardCpu } from "./cpu.ts";
+import { decodeLine, makeDecoder, mergeTwoLineFrames } from "./decode.ts";
 import { fastPath } from "./fastpath.ts";
-import { FEATURE_COUNT, writeTokenFeatures } from "./features.ts";
-import { forwardGpu } from "./gpu.ts";
+import { featurizeTokens } from "./features.ts";
+import { forwardGpuBatch } from "./gpu.ts";
 import { MODEL, type Model } from "./model.ts";
 import type { LogLine, LogParseResult } from "./types.ts";
 
@@ -31,7 +31,7 @@ export interface LogParseOptions {
   backend?: Backend;
   /** Skip the deterministic JSON / logfmt paths and send every line to the model. */
   fastPaths?: boolean;
-  /** Maximum tokens per forward pass (one GPU dispatch); lines are never split. */
+  /** Upper bound on padded tokens (lines × longest line) per GPU dispatch; lines are never split. */
   batchTokens?: number;
   /**
    * Reuse model output for lines whose feature sequence was already seen in this call
@@ -48,24 +48,24 @@ interface PendingLine {
   index: number;
   text: string;
   tokens: Token[];
-  /** Per-token feature ids, also the memoisation key material. */
-  features: Uint32Array;
+  rows: number[][];
   key?: string;
 }
 
 /** Two independent FNV-1a hashes over the feature ids: a 64-bit memo key. */
-function featureKey(features: Uint32Array): string {
+function featureKey(rows: number[][]): string {
   let a = 0x811c9dc5;
   let b = 0x01000193;
-  for (let i = 0; i < features.length; i++) {
-    const v = features[i]!;
-    a = Math.imul(a ^ v, 0x01000193) >>> 0;
-    b = Math.imul(b ^ (v + 0x9e3779b9), 0x85ebca6b) >>> 0;
+  for (const row of rows) {
+    for (const v of row) {
+      a = Math.imul(a ^ v, 0x01000193) >>> 0;
+      b = Math.imul(b ^ (v + 0x9e3779b9), 0x85ebca6b) >>> 0;
+    }
   }
-  return `${features.length}:${a}:${b}`;
+  return `${rows.length}:${a}:${b}`;
 }
 
-const TRANSITIONS = bioTransitions(MODEL.manifest.labels);
+const DECODER = makeDecoder(MODEL);
 
 /** Splits text into lines, keeping UTF-16 spans (line breaks excluded). */
 export function splitLines(text: string): [number, number][] {
@@ -83,35 +83,27 @@ export function splitLines(text: string): [number, number][] {
   return spans;
 }
 
-/** Packs pending lines into flat batches of at most `batchTokens` tokens (whole lines only). */
-function packBatches(
-  pending: PendingLine[],
-  batchTokens: number,
-): { batch: Batch; lines: PendingLine[] }[] {
-  const out: { batch: Batch; lines: PendingLine[] }[] = [];
+/**
+ * Groups lines of similar length into GPU batches. The kernel pads every line in a batch to
+ * the longest one, so lines are sorted by length and a batch closes when `lines × longest`
+ * would exceed `batchTokens`.
+ */
+export function packBatches(pending: PendingLine[], batchTokens: number): PendingLine[][] {
+  const sorted = [...pending].sort((a, b) => a.tokens.length - b.tokens.length);
+  const out: PendingLine[][] = [];
   let group: PendingLine[] = [];
-  let count = 0;
-  const flush = () => {
-    if (group.length === 0) return;
-    const features = new Uint32Array(count * FEATURE_COUNT);
-    const lineId = new Uint32Array(count);
-    const offsets: number[] = [0];
-    let p = 0;
-    for (const [li, line] of group.entries()) {
-      features.set(line.features, p * FEATURE_COUNT);
-      for (let i = 0; i < line.tokens.length; i++, p++) lineId[p] = li;
-      offsets.push(p);
+  let longest = 0;
+  for (const line of sorted) {
+    const n = Math.max(1, line.tokens.length);
+    if (group.length > 0 && (group.length + 1) * Math.max(longest, n) > batchTokens) {
+      out.push(group);
+      group = [];
+      longest = 0;
     }
-    out.push({ batch: { n: count, features, lineId, offsets }, lines: group });
-    group = [];
-    count = 0;
-  };
-  for (const line of pending) {
-    if (count > 0 && count + line.tokens.length > batchTokens) flush();
     group.push(line);
-    count += line.tokens.length;
+    longest = Math.max(longest, n);
   }
-  flush();
+  if (group.length) out.push(group);
   return out;
 }
 
@@ -147,10 +139,7 @@ export async function parse(text: string, options: LogParseOptions = {}): Promis
       }
     }
     const tokens = tokenize(lineText);
-    const features = new Uint32Array(tokens.length * FEATURE_COUNT);
-    for (let t = 0; t < tokens.length; t++)
-      writeTokenFeatures(tokens, t, features, t * FEATURE_COUNT);
-    pending.push({ index: i, text: lineText, tokens, features });
+    pending.push({ index: i, text: lineText, tokens, rows: featurizeTokens(tokens) });
   }
   stats.model = pending.length;
 
@@ -160,7 +149,7 @@ export async function parse(text: string, options: LogParseOptions = {}): Promis
   if (options.memoize ?? true) {
     unique = [];
     for (const line of pending) {
-      line.key = featureKey(line.features);
+      line.key = featureKey(line.rows);
       const others = waiting.get(line.key);
       if (others) others.push(line);
       else {
@@ -178,26 +167,34 @@ export async function parse(text: string, options: LogParseOptions = {}): Promis
     const useGpu =
       backend === "webgpu" || (backend === "auto" && hasWebGPU() && total >= GPU_MIN_TOKENS);
     stats.backend = useGpu ? "webgpu" : "cpu";
-    const batches = packBatches(unique, options.batchTokens ?? DEFAULT_BATCH_TOKENS);
-    const W = model.tags + model.kinds;
-    const emit = (line: PendingLine, logits: Float32Array) => {
+    const decodeOne = (line: PendingLine, tags: Float32Array, pooled: ArrayLike<number>) => {
       lines[line.index] = decodeLine(
-        model,
-        TRANSITIONS,
-        logits,
+        DECODER,
+        tags,
+        pooled,
         line.text,
         line.tokens,
         line.index,
         spans[line.index]!,
       );
     };
-    for (const { batch, lines: group } of batches) {
-      const logits = useGpu ? await forwardGpu(model, batch) : forwardCpu(model, batch);
-      for (const [li, line] of group.entries()) {
-        const slice = logits.subarray(batch.offsets[li]! * W, batch.offsets[li + 1]! * W);
-        emit(line, slice);
-        if (line.key !== undefined)
-          for (const other of waiting.get(line.key) ?? []) emit(other, slice);
+    const emit = (line: PendingLine, tags: Float32Array, pooled: ArrayLike<number>) => {
+      decodeOne(line, tags, pooled);
+      if (line.key !== undefined)
+        for (const other of waiting.get(line.key) ?? []) decodeOne(other, tags, pooled);
+    };
+    if (useGpu) {
+      for (const group of packBatches(unique, options.batchTokens ?? DEFAULT_BATCH_TOKENS)) {
+        const out = await forwardGpuBatch(
+          model,
+          group.map((l) => l.rows),
+        );
+        for (const [i, line] of group.entries()) emit(line, out.tags[i]!, out.pooled?.[i] ?? []);
+      }
+    } else {
+      for (const line of unique) {
+        const out = forwardCpu(model, line.rows);
+        emit(line, out.tags, out.pooled ?? []);
       }
     }
   }

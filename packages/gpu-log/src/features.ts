@@ -111,14 +111,19 @@ export function writeTokenFeatures(tokens: Token[], i: number, out: Uint32Array,
   out[at + 8] = OFF_COL + colBucket(t.start);
 }
 
-/** Featurizes a single line (no newlines). Mirrors `featurize()` in Python. */
-export function featurize(line: string): FeatureRows {
-  const tokens = tokenize(line);
+/** Feature rows for already-tokenized text. Mirrors `featurize_tokens()` in Python. */
+export function featurizeTokens(tokens: Token[]): number[][] {
   const rows: number[][] = [];
   const buf = new Uint32Array(FEATURE_COUNT);
   for (let i = 0; i < tokens.length; i++) {
     writeTokenFeatures(tokens, i, buf, 0);
     rows.push(Array.from(buf));
   }
-  return { tokens, rows };
+  return rows;
+}
+
+/** Featurizes a single line (no newlines). Mirrors `featurize()` in Python. */
+export function featurize(line: string): FeatureRows {
+  const tokens = tokenize(line);
+  return { tokens, rows: featurizeTokens(tokens) };
 }

@@ -1,32 +1,41 @@
 import numpy as np
 import torch
+from gpu_utils_training.batch import collate
+from gpu_utils_training.export import check_fixtures
+from gpu_utils_training.qat import set_quant
 
-from gpu_log.features import featurize
-from gpu_log.model import LogTagger, dequantized, forward_numpy
-
-
-def test_numpy_forward_matches_torch_with_line_masking() -> None:
-    torch.manual_seed(0)
-    model = LogTagger()
-    model.set_quant(True)
-    model.eval()
-    texts = ["2024-01-15 INFO hello world k=v", "\tat a.b.C.d(C.java:12)"]
-    deq = dequantized(model.tensors())
-    rows = [np.asarray(featurize(t)[1], dtype=np.int64) for t in texts]
-    L = max(len(r) for r in rows)
-    feats = np.zeros((2, L, rows[0].shape[1]), dtype=np.int64)
-    mask = np.zeros((2, L), dtype=np.float32)
-    for i, r in enumerate(rows):
-        feats[i, : len(r)] = r
-        mask[i, : len(r)] = 1
-    with torch.no_grad():
-        tags, kinds = model(torch.from_numpy(feats), torch.from_numpy(mask))
-    for i, r in enumerate(rows):
-        ref = forward_numpy(deq, r)
-        assert np.abs(tags[i, : len(r)].numpy() - ref[:, :23]).max() < 1e-4
-        assert np.abs(kinds[i].numpy() - ref[:, 23:].mean(0)).max() < 1e-4
+from gpu_log.data import KINDS, LABELS, batches, cached, loss
+from gpu_log.export import MODEL_DIR
+from gpu_log.features import FEATURE_COUNT, featurize
+from gpu_log.model import build
 
 
-def test_param_budget() -> None:
-    n = LogTagger().param_count()
-    assert 100_000 <= n <= 250_000
+def test_family_shapes_and_budget() -> None:
+    model = build()
+    assert 100_000 <= model.parameter_count() <= 250_000
+    rows, mask = collate([featurize("2024-01-15 INFO hello world k=v")[1], featurize("\tat a.b.C.d(C.java:12)")[1]], FEATURE_COUNT, model.padding_id)
+    out = model(rows, mask)
+    assert out["tags"].shape == (2, rows.shape[1], len(LABELS))
+    assert out["pooled"].shape == (2, len(KINDS))
+
+
+def test_batches_and_loss() -> None:
+    ds = cached("smoke", 300, 5)
+    model = build()
+    bs = batches(ds, 16, np.random.default_rng(0), model.padding_id)
+    assert sum(len(b[3]) for b in bs) == len(ds)
+    value = loss(model, bs[0])
+    assert torch.isfinite(value)
+
+
+def test_exported_fixtures_match_model() -> None:
+    """The shipped model/ reproduces fixtures.json (QAT on = decoded int6 weights)."""
+    from gpu_utils_training.models import from_config
+    from gpu_utils_training.quant import decode_weights
+    import json
+
+    manifest = json.loads((MODEL_DIR / "manifest.json").read_text())
+    model = from_config(manifest)
+    model.load_tensors(decode_weights((MODEL_DIR / "weights.txt").read_text(), manifest))
+    set_quant(model, False)
+    assert check_fixtures(model, MODEL_DIR) < 1e-4

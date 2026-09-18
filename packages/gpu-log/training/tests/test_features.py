@@ -22,7 +22,5 @@ def test_ids_stay_within_their_tables() -> None:
 
 
 def test_fixtures_match_featurizer() -> None:
-    if not FIXTURES.exists():
-        return
-    for case in json.loads(FIXTURES.read_text()):
-        assert featurize(case["text"])[1] == case["features"], case["text"]
+    for case in json.loads(FIXTURES.read_text())["cases"]:
+        assert featurize(case["input"])[1] == case["rows"], case["input"]
