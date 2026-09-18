@@ -1,6 +1,6 @@
 {
   "name": "gpu-cite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Parse freeform citation and reference strings into structured bibliographic fields",
   "author": "Anand Chowdhary (https://anandchowdhary.com)",
   "license": "MIT",
