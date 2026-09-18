@@ -578,6 +578,9 @@ function compileFilter(ctx: Ctx, clause: number[]): undefined {
     let fam = dateOp(opText);
     if (fam === "in") {
       if (lo === hi) return push(flip("eq"), lo);
+      // "not updated in the last 30 days": the window ends now, so its complement in the
+      // data is everything before it. Windows that end in the future stay unsupported.
+      if (negs % 2 === 1 && hi >= ctx.now.toISOString().slice(0, 10)) return push("lt", lo);
       if (negatedUnsupported("between")) return;
       return push("between", [lo, hi]);
     }
