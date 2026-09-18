@@ -59,6 +59,7 @@ describe("gpu-view evaluation", () => {
   for (const [name, file] of [
     ["unfamiliar v1 (contaminated: analysed after v1)", "eval/unfamiliar-v1.json"],
     ["unfamiliar v2 (written before the v2 model was evaluated)", "eval/unfamiliar-v2.json"],
+    ["unfamiliar v3 (written before any v2 output on its schemas)", "eval/unfamiliar-v3.json"],
   ] as const) {
     it(`${name}: spec exact match (spans ignored)`, async () => {
       const u = read<Unfamiliar>(file);

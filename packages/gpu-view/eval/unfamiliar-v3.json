@@ -1,0 +1,1774 @@
+{
+ "note": "Third hand-written set, over four schemas neither the generator nor the earlier unfamiliar sets used (library loans, veterinary visits, bird sightings, board game collection). Written by hand before any v2 model output on these schemas was inspected, and never used for tuning: the v2 error analysis was done on unfamiliar-v1 only. Spans are not asserted.",
+ "now": "2026-09-17T12:00:00Z",
+ "schemas": {
+  "library": {
+   "fields": [
+    {
+     "name": "borrower",
+     "kind": "text",
+     "aliases": [
+      "member",
+      "reader",
+      "patron"
+     ]
+    },
+    {
+     "name": "book_title",
+     "kind": "text",
+     "aliases": [
+      "title",
+      "book"
+     ]
+    },
+    {
+     "name": "genre",
+     "kind": "enum",
+     "values": [
+      "mystery",
+      "poetry",
+      "history",
+      "biography",
+      "cookery"
+     ]
+    },
+    {
+     "name": "pages",
+     "kind": "number",
+     "aliases": [
+      "page count",
+      "length"
+     ]
+    },
+    {
+     "name": "borrowed_on",
+     "kind": "date",
+     "aliases": [
+      "borrowed",
+      "checkout date"
+     ],
+     "primary": true
+    },
+    {
+     "name": "due_on",
+     "kind": "date",
+     "aliases": [
+      "due",
+      "due date"
+     ]
+    },
+    {
+     "name": "renewals",
+     "kind": "number",
+     "aliases": [
+      "renewal count"
+     ]
+    },
+    {
+     "name": "overdue",
+     "kind": "boolean"
+    },
+    {
+     "name": "branch",
+     "kind": "enum",
+     "values": [
+      "central",
+      "riverside",
+      "hilltop",
+      "eastgate"
+     ]
+    },
+    {
+     "name": "fine",
+     "kind": "number",
+     "aliases": [
+      "fine amount",
+      "penalty"
+     ]
+    }
+   ]
+  },
+  "clinic": {
+   "fields": [
+    {
+     "name": "pet",
+     "kind": "text",
+     "aliases": [
+      "animal",
+      "patient"
+     ]
+    },
+    {
+     "name": "owner_name",
+     "kind": "text",
+     "aliases": [
+      "owner"
+     ]
+    },
+    {
+     "name": "species",
+     "kind": "enum",
+     "values": [
+      "dog",
+      "cat",
+      "rabbit",
+      "parrot",
+      "ferret"
+     ]
+    },
+    {
+     "name": "weight_kg",
+     "kind": "number",
+     "aliases": [
+      "weight"
+     ]
+    },
+    {
+     "name": "visit_date",
+     "kind": "date",
+     "aliases": [
+      "visited",
+      "seen on"
+     ],
+     "primary": true
+    },
+    {
+     "name": "next_checkup",
+     "kind": "date",
+     "aliases": [
+      "checkup",
+      "follow up"
+     ]
+    },
+    {
+     "name": "vaccinated",
+     "kind": "boolean"
+    },
+    {
+     "name": "cost",
+     "kind": "number",
+     "aliases": [
+      "bill",
+      "charge"
+     ]
+    },
+    {
+     "name": "vet",
+     "kind": "text",
+     "aliases": [
+      "doctor",
+      "clinician"
+     ]
+    },
+    {
+     "name": "urgency",
+     "kind": "enum",
+     "values": [
+      "routine",
+      "urgent",
+      "emergency"
+     ]
+    }
+   ]
+  },
+  "birds": {
+   "fields": [
+    {
+     "name": "species_name",
+     "kind": "text",
+     "aliases": [
+      "species",
+      "bird"
+     ]
+    },
+    {
+     "name": "observer",
+     "kind": "text",
+     "aliases": [
+      "spotter",
+      "birder"
+     ]
+    },
+    {
+     "name": "habitat",
+     "kind": "enum",
+     "values": [
+      "wetland",
+      "woodland",
+      "coastal",
+      "moorland",
+      "urban"
+     ]
+    },
+    {
+     "name": "flock_size",
+     "kind": "number",
+     "aliases": [
+      "flock size",
+      "individuals"
+     ]
+    },
+    {
+     "name": "spotted_on",
+     "kind": "date",
+     "aliases": [
+      "spotted",
+      "sighting date"
+     ],
+     "primary": true
+    },
+    {
+     "name": "wingspan_cm",
+     "kind": "number",
+     "aliases": [
+      "wingspan"
+     ]
+    },
+    {
+     "name": "rare",
+     "kind": "boolean"
+    },
+    {
+     "name": "county",
+     "kind": "enum",
+     "values": [
+      "devon",
+      "norfolk",
+      "argyll",
+      "kent"
+     ]
+    },
+    {
+     "name": "verified",
+     "kind": "boolean"
+    },
+    {
+     "name": "notes",
+     "kind": "text"
+    }
+   ]
+  },
+  "boardgames": {
+   "fields": [
+    {
+     "name": "game",
+     "kind": "text",
+     "aliases": [
+      "title"
+     ]
+    },
+    {
+     "name": "designer",
+     "kind": "text",
+     "aliases": [
+      "author"
+     ]
+    },
+    {
+     "name": "style",
+     "kind": "enum",
+     "values": [
+      "strategy",
+      "party",
+      "family",
+      "coop",
+      "abstract"
+     ]
+    },
+    {
+     "name": "players_max",
+     "kind": "number",
+     "aliases": [
+      "max players",
+      "player count"
+     ]
+    },
+    {
+     "name": "playtime_min",
+     "kind": "number",
+     "aliases": [
+      "playtime",
+      "play time"
+     ]
+    },
+    {
+     "name": "complexity",
+     "kind": "number",
+     "aliases": [
+      "weight",
+      "difficulty"
+     ]
+    },
+    {
+     "name": "published",
+     "kind": "number",
+     "aliases": [
+      "release year",
+      "year"
+     ]
+    },
+    {
+     "name": "owned",
+     "kind": "boolean"
+    },
+    {
+     "name": "shelf",
+     "kind": "enum",
+     "values": [
+      "living room",
+      "office",
+      "attic",
+      "loft"
+     ]
+    },
+    {
+     "name": "plays",
+     "kind": "number",
+     "aliases": [
+      "times played",
+      "play count"
+     ]
+    },
+    {
+     "name": "rating",
+     "kind": "number",
+     "aliases": [
+      "score"
+     ]
+    }
+   ]
+  }
+ },
+ "cases": [
+  {
+   "text": "overdue loans at the riverside branch",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "overdue",
+      "op": "is_true"
+     },
+     {
+      "field": "branch",
+      "op": "eq",
+      "value": "riverside"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "boolean+enum"
+  },
+  {
+   "text": "books borrowed last month, newest first",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "borrowed_on",
+      "op": "between",
+      "value": [
+       "2026-08-01",
+       "2026-08-31"
+      ]
+     }
+    ],
+    "sort": [
+     {
+      "field": "borrowed_on",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "time+sort"
+  },
+  {
+   "text": "mystery books longer than 400 pages",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "genre",
+      "op": "eq",
+      "value": "mystery"
+     },
+     {
+      "field": "pages",
+      "op": "gt",
+      "value": 400
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "comparative+unit-noun"
+  },
+  {
+   "text": "how many loans per branch",
+   "schema": "library",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "branch"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "count"
+     }
+    ]
+   },
+   "tag": "count-per"
+  },
+  {
+   "text": "average fine by genre as a bar chart",
+   "schema": "library",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "genre"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "avg",
+      "field": "fine"
+     }
+    ],
+    "chart": "bar"
+   },
+   "tag": "agg+group+chart"
+  },
+  {
+   "text": "loans due today",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "due_on",
+      "op": "eq",
+      "value": "2026-09-17"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "date-field+today"
+  },
+  {
+   "text": "top 5 loans by fine",
+   "schema": "library",
+   "spec": {
+    "filters": [],
+    "sort": [
+     {
+      "field": "fine",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": [],
+    "limit": 5
+   },
+   "tag": "top-n-by"
+  },
+  {
+   "text": "poetry or biography titles",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "genre",
+      "op": "in",
+      "value": [
+       "poetry",
+       "biography"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "enum-or"
+  },
+  {
+   "text": "loans without a borrower",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "borrower",
+      "op": "is_empty"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "is_empty"
+  },
+  {
+   "text": "books renewed more than twice",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "renewals",
+      "op": "gt",
+      "value": 2
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "number-word"
+  },
+  {
+   "text": "titles containing dragon borrowed this year",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "book_title",
+      "op": "contains",
+      "value": "dragon"
+     },
+     {
+      "field": "borrowed_on",
+      "op": "between",
+      "value": [
+       "2026-01-01",
+       "2026-12-31"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "contains+time"
+  },
+  {
+   "text": "history books from the central branch, oldest first",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "genre",
+      "op": "eq",
+      "value": "history"
+     },
+     {
+      "field": "branch",
+      "op": "eq",
+      "value": "central"
+     }
+    ],
+    "sort": [
+     {
+      "field": "borrowed_on",
+      "dir": "asc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "two-enum+sort"
+  },
+  {
+   "text": "total fines per month this year, line chart",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "borrowed_on",
+      "op": "between",
+      "value": [
+       "2026-01-01",
+       "2026-12-31"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "borrowed_on"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "sum",
+      "field": "fine"
+     }
+    ],
+    "chart": "line",
+    "granularity": "month"
+   },
+   "tag": "granularity"
+  },
+  {
+   "text": "loans that are not overdue",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "overdue",
+      "op": "is_false"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "negated-boolean"
+  },
+  {
+   "text": "books due before 2026-10-01",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "due_on",
+      "op": "lt",
+      "value": "2026-10-01"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "iso-date"
+  },
+  {
+   "text": "members named Alvarez",
+   "schema": "library",
+   "spec": {
+    "filters": [
+     {
+      "field": "borrower",
+      "op": "eq",
+      "value": "Alvarez"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "named-value"
+  },
+  {
+   "text": "longest books first, limit 20",
+   "schema": "library",
+   "spec": {
+    "filters": [],
+    "sort": [
+     {
+      "field": "pages",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": [],
+    "limit": 20
+   },
+   "tag": "superlative-alias"
+  },
+  {
+   "text": "emergency visits this week",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "urgency",
+      "op": "eq",
+      "value": "emergency"
+     },
+     {
+      "field": "visit_date",
+      "op": "between",
+      "value": [
+       "2026-09-14",
+       "2026-09-20"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "enum+time"
+  },
+  {
+   "text": "unvaccinated dogs",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "vaccinated",
+      "op": "is_false"
+     },
+     {
+      "field": "species",
+      "op": "eq",
+      "value": "dog"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "negation-prefix"
+  },
+  {
+   "text": "cats heavier than 5 kg",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "species",
+      "op": "eq",
+      "value": "cat"
+     },
+     {
+      "field": "weight_kg",
+      "op": "gt",
+      "value": 5
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "comparative+unit"
+  },
+  {
+   "text": "average bill per species",
+   "schema": "clinic",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "species"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "avg",
+      "field": "cost"
+     }
+    ]
+   },
+   "tag": "alias-agg"
+  },
+  {
+   "text": "visits seen by doctor Okonkwo last month",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "vet",
+      "op": "contains",
+      "value": "Okonkwo"
+     },
+     {
+      "field": "visit_date",
+      "op": "between",
+      "value": [
+       "2026-08-01",
+       "2026-08-31"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "person+time"
+  },
+  {
+   "text": "how many visits per urgency, pie chart",
+   "schema": "clinic",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "urgency"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "count"
+     }
+    ],
+    "chart": "pie"
+   },
+   "tag": "count-per+chart"
+  },
+  {
+   "text": "rabbits with a checkup next month",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "species",
+      "op": "eq",
+      "value": "rabbit"
+     },
+     {
+      "field": "next_checkup",
+      "op": "between",
+      "value": [
+       "2026-10-01",
+       "2026-10-31"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "second-date-field"
+  },
+  {
+   "text": "most expensive visits first, top 10",
+   "schema": "clinic",
+   "spec": {
+    "filters": [],
+    "sort": [
+     {
+      "field": "cost",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": [],
+    "limit": 10
+   },
+   "tag": "superlative-alias"
+  },
+  {
+   "text": "visits costing between 100 and 250",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "cost",
+      "op": "between",
+      "value": [
+       100,
+       250
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "between-number"
+  },
+  {
+   "text": "parrots or ferrets seen in august 2026",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "species",
+      "op": "in",
+      "value": [
+       "parrot",
+       "ferret"
+      ]
+     },
+     {
+      "field": "visit_date",
+      "op": "between",
+      "value": [
+       "2026-08-01",
+       "2026-08-31"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "enum-or+month-year"
+  },
+  {
+   "text": "routine visits without a follow up",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "urgency",
+      "op": "eq",
+      "value": "routine"
+     },
+     {
+      "field": "next_checkup",
+      "op": "is_empty"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "enum+is_empty"
+  },
+  {
+   "text": "total cost by vet this quarter",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "visit_date",
+      "op": "between",
+      "value": [
+       "2026-07-01",
+       "2026-09-30"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "vet"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "sum",
+      "field": "cost"
+     }
+    ]
+   },
+   "tag": "agg+group+time"
+  },
+  {
+   "text": "pets named Biscuit",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "pet",
+      "op": "eq",
+      "value": "Biscuit"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "named-value"
+  },
+  {
+   "text": "visits on 2026-09-16",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "visit_date",
+      "op": "eq",
+      "value": "2026-09-16"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "iso-date"
+  },
+  {
+   "text": "number of urgent visits in the last 7 days",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "urgency",
+      "op": "eq",
+      "value": "urgent"
+     },
+     {
+      "field": "visit_date",
+      "op": "between",
+      "value": [
+       "2026-09-11",
+       "2026-09-17"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": [
+     {
+      "fn": "count"
+     }
+    ]
+   },
+   "tag": "count+relative-window"
+  },
+  {
+   "text": "vaccinated cats under 4 kg sorted by weight",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "vaccinated",
+      "op": "is_true"
+     },
+     {
+      "field": "species",
+      "op": "eq",
+      "value": "cat"
+     },
+     {
+      "field": "weight_kg",
+      "op": "lt",
+      "value": 4
+     }
+    ],
+    "sort": [
+     {
+      "field": "weight_kg",
+      "dir": "asc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "three-filters+sort"
+  },
+  {
+   "text": "ferrets or rabbits with a bill over 300, cheapest first",
+   "schema": "clinic",
+   "spec": {
+    "filters": [
+     {
+      "field": "species",
+      "op": "in",
+      "value": [
+       "ferret",
+       "rabbit"
+      ]
+     },
+     {
+      "field": "cost",
+      "op": "gt",
+      "value": 300
+     }
+    ],
+    "sort": [
+     {
+      "field": "cost",
+      "dir": "asc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "superlative-alias"
+  },
+  {
+   "text": "rare birds in norfolk",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "rare",
+      "op": "is_true"
+     },
+     {
+      "field": "county",
+      "op": "eq",
+      "value": "norfolk"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "boolean+enum"
+  },
+  {
+   "text": "sightings in wetland habitats last spring",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "habitat",
+      "op": "eq",
+      "value": "wetland"
+     },
+     {
+      "field": "spotted_on",
+      "op": "between",
+      "value": [
+       "2026-03-01",
+       "2026-05-31"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "season"
+  },
+  {
+   "text": "flocks of more than 50 individuals",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "flock_size",
+      "op": "gt",
+      "value": 50
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "alias-noun"
+  },
+  {
+   "text": "average wingspan by habitat",
+   "schema": "birds",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "habitat"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "avg",
+      "field": "wingspan_cm"
+     }
+    ]
+   },
+   "tag": "agg+group"
+  },
+  {
+   "text": "unverified sightings from this month",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "verified",
+      "op": "is_false"
+     },
+     {
+      "field": "spotted_on",
+      "op": "between",
+      "value": [
+       "2026-09-01",
+       "2026-09-30"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "negation-prefix+time"
+  },
+  {
+   "text": "how many sightings per county as a bar chart",
+   "schema": "birds",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "county"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "count"
+     }
+    ],
+    "chart": "bar"
+   },
+   "tag": "count-per+chart"
+  },
+  {
+   "text": "birds spotted by Hannah in devon",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "observer",
+      "op": "contains",
+      "value": "Hannah"
+     },
+     {
+      "field": "county",
+      "op": "eq",
+      "value": "devon"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "person+enum"
+  },
+  {
+   "text": "coastal sightings with a wingspan over 120 cm",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "habitat",
+      "op": "eq",
+      "value": "coastal"
+     },
+     {
+      "field": "wingspan_cm",
+      "op": "gt",
+      "value": 120
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "unit-suffix"
+  },
+  {
+   "text": "top 10 sightings by flock size",
+   "schema": "birds",
+   "spec": {
+    "filters": [],
+    "sort": [
+     {
+      "field": "flock_size",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": [],
+    "limit": 10
+   },
+   "tag": "top-n-by-multiword"
+  },
+  {
+   "text": "sightings without notes",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "notes",
+      "op": "is_empty"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "is_empty"
+  },
+  {
+   "text": "woodland or moorland sightings in 2025",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "habitat",
+      "op": "in",
+      "value": [
+       "woodland",
+       "moorland"
+      ]
+     },
+     {
+      "field": "spotted_on",
+      "op": "between",
+      "value": [
+       "2025-01-01",
+       "2025-12-31"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "enum-or+year"
+  },
+  {
+   "text": "species names containing warbler",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "species_name",
+      "op": "contains",
+      "value": "warbler"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "contains"
+  },
+  {
+   "text": "total individuals per month this year, line chart",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "spotted_on",
+      "op": "between",
+      "value": [
+       "2026-01-01",
+       "2026-12-31"
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "spotted_on"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "sum",
+      "field": "flock_size"
+     }
+    ],
+    "chart": "line",
+    "granularity": "month"
+   },
+   "tag": "granularity"
+  },
+  {
+   "text": "rare and verified sightings, newest first",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "rare",
+      "op": "is_true"
+     },
+     {
+      "field": "verified",
+      "op": "is_true"
+     }
+    ],
+    "sort": [
+     {
+      "field": "spotted_on",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "two-booleans"
+  },
+  {
+   "text": "sightings before june",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "spotted_on",
+      "op": "lt",
+      "value": "2026-06-01"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "bare-month"
+  },
+  {
+   "text": "max flock size per species",
+   "schema": "birds",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "species_name"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "max",
+      "field": "flock_size"
+     }
+    ]
+   },
+   "tag": "max-per"
+  },
+  {
+   "text": "urban sightings of more than 5 birds, largest flocks first",
+   "schema": "birds",
+   "spec": {
+    "filters": [
+     {
+      "field": "habitat",
+      "op": "eq",
+      "value": "urban"
+     },
+     {
+      "field": "flock_size",
+      "op": "gt",
+      "value": 5
+     }
+    ],
+    "sort": [
+     {
+      "field": "flock_size",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "superlative-alias"
+  },
+  {
+   "text": "coop games with at most 4 players",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "style",
+      "op": "eq",
+      "value": "coop"
+     },
+     {
+      "field": "players_max",
+      "op": "lte",
+      "value": 4
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "lte-phrase"
+  },
+  {
+   "text": "party games under 30 minutes",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "style",
+      "op": "eq",
+      "value": "party"
+     },
+     {
+      "field": "playtime_min",
+      "op": "lt",
+      "value": 30
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "unit-noun"
+  },
+  {
+   "text": "games published between 2015 and 2020",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "published",
+      "op": "between",
+      "value": [
+       2015,
+       2020
+      ]
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "year-like-number"
+  },
+  {
+   "text": "strategy games i do not own",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "style",
+      "op": "eq",
+      "value": "strategy"
+     },
+     {
+      "field": "owned",
+      "op": "is_false"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "negated-boolean"
+  },
+  {
+   "text": "average rating by style",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "style"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "avg",
+      "field": "rating"
+     }
+    ]
+   },
+   "tag": "agg+group"
+  },
+  {
+   "text": "top 10 games by plays",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [],
+    "sort": [
+     {
+      "field": "plays",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": [],
+    "limit": 10
+   },
+   "tag": "top-n-by"
+  },
+  {
+   "text": "games designed by Feld",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "designer",
+      "op": "contains",
+      "value": "Feld"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "inflected-alias"
+  },
+  {
+   "text": "abstract games with a complexity under 2.5",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "style",
+      "op": "eq",
+      "value": "abstract"
+     },
+     {
+      "field": "complexity",
+      "op": "lt",
+      "value": 2.5
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "decimal"
+  },
+  {
+   "text": "how many games per shelf",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "shelf"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "count"
+     }
+    ]
+   },
+   "tag": "count-per"
+  },
+  {
+   "text": "games rated 8 or higher, highest rated first",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "rating",
+      "op": "gte",
+      "value": 8
+     }
+    ],
+    "sort": [
+     {
+      "field": "rating",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "gte-phrase+superlative"
+  },
+  {
+   "text": "titles containing catan",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "game",
+      "op": "contains",
+      "value": "catan"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "contains"
+  },
+  {
+   "text": "family games in the living room",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "style",
+      "op": "eq",
+      "value": "family"
+     },
+     {
+      "field": "shelf",
+      "op": "eq",
+      "value": "living room"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "multiword-enum"
+  },
+  {
+   "text": "games with no designer",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "designer",
+      "op": "is_empty"
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "is_empty"
+  },
+  {
+   "text": "longest games first, limit 15",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [],
+    "sort": [
+     {
+      "field": "playtime_min",
+      "dir": "desc"
+     }
+    ],
+    "groupBy": [],
+    "aggregate": [],
+    "limit": 15
+   },
+   "tag": "superlative-alias"
+  },
+  {
+   "text": "count of games by style as a pie chart",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [],
+    "sort": [],
+    "groupBy": [
+     {
+      "field": "style"
+     }
+    ],
+    "aggregate": [
+     {
+      "fn": "count"
+     }
+    ],
+    "chart": "pie"
+   },
+   "tag": "count-of-by"
+  },
+  {
+   "text": "strategy or abstract games published before 2010",
+   "schema": "boardgames",
+   "spec": {
+    "filters": [
+     {
+      "field": "style",
+      "op": "in",
+      "value": [
+       "strategy",
+       "abstract"
+      ]
+     },
+     {
+      "field": "published",
+      "op": "lt",
+      "value": 2010
+     }
+    ],
+    "sort": [],
+    "groupBy": [],
+    "aggregate": []
+   },
+   "tag": "enum-or+year-like"
+  }
+ ]
+}
