@@ -1,9 +1,9 @@
 {
-	"name": "@gpu-utils/tooling",
-	"private": true,
-	"type": "module",
-	"description": "Shared build, size-budget, and scaffolding scripts for gpu-utils packages",
-	"scripts": {
-		"test": "vitest run"
-	}
+  "name": "@gpu-utils/tooling",
+  "private": true,
+  "type": "module",
+  "description": "Shared build, size-budget, and scaffolding scripts for gpu-utils packages",
+  "scripts": {
+    "test": "vitest run"
+  }
 }

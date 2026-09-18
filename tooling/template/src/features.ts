@@ -6,13 +6,9 @@ import { type FeatureRows, hashToken, tokenize } from "@gpu-utils/runtime";
  * test/parity.test.ts against fixtures exported from Python.
  */
 export function featurize(text: string): FeatureRows {
-	const tokens = tokenize(text);
-	return {
-		tokens,
-		rows: tokens.map((t) => [
-			hashToken(t.text, 1024),
-			t.shape,
-			Math.min(t.text.length, 15),
-		]),
-	};
+  const tokens = tokenize(text);
+  return {
+    tokens,
+    rows: tokens.map((t) => [hashToken(t.text, 1024), t.shape, Math.min(t.text.length, 15)]),
+  };
 }

@@ -7,5 +7,5 @@ import { describe, it } from "vitest";
  * against the CPU path in the browser test suite.
  */
 describe("__NAME__ parity", () => {
-	it.todo("matches PyTorch fixtures on the CPU reference path");
+  it.todo("matches PyTorch fixtures on the CPU reference path");
 });

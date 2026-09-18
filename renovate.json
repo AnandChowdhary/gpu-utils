@@ -1,20 +1,16 @@
 {
-	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": [
-		"config:recommended",
-		":pinAllExceptPeerDependencies",
-		"group:allNonMajor"
-	],
-	"schedule": ["before 6am on monday"],
-	"labels": ["dependencies"],
-	"packageRules": [
-		{
-			"matchManagers": ["github-actions"],
-			"groupName": "Actions dependencies"
-		},
-		{
-			"matchManagers": ["pep621", "pip_requirements"],
-			"groupName": "Python dependencies"
-		}
-	]
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":pinAllExceptPeerDependencies", "group:allNonMajor"],
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "Actions dependencies"
+    },
+    {
+      "matchManagers": ["pep621", "pip_requirements"],
+      "groupName": "Python dependencies"
+    }
+  ]
 }

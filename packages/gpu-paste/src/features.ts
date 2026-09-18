@@ -1,10 +1,4 @@
-import {
-	CharClass,
-	type FeatureRows,
-	hashToken,
-	type Token,
-	tokenize,
-} from "@gpu-utils/runtime";
+import { CharClass, type FeatureRows, hashToken, type Token, tokenize } from "@gpu-utils/runtime";
 
 /**
  * CPU pre-pass: split text into tokens and emit FEATURE_COUNT sparse feature ids per token,
@@ -36,43 +30,43 @@ const VOWEL = /[aeiou]/g;
 
 /** First letter plus the remaining non-vowel letters (lowercased); non-letter runs unchanged. */
 function skeleton(text: string, cls: number): string {
-	if (cls !== CharClass.Letter) return text;
-	const lowered = text.toLowerCase();
-	const chars = Array.from(lowered);
-	return chars[0]! + chars.slice(1).join("").replace(VOWEL, "");
+  if (cls !== CharClass.Letter) return text;
+  const lowered = text.toLowerCase();
+  const chars = Array.from(lowered);
+  return chars[0]! + chars.slice(1).join("").replace(VOWEL, "");
 }
 
 export function featurizeTokens(tokens: Token[]): number[][] {
-	let totalLines = 1;
-	for (const t of tokens) if (t.cls === CharClass.Newline) totalLines++;
-	const rows: number[][] = [];
-	let line = 0;
-	let column = 0;
-	for (const t of tokens) {
-		const chars = Array.from(t.text);
-		rows.push([
-			hashToken(t.text, WORD_BUCKETS),
-			BASE_SKELETON + hashToken(skeleton(t.text, t.cls), SKELETON_BUCKETS),
-			BASE_SHAPE + t.shape,
-			BASE_PREFIX + hashToken(chars.slice(0, 2).join(""), AFFIX_BUCKETS),
-			BASE_SUFFIX + hashToken(chars.slice(-2).join(""), AFFIX_BUCKETS),
-			BASE_LENGTH + Math.min(t.end - t.start, LENGTH_ROWS - 1),
-			BASE_COLUMN + Math.min(column, COLUMN_ROWS - 1),
-			BASE_LINE + Math.min(line, LINE_ROWS - 1),
-			BASE_FROM_END + Math.min(totalLines - 1 - line, FROM_END_ROWS - 1),
-			BASE_BIAS,
-		]);
-		if (t.cls === CharClass.Newline) {
-			line++;
-			column = 0;
-		} else {
-			column++;
-		}
-	}
-	return rows;
+  let totalLines = 1;
+  for (const t of tokens) if (t.cls === CharClass.Newline) totalLines++;
+  const rows: number[][] = [];
+  let line = 0;
+  let column = 0;
+  for (const t of tokens) {
+    const chars = Array.from(t.text);
+    rows.push([
+      hashToken(t.text, WORD_BUCKETS),
+      BASE_SKELETON + hashToken(skeleton(t.text, t.cls), SKELETON_BUCKETS),
+      BASE_SHAPE + t.shape,
+      BASE_PREFIX + hashToken(chars.slice(0, 2).join(""), AFFIX_BUCKETS),
+      BASE_SUFFIX + hashToken(chars.slice(-2).join(""), AFFIX_BUCKETS),
+      BASE_LENGTH + Math.min(t.end - t.start, LENGTH_ROWS - 1),
+      BASE_COLUMN + Math.min(column, COLUMN_ROWS - 1),
+      BASE_LINE + Math.min(line, LINE_ROWS - 1),
+      BASE_FROM_END + Math.min(totalLines - 1 - line, FROM_END_ROWS - 1),
+      BASE_BIAS,
+    ]);
+    if (t.cls === CharClass.Newline) {
+      line++;
+      column = 0;
+    } else {
+      column++;
+    }
+  }
+  return rows;
 }
 
 export function featurize(text: string): FeatureRows {
-	const tokens = tokenize(text);
-	return { tokens, rows: featurizeTokens(tokens) };
+  const tokens = tokenize(text);
+  return { tokens, rows: featurizeTokens(tokens) };
 }

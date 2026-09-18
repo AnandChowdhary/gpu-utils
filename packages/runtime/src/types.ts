@@ -4,7 +4,7 @@ import type { Token } from "./tokenize.ts";
 export type Backend = "auto" | "webgpu" | "cpu";
 
 export interface FeatureRows {
-	tokens: Token[];
-	/** One row of sparse feature ids per token. */
-	rows: number[][];
+  tokens: Token[];
+  /** One row of sparse feature ids per token. */
+  rows: number[][];
 }
