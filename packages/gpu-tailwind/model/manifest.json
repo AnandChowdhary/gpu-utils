@@ -1,11 +1,16 @@
 {
   "format": 1,
   "name": "gpu-tailwind",
+  "family": "scan",
+  "featureRows": 1565,
+  "paddingId": 1565,
   "hidden": 24,
-  "head": 32,
-  "out": 10,
-  "rows": 1565,
-  "width": 7,
+  "head": 48,
+  "scanLayers": 1,
+  "convTaps": 5,
+  "tags": 10,
+  "pooled": 0,
+  "slots": 7,
   "labels": [
     "O",
     "B-PROP",
@@ -18,166 +23,169 @@
     "NEG"
   ],
   "checkpoint": {
+    "run": "default",
+    "epoch": 29,
     "seed": 0,
-    "epoch": 28,
-    "step": 29464,
-    "token_acc": 0.9878661032440953,
-    "seq_acc": 0.8236666666666667
+    "metrics": {
+      "token_acc": 0.9904001237268288,
+      "seq_acc": 0.8553333333333333,
+      "boundary_acc": 0.9994476480855483,
+      "PROP_precision": 0.9722921914357683,
+      "PROP_recall": 0.9795711204161909,
+      "PROP_f1": 0.9759180835598256,
+      "VAL_precision": 0.964534950234527,
+      "VAL_recall": 0.961345496009122,
+      "VAL_f1": 0.9629375820912569,
+      "VAR_precision": 0.980743394536498,
+      "VAR_recall": 0.9768064228367529,
+      "VAR_f1": 0.9787709497206704
+    },
+    "date": "2026-09-18"
   },
   "tensors": [
     {
-      "name": "emb",
+      "name": "embed",
       "offset": 0,
       "length": 37560,
       "shape": [
         1565,
         24
       ],
-      "scale": 0.1120301523516255
+      "scale": 0.10035735561001685
     },
     {
-      "name": "wa_f",
+      "name": "scan0.f.wa",
       "offset": 37560,
       "length": 576,
       "shape": [
         24,
         24
       ],
-      "scale": 0.0637233680294406
+      "scale": 0.06254931803672545
     },
     {
-      "name": "ba_f",
+      "name": "scan0.f.ba",
       "offset": 38136,
       "length": 24,
       "shape": [
         24
       ],
-      "scale": 0.05961071675823581
+      "scale": 0.06805608349461709
     },
     {
-      "name": "wu_f",
+      "name": "scan0.f.wu",
       "offset": 38160,
       "length": 576,
       "shape": [
         24,
         24
       ],
-      "scale": 0.05663048067400532
+      "scale": 0.038460919933934364
     },
     {
-      "name": "bu_f",
+      "name": "scan0.f.bu",
       "offset": 38736,
       "length": 24,
       "shape": [
         24
       ],
-      "scale": 0.045478124772348714
+      "scale": 0.04793565119466474
     },
     {
-      "name": "wa_b",
+      "name": "scan0.b.wa",
       "offset": 38760,
       "length": 576,
       "shape": [
         24,
         24
       ],
-      "scale": 0.07105951155385663
+      "scale": 0.06714211740801411
     },
     {
-      "name": "ba_b",
+      "name": "scan0.b.ba",
       "offset": 39336,
       "length": 24,
       "shape": [
         24
       ],
-      "scale": 0.03802409479694982
+      "scale": 0.0700407951108871
     },
     {
-      "name": "wu_b",
+      "name": "scan0.b.wu",
       "offset": 39360,
       "length": 576,
       "shape": [
         24,
         24
       ],
-      "scale": 0.053145989294975035
+      "scale": 0.05371017609873126
     },
     {
-      "name": "bu_b",
+      "name": "scan0.b.bu",
       "offset": 39936,
       "length": 24,
       "shape": [
         24
       ],
-      "scale": 0.026130668578609344
+      "scale": 0.0325934233204011
     },
     {
-      "name": "conv",
+      "name": "conv0.w",
       "offset": 39960,
-      "length": 216,
+      "length": 240,
       "shape": [
-        3,
-        72
+        5,
+        48
       ],
-      "scale": 0.05896862091556672
+      "scale": 0.09123273818723616
     },
     {
-      "name": "bc",
-      "offset": 40176,
-      "length": 72,
+      "name": "conv0.b",
+      "offset": 40200,
+      "length": 48,
       "shape": [
-        72
+        48
       ],
-      "scale": 0.0167681997822177
+      "scale": 0.044114858873428836
     },
     {
-      "name": "w1",
+      "name": "head.w",
       "offset": 40248,
-      "length": 2304,
+      "length": 4608,
       "shape": [
-        72,
-        32
+        96,
+        48
       ],
-      "scale": 0.07622754189275927
+      "scale": 0.06606793403625488
     },
     {
-      "name": "wg",
-      "offset": 42552,
-      "length": 2304,
-      "shape": [
-        72,
-        32
-      ],
-      "scale": 0.031756153029780236
-    },
-    {
-      "name": "b1",
+      "name": "head.b",
       "offset": 44856,
-      "length": 32,
+      "length": 48,
       "shape": [
-        32
+        48
       ],
-      "scale": 0.016029870317828272
+      "scale": 0.019826754446952574
     },
     {
-      "name": "w2",
-      "offset": 44888,
-      "length": 320,
+      "name": "tags.w",
+      "offset": 44904,
+      "length": 480,
       "shape": [
-        32,
+        48,
         10
       ],
-      "scale": 0.12222086998724169
+      "scale": 0.10198535457734138
     },
     {
-      "name": "b2",
-      "offset": 45208,
+      "name": "tags.b",
+      "offset": 45384,
       "length": 10,
       "shape": [
         10
       ],
-      "scale": 0.019895788161985336
+      "scale": 0.01556775935234562
     }
   ],
-  "parameters": 45218
+  "parameters": 45394
 }
