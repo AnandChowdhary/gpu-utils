@@ -1,6 +1,6 @@
 {
   "name": "gpu-email",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Split plain-text emails into reply, quoted history, and signature, and extract contact details",
   "author": "Anand Chowdhary (https://anandchowdhary.com)",
   "license": "MIT",
