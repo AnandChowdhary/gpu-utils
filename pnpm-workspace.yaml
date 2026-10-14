@@ -6,3 +6,6 @@ packages:
 allowBuilds:
   esbuild: true
   "@biomejs/biome": true
+
+overrides:
+  shell-quote: 1.11.0
